@@ -31,6 +31,10 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.send("Hola pues");
+});
+
 server.listen(3001, () => {
   console.log("SERVER IS RUNNING");
 });
