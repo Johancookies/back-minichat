@@ -52,7 +52,6 @@ const getRethinkDB = async function () {
 };
 
 //routes
-
 app.get("/chats/:room", async (req, res) => {
   const conn = await getRethinkDB();
   const room = req.params.room;
@@ -80,11 +79,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (data) => {
+    console.log(data);
     const conn = await getRethinkDB();
     r.table("chats")
       .insert(data)
       .run(conn, function (err, res) {
         if (err) throw err;
+        console.log(res);
       });
     socket.to(data.room).emit("receive_message", data);
   });
