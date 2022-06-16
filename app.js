@@ -53,20 +53,20 @@ const getRethinkDB = async function () {
 
 //routes
 app.get("/chats/:room", async (req, res) => {
-  const conn = await getRethinkDB();
-  const room = req.params.room;
-
-  let query = r.table("chats").filter({ room: room });
-  let orderedQuery = query.orderBy(r.desc("ts"));
-  orderedQuery.run(conn, (err, cursor) => {
-    if (err) throw err;
-    cursor.toArray((err, result) => {
-      if (err) throw err;
-      res.json({
-        data: result,
-      });
-    });
-  });
+  res.send("dont have database")
+  // const conn = await getRethinkDB();
+  // const room = req.params.room;
+  // let query = r.table("chats").filter({ room: room });
+  // let orderedQuery = query.orderBy(r.desc("ts"));
+  // orderedQuery.run(conn, (err, cursor) => {
+  //   if (err) throw err;
+  //   cursor.toArray((err, result) => {
+  //     if (err) throw err;
+  //     res.json({
+  //       data: result,
+  //     });
+  //   });
+  // });
 });
 
 // socket config
@@ -79,14 +79,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (data) => {
-    console.log(data);
-    const conn = await getRethinkDB();
-    r.table("chats")
-      .insert(data)
-      .run(conn, function (err, res) {
-        if (err) throw err;
-        console.log(res);
-      });
+    // console.log(data);
+    // const conn = await getRethinkDB();
+    // r.table("chats")
+    //   .insert(data)
+    //   .run(conn, function (err, res) {
+    //     if (err) throw err;
+    //     console.log(res);
+    //   });
     socket.to(data.room).emit("receive_message", data);
   });
 
