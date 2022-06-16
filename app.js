@@ -99,6 +99,6 @@ app.get("/", (req, res) => {
   res.send("...");
 });
 
-server.listen(3001, () => {
+server.listen(process.env.PORT, () => {
   console.log("SERVER IS RUNNING");
 });
