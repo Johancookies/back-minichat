@@ -3,6 +3,7 @@ const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
 var r = require("rethinkdb");
+const { emit } = require("process");
 
 const app = express();
 app.use(cors());
@@ -72,18 +73,24 @@ app.get("/chats/:room", async (req, res) => {
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
+  socket.on("service_ping", (data) => {
+    socket.emit("pong", 1);
+  });
+
   socket.on("join_room", (room) => {
     socket.join(room);
     console.log(`User ${socket.id} joined room ${room}`);
   });
 
   socket.on("send_message", async (data) => {
-    const conn = await getRethinkDB();
-    r.table("chats")
-      .insert(data)
-      .run(conn, function (err, res) {
-        if (err) throw err;
-      });
+    // const conn = await getRethinkDB();
+    // r.table("chats")
+    //   .insert(data)
+    //   .run(conn, function (err, res) {
+    //     if (err) throw err;
+    //   });
+    console.log(data);
+
     socket.to(data.room).emit("receive_message", data);
   });
 
