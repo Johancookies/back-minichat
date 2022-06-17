@@ -3,14 +3,15 @@ const http = require("http");
 const cors = require("cors");
 const morgan = require("morgan");
 const { Server } = require("socket.io");
-require('dotenv').config();
+require("dotenv").config();
 
 // import routes
 const serviceLines = require("./routes/service_lines");
-const channel =  require("./routes/channels")
+const channel = require("./routes/channels");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 app.use(morgan("dev"));
 
 const server = http.createServer(app);
@@ -27,7 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/service-lines", serviceLines);
-app.use("/channels", channel)
+app.use("/channels", channel);
 
 // app.get("/chats/:room", async (req, res) => {
 //   res.send("dont have database");
@@ -74,5 +75,3 @@ io.on("connection", (socket) => {
 server.listen(process.env.PORT, () => {
   console.log("server is running in port " + process.env.PORT);
 });
-
-
