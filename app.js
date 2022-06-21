@@ -64,16 +64,17 @@ io.on("connection", (socket) => {
     socket.join(room);
     const conn = await getRethinkDB();
     r.table("messages")
-      .changes()
-      .filter({ id_channel: room })
+    .filter({ id_channel: room })
+    .changes()
       .run(conn, (err, cursor) => {
         if (err) console.log(err);
-        console.log(cursor);
-        cursor.toArray((err, result) => {
-          console.log(result);
-          if (err) console.log(err);
-          socket.to(room).emit("receive_message", result);
-        });
+        cursor.each(console.log);
+        // console.log(cursor);
+        // cursor.toArray((err, result) => {
+        //   console.log(result);
+        //   if (err) console.log(err);
+        //   socket.to(room).emit("receive_message", result);
+        // });
       });
   });
 
