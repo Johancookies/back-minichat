@@ -5,6 +5,10 @@ const morgan = require("morgan");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
+// db
+const r = require("rethinkdb");
+const getRethinkDB = require("./config/db");
+
 // import routes
 const serviceLines = require("./routes/service_lines");
 const channel = require("./routes/channels");
@@ -53,23 +57,37 @@ app.use("/messages", messages);
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
-  socket.on("join_room", (room) => {
+  // changefit messages
+  socket.on("join_room", async (room) => {
     socket.join(room);
+    const conn = await getRethinkDB();
+    r.table("messages")
+      .filter({ id_channel: room })
+      .changes()
+      .run(conn, (err, cursor) => {
+        if (err) console.log(err);
+        cursor.toArray((err, result) => {
+          if (err) console.log(err);
+          socket.to(data.room).emit("receive_message", result);
+        });
+      });
+
     console.log(`User ${socket.id} joined room ${room}`);
   });
 
-  socket.on("send_message", async (data) => {
-    // const conn = await getRethinkDB();
-    // r.table("chats")
-    //   .insert(data)
-    //   .run(conn, function (err, res) {
-    //     if (err) throw err;
-    //     console.log(res);
-    //   });
-    console.log(data);
-    socket.to(data.room).emit("receive_message", data);
-  });
+  // socket.on("send_message", async (data) => {
+  //   // const conn = await getRethinkDB();
+  //   // r.table("chats")
+  //   //   .insert(data)
+  //   //   .run(conn, function (err, res) {
+  //   //     if (err) throw err;
+  //   //     console.log(res);
+  //   //   });
+  //   console.log(data);
+  //   socket.to(data.room).emit("receive_message", data);
+  // });
 
+  // changefit messages
   socket.on("disconnect", () => {
     console.log(`User Disconnected ${socket.id}`);
   });
