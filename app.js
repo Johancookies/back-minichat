@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
     //     if (err) throw err;
     //     console.log(res);
     //   });
+    console.log(data)
     socket.to(data.room).emit("receive_message", data);
   });
 
