@@ -68,13 +68,15 @@ io.on("connection", (socket) => {
     .changes()
       .run(conn, (err, cursor) => {
         if (err) console.log(err);
-        cursor.each(console.log);
+        cursor.each(
+          (err, result) => {
+              console.log(result);
+              if (err) console.log(err);
+              socket.to(room).emit("receive_message", result);
+            }
+        );
         // console.log(cursor);
-        // cursor.toArray((err, result) => {
-        //   console.log(result);
-        //   if (err) console.log(err);
-        //   socket.to(room).emit("receive_message", result);
-        // });
+        // cursor.toArray();
       });
   });
 
