@@ -50,7 +50,7 @@ channel.get("/", async (req, response) => {
                 });
             } else {
               response.json({
-                id_channel: result[0]?.id_channel,
+                id_channel: result[0].id_channel,
               });
             }
           });
