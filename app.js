@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
         cursor.toArray((err, result) => {
           console.log(result);
           if (err) console.log(err);
-          socket.to(data.room).emit("receive_message", result);
+          socket.to(room).emit("receive_message", result);
         });
       });
   });
