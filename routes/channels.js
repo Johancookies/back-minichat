@@ -5,17 +5,10 @@ const getRethinkDB = require("../config/db");
 
 const channel = express.Router();
 
-channel.post("/", async (req, response) => {
-  const channel = req.body;
-  const conn = await getRethinkDB();
-  rethinkdb
-    .table("channels")
-    .insert(channel)
-    .run(conn, function (err, res) {
-      if (err) throw err;
-      response.sendStatus(200);
-    });
-});
+app.use(async (req, res, next) => {
+	if (req.body) next('router')
+	res.sendStatus(500)
+})
 
 channel.get("/", async (req, response) => {
   const conn = await getRethinkDB();
@@ -26,13 +19,39 @@ channel.get("/", async (req, response) => {
     .filter({ id_channel: channelId })
     .run(conn, (err, cursor) => {
       if (err) response.sendStatus(500);
-      console.log(cursor);
-      cursor.toArray((err, result) => {
-        if (err) response.sendStatus(500);
-        response.json({
-          id_channel: result.id_channel,
+      if (cursor) {
+        cursor.toArray((err, result) => {
+          if (err) response.sendStatus(500);
+          response.json({
+            id_channel: result.id_channel,
+          });
         });
-      });
+      } else {
+        const time = new Date();
+        let channel = {
+          id_channel: channelId,
+          create_at: time,
+        };
+        rethinkdb
+          .table("channels")
+          .insert(channel)
+          .run(conn, function (err, res) {
+            if (err) response.sendStatus(500) 
+            response.json(channel);
+          });
+      }
+    });
+});
+
+channel.post("/", async (req, response) => {
+  const channel = req.body;
+  const conn = await getRethinkDB();
+  rethinkdb
+    .table("channels")
+    .insert(channel)
+    .run(conn, function (err, res) {
+      if (err) throw err;
+      response.sendStatus(200);
     });
 });
 
