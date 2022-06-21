@@ -31,27 +31,29 @@ channel.get("/", async (req, response) => {
         if (cursor) {
           cursor.toArray((err, result) => {
             if (err) response.sendStatus(500);
-            response.json({
-              id_channel: result.id_channel,
-            });
-          });
-        } else {
-          const time = new Date(); // creaate the time of the channel
-          let channel = {
-            id_channel: channelId,
-            create_at: time,
-            id_user: id_user,
-            id_service_line: id_service_line,
-          };
-          rethinkdb
-            .table("channels")
-            .insert(channel)
-            .run(conn, function (err, _res) {
-              if (err) response.sendStatus(500);
+            if (result.length === 0) {
+              const time = new Date(); // creaate the time of the channel
+              let channel = {
+                id_channel: channelId,
+                create_at: time,
+                id_user: id_user,
+                id_service_line: id_service_line,
+              };
+              rethinkdb
+                .table("channels")
+                .insert(channel)
+                .run(conn, function (err, _res) {
+                  if (err) response.sendStatus(500);
+                  response.json({
+                    id_channel: channel.id_channel,
+                  });
+                });
+            } else {
               response.json({
-                id_channel: channel.id_channel,
+                id_channel: result[0]?.id_channel,
               });
-            });
+            }
+          });
         }
       });
   } catch (e) {
