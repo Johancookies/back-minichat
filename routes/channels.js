@@ -7,7 +7,7 @@ const channel = express.Router();
 
 // middleware
 
-app.use(async (err, req, res, next) => {
+channel.use(async (err, req, res, next) => {
   if (err) res.json({ error: err, status: 504 });
   if (req.body) next("router");
   res.sendStatus(204);
