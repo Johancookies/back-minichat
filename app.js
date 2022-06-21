@@ -60,6 +60,10 @@ io.on("connection", (socket) => {
   // changefit messages
   socket.on("join_room", async (room) => {
     socket.join(room);
+    console.log(`User ${socket.id} joined room ${room}`);
+  });
+
+  socket.on("send_message", async (data) => {
     const conn = await getRethinkDB();
     r.table("messages")
       .filter({ id_channel: room })
@@ -71,21 +75,7 @@ io.on("connection", (socket) => {
           socket.to(data.room).emit("receive_message", result);
         });
       });
-
-    console.log(`User ${socket.id} joined room ${room}`);
   });
-
-  // socket.on("send_message", async (data) => {
-  //   // const conn = await getRethinkDB();
-  //   // r.table("chats")
-  //   //   .insert(data)
-  //   //   .run(conn, function (err, res) {
-  //   //     if (err) throw err;
-  //   //     console.log(res);
-  //   //   });
-  //   console.log(data);
-  //   socket.to(data.room).emit("receive_message", data);
-  // });
 
   // changefit messages
   socket.on("disconnect", () => {
