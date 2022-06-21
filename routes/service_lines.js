@@ -18,4 +18,16 @@ serviceLines.get("/", async (req, res) => {
   });
 });
 
+serviceLines.post("/", async (req, response) => {
+  const conn = await getRethinkDB();
+  const serviceLine = req.body;
+  rethinkdb
+    .table("service_lines")
+    .insert(serviceLine)
+    .run(conn, function (err) {
+      if (err) throw err;
+      response.sendStatus(200);
+    });
+});
+
 module.exports = serviceLines;
