@@ -68,7 +68,9 @@ io.on("connection", (socket) => {
       .changes()
       .run(conn, (err, cursor) => {
         if (err) console.log(err);
+        console.log(cursor);
         cursor.toArray((err, result) => {
+          console.log(result);
           if (err) console.log(err);
           socket.to(data.room).emit("receive_message", result);
         });
