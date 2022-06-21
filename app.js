@@ -8,6 +8,7 @@ require("dotenv").config();
 // import routes
 const serviceLines = require("./routes/service_lines");
 const channel = require("./routes/channels");
+const messages = require("./routes/messages");
 
 const app = express();
 app.use(cors());
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 
 app.use("/service-lines", serviceLines);
 app.use("/channels", channel);
+app.use("/messages", messages);
 
 // app.get("/chats/:room", async (req, res) => {
 //   res.send("dont have database");
@@ -64,7 +66,7 @@ io.on("connection", (socket) => {
     //     if (err) throw err;
     //     console.log(res);
     //   });
-    console.log(data)
+    console.log(data);
     socket.to(data.room).emit("receive_message", data);
   });
 

@@ -38,6 +38,7 @@ channel.get("/", async (req, response) => {
                 create_at: time,
                 id_user: id_user,
                 id_service_line: id_service_line,
+                id_meet: null,
               };
               rethinkdb
                 .table("channels")
