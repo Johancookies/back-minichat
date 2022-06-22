@@ -66,7 +66,9 @@ io.on("connection", (socket) => {
   // changefeed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    const currentRoom = socket.rooms.some((itemRoom) => itemRoom === room);
+    const currentRoom = socket.rooms.values.some(
+      (itemRoom) => itemRoom === room
+    );
     socket.join(room); // join to the room user_id + service_lines
     if (!currentRoom) {
       try {
