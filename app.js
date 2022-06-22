@@ -57,40 +57,33 @@ app.use("/messages", messages);
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
+  socket.on("service_ping", (data) => {
+    // socket.emit("pong", 1);
+    console.log(data);
+    socket.emit("pong", 1);
+  });
+
   // changefit messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-
     socket.join(room);
+    io.to(room).emit("test", "Holiiiiiiiiii");
+
     const conn = await getRethinkDB();
     r.table("messages")
-    .filter({ id_channel: room })
-    .changes()
+      .filter({ id_channel: room })
+      .changes()
       .run(conn, (err, cursor) => {
         if (err) console.log(err);
-        cursor.each(
-          (err, result) => {
-              console.log(result);
-              if (err) console.log(err);
-              socket.to(room).emit("receive_message", result);
-            }
-        );
+        cursor.each((err, result) => {
+          console.log(result);
+          if (err) console.log(err);
+          io.to(room).emit("receive_message", result.new_val);
+        });
         // console.log(cursor);
         // cursor.toArray();
       });
   });
-
-  // socket.on("send_message", async (data) => {
-  //   // const conn = await getRethinkDB();
-  //   // r.table("chats")
-  //   //   .insert(data)
-  //   //   .run(conn, function (err, res) {
-  //   //     if (err) throw err;
-  //   //     console.log(res);
-  //   //   });
-  //   console.log(data);
-  //   socket.to(data.room).emit("receive_message", data);
-  // });
 
   // changefit messages
   socket.on("disconnect", () => {
