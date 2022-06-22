@@ -77,8 +77,8 @@ io.on("connection", (socket) => {
           cursor.each((err, result) => {
             if (err) console.log(err);
             io.to(room).emit("receive_message", result);
-            // cursor.close();
           });
+          cursor.close();
         });
     } catch (e) {
       console.error(e);
