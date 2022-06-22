@@ -74,7 +74,6 @@ io.on("connection", (socket) => {
         .limit(1)
         .changes()
         .run(conn, (err, cursor) => {
-          console.log(cursor);
           if (err) console.error(err);
           cursor.each((err, result) => {
             if (err) console.log(err);
