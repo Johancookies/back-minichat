@@ -66,22 +66,25 @@ io.on("connection", (socket) => {
   // changefeed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
+    const currentRoom = socket.rooms.some((itemRoom) => itemRoom === room);
     socket.join(room); // join to the room user_id + service_lines
-    try {
-      const conn = await getRethinkDB(); // connect whit the database
-      r.table("messages")
-        .filter({ id_channel: room })
-        .changes({include_initial: false})
-        .run(conn, (err, cursor) => {
-          if (err) console.error(err);
-          cursor.each((err, result) => {
-            if (err) console.log(err);
-            console.log(result.new_val);
-            io.to(room).emit("receive_message", result.new_val);
+    if (!currentRoom) {
+      try {
+        const conn = await getRethinkDB(); // connect whit the database
+        r.table("messages")
+          .filter({ id_channel: room })
+          .changes()
+          .run(conn, (err, cursor) => {
+            if (err) console.error(err);
+            cursor.each((err, result) => {
+              if (err) console.log(err);
+              console.log(result.new_val);
+              io.to(room).emit("receive_message", result.new_val);
+            });
           });
-        });
-    } catch (e) {
-      console.error(e);
+      } catch (e) {
+        console.error(e);
+      }
     }
   });
 
