@@ -73,6 +73,7 @@ io.on("connection", (socket) => {
         .filter({ id_channel: room })
         .changes()
         .run(conn, (err, cursor) => {
+          console.log(cursor);
           if (err) console.error(err);
           cursor.each((err, result) => {
             if (err) console.log(err);
