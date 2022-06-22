@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
       const conn = await getRethinkDB(); // connect whit the database
       r.table("messages")
         .filter({ id_channel: room })
-        .changes()
+        .changes({include_initial: false})
         .run(conn, (err, cursor) => {
           if (err) console.error(err);
           cursor.each((err, result) => {
