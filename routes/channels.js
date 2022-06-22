@@ -7,8 +7,8 @@ const channel = express.Router();
 
 // middleware
 
-channel.use(async (err, req, res, next) => {
-  if (err) res.json({ error: err, status: 504 });
+channel.use((err, req, res, next) => {
+  if (err) res.json({ error: err, status: 500 });
   if (req.body) next("router");
   res.sendStatus(204);
 });
@@ -16,13 +16,11 @@ channel.use(async (err, req, res, next) => {
 // get to send or insert the channel
 
 channel.get("/", async (req, response) => {
-  const conn = await getRethinkDB();
-
-  let id_user = req.query.id_user;
-  let id_service_line = req.query.id_service_line;
-  const channelId = id_user + id_service_line; // id of the channel (unique)
-
   try {
+    const conn = await getRethinkDB();
+    let id_user = req.query.id_user;
+    let id_service_line = req.query.id_service_line;
+    const channelId = id_user + id_service_line; // id of the channel (unique)
     rethinkdb
       .table("channels")
       .filter({ id_channel: channelId })
@@ -66,15 +64,19 @@ channel.get("/", async (req, response) => {
 
 // post to create channels
 channel.post("/", async (req, response) => {
-  const channel = req.body;
-  const conn = await getRethinkDB();
-  rethinkdb
-    .table("channels")
-    .insert(channel)
-    .run(conn, function (err, _res) {
-      if (err) throw err;
-      response.sendStatus(200);
-    });
+  try {
+    const channel = req.body;
+    const conn = await getRethinkDB();
+    rethinkdb
+      .table("channels")
+      .insert(channel)
+      .run(conn, function (err, _res) {
+        if (err) throw err;
+        response.sendStatus(200);
+      });
+  } catch (e) {
+    response.json({ error: e, status: 500 });
+  }
 });
 
 module.exports = channel;
