@@ -12,35 +12,50 @@ messages.use((err, req, res, next) => {
   res.sendStatus(204);
 });
 
+// get messages by channel
+messages.get("/by-channel", async (req, response) => {
+  const conn = await getRethinkDB();
+  const idChannel = req.query.id_channel;
+  r.table("messages")
+    .filter({ id_channel: idChannel })
+    .run(conn, (err, cursor) => {
+      if (err) console.log(err);
+      cursor.toArray((err, result) => {
+        if (err) console.log(err);
+        response.json({ data: result });
+      });
+    });
+});
+
 // create messages
 messages.post("/", async (req, response) => {
-  try {
-    const conn = await getRethinkDB();
-    const message = req.body;
-    let meet_id = "";
-    r.table("meetings")
-      .filter({ id_channel: message.id_channel })
-      .limit(1)
-      .run(conn, (err, cursor) => {
+  const conn = await getRethinkDB();
+  const message = req.body;
+  let meet_id = "";
+  r.table("meetings")
+    .filter(
+      r
+        .row("id_channel")
+        .eq(message.id_channel)
+        .and(r.row("status").eq("active").or(r.row("status").eq("waiting")))
+    )
+    .run(conn, (err, cursor) => {
+      if (err) console.log(err);
+      cursor.toArray((err, result) => {
         if (err) console.log(err);
-        cursor.toArray((err, result) => {
-          if (err) console.log(err);
-          if (result.length === 0) {
-            createMeeting(conn, message, response);
-          } else {
-            if (result[0].status === "inactive") {
-              createMeeting(conn, message, response);
-            } else {
-              meet_id = result[0].id;
-              message.id_meet = meet_id;
-              insertMessage(conn, message, response);
-            }
-          }
-        });
+        if (result[0].status === "waiting") {
+          r.table("meetings")
+            .filter({ id: result[0].id })
+            .update({ status: "active" })
+            .run(conn, (err, res) => {
+              if (err) console.log(err);
+            });
+        }
+        meet_id = result[0].id;
+        message.id_meet = meet_id;
+        insertMessage(conn, message, response);
       });
-  } catch (e) {
-    response.json({ error: e, status: 500 });
-  }
+    });
 });
 
 function insertMessage(con, data, response) {
@@ -50,27 +65,6 @@ function insertMessage(con, data, response) {
       .run(con, (err, _) => {
         if (err) console.log(err);
         response.sendStatus(200);
-      });
-  } catch (e) {
-    response.json({ error: e, status: 500 });
-  }
-}
-
-function createMeeting(con, message, response) {
-  try {
-    const currentDate = new Date();
-    let dataMeeting = {
-      id_channel: message.id_channel,
-      status: "active",
-      create_at: currentDate,
-    };
-    r.table("meetings")
-      .insert(dataMeeting)
-      .run(con, (err, res) => {
-        if (err) console.log(err);
-        meet_id = res.generated_keys[0];
-        message.id_meet = meet_id;
-        insertMessage(con, message, response);
       });
   } catch (e) {
     response.json({ error: e, status: 500 });

@@ -59,34 +59,43 @@ io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
   socket.on("service_ping", (data) => {
-    console.log(data);
     socket.emit("pong", 1);
   });
 
   // changefeed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    const currentRoom = true;
-    console.log(socket.rooms.values);
-    console.log(typeof socket.rooms.values);
     socket.join(room); // join to the room user_id + service_lines
-    if (!currentRoom) {
-      try {
-        const conn = await getRethinkDB(); // connect whit the database
-        r.table("messages")
-          .filter({ id_channel: room })
-          .changes()
-          .run(conn, (err, cursor) => {
-            if (err) console.error(err);
-            cursor.each((err, result) => {
-              if (err) console.log(err);
-              console.log(result.new_val);
-              io.to(room).emit("receive_message", result.new_val);
-            });
+    try {
+      const conn = await getRethinkDB(); // connect whit the database
+      r.table("meetings")
+        .filter(
+          r
+            .row("id_channel")
+            .eq(room)
+            .and(r.row("status").eq("active").or(r.row("status").eq("waiting")))
+        )
+        .run(conn, (err, cursor) => {
+          if (err) console.log(err);
+          cursor.toArray((err, result) => {
+            if (err) console.log(err);
+            if (result.length === 0) {
+              createMeeting(conn, room);
+              r.table("messages")
+                .filter({ id_channel: room })
+                .changes()
+                .run(conn, (err, cursor) => {
+                  if (err) console.error(err);
+                  cursor.each((err, result) => {
+                    if (err) console.log(err);
+                    io.to(room).emit("receive_message", result.new_val);
+                  });
+                });
+            }
           });
-      } catch (e) {
-        console.error(e);
-      }
+        });
+    } catch (e) {
+      console.error(e);
     }
   });
 
@@ -98,3 +107,21 @@ io.on("connection", (socket) => {
 server.listen(process.env.PORT, () => {
   console.log("server is running on port " + process.env.PORT);
 });
+
+function createMeeting(con, idChannel) {
+  try {
+    const currentDate = new Date();
+    let dataMeeting = {
+      id_channel: idChannel,
+      status: "waiting",
+      create_at: currentDate,
+    };
+    r.table("meetings")
+      .insert(dataMeeting)
+      .run(con, (err, res) => {
+        if (err) console.log(err);
+      });
+  } catch (e) {
+    console.log(e);
+  }
+}

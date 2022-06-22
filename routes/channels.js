@@ -62,6 +62,24 @@ channel.get("/", async (req, response) => {
   }
 });
 
+// get channels by product
+channel.get("/by-product", async (req, response) => {
+  const conn = await getRethinkDB();
+  const id_product = req.query.id_product;
+  rethinkdb
+    .table("channels")
+    .filter({ id_product: id_product })
+    .run(conn, (err, cursor) => {
+      if (err) console.log(err);
+      cursor.toArray((err, result) => {
+        if (err) console.log(err);
+        response.json({
+          data: result,
+        });
+      });
+    });
+});
+
 // post to create channels
 channel.post("/", async (req, response) => {
   try {
