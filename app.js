@@ -78,16 +78,14 @@ io.on("connection", (socket) => {
             console.log(result);
             if (err) console.log(err);
             io.to(room).emit("receive_message", result.new_val);
+            cursor.close();
           });
-          // console.log(cursor);
-          // cursor.toArray();
         });
     } catch (e) {
       console.error(e);
     }
   });
 
-  // changefit messages
   socket.on("disconnect", () => {
     console.log(`User Disconnected ${socket.id}`);
   });
