@@ -127,6 +127,10 @@ io.on("connection", (socket) => {
   });
 });
 
+function ioEmmit({ key, data }) {
+  io.emit(key, data);
+}
+
 server.listen(process.env.PORT, () => {
   console.log("server is running on port " + process.env.PORT);
 });
@@ -148,3 +152,5 @@ function createMeeting(con, idChannel) {
     console.log(e);
   }
 }
+
+module.exports.log = ioEmmit;

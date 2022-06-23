@@ -1,9 +1,8 @@
 const express = require("express");
-const cron = require("node-cron");
-
 const r = require("rethinkdb");
 const getRethinkDB = require("../config/db");
 const messages = express.Router();
+const ioEmmit = require("../app");
 
 const url_taskMap = {};
 
@@ -34,13 +33,6 @@ messages.post("/", async (req, response) => {
   const conn = await getRethinkDB();
   const message = req.body;
   const currentDate = new Date();
-  const task = cron.schedule(
-    "5 * * * * *",
-    () => {
-      console.log("Meeting inactive...");
-    },
-    { scheduled: false }
-  );
 
   let meet_id = "";
   r.table("meetings")
@@ -54,12 +46,6 @@ messages.post("/", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
-        if (url_taskMap[result[0].id]) {
-          task.stop();
-        } else {
-          url_taskMap[result[0].id] = task;
-        }
-        task.start();
         if (result[0].status === "waiting") {
           r.table("meetings")
             .filter({ id: result[0].id })
@@ -68,6 +54,20 @@ messages.post("/", async (req, response) => {
               if (err) console.log(err);
             });
         }
+        const timeout = setTimeout(() => {
+          r.table("meetings")
+            .filter({ id: result[0].id })
+            .update({ status: "inactive" })
+            .run(conn, (err, res) => {
+              if (err) console.log(err);
+              console.log("inactive meeting" + result[0].id);
+              ioEmmit.log({ key: "close_meeting", data: result[0].id });
+            });
+        }, 5000);
+        if (url_taskMap[result[0].id]) {
+          clearTimeout(url_taskMap[result[0].id]);
+        }
+        url_taskMap[result[0].id] = timeout;
         meet_id = result[0].id;
         message.id_meet = meet_id;
         message.create_at = currentDate;
