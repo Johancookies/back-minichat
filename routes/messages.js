@@ -63,7 +63,7 @@ messages.post("/", async (req, response) => {
               console.log("inactive meeting" + result[0].id);
               ioEmmit.log({ key: "close_meeting", data: result[0].id });
             });
-        }, 5000);
+        }, 600000);
         if (url_taskMap[result[0].id]) {
           clearTimeout(url_taskMap[result[0].id]);
         }
