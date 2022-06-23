@@ -63,7 +63,7 @@ channel.get("/", async (req, response) => {
 // get channels by product
 channel.get("/by-collab", async (req, response) => {
   const conn = await getRethinkDB();
-  const idUser = req.query.id_user;
+  const idUser = Number(req.query.id_user);
   r.table("channels")
     .filter({ id_user: idUser })
     .run(conn, (err, cursor) => {
