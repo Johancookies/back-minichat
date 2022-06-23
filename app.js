@@ -136,7 +136,7 @@ server.listen(process.env.PORT, () => {
 });
 
 function createMeeting(con, idChannel) {
-  try {
+  try { 
     const currentDate = new Date();
     let dataMeeting = {
       id_channel: idChannel,

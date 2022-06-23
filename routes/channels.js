@@ -1,6 +1,6 @@
 const express = require("express");
 
-const rethinkdb = require("rethinkdb");
+const r = require("r");
 const getRethinkDB = require("../config/db");
 
 const channel = express.Router();
@@ -17,11 +17,10 @@ channel.use((err, req, res, next) => {
 channel.get("/", async (req, response) => {
   try {
     const conn = await getRethinkDB();
-    let id_user = req.query.id_user;
-    let id_service_line = req.query.id_service_line;
-    const channelId = id_user + id_service_line; // id of the channel (unique)
-    rethinkdb
-      .table("channels")
+    let idMember = req.query.id_member;
+    let idServiceLine = req.query.id_service_line;
+    const channelId = idMember + idServiceLine; // id of the channel (unique)
+    r.table("channels")
       .filter({ id_channel: channelId })
       .run(conn, (err, cursor) => {
         if (err) response.sendStatus(500);
@@ -33,11 +32,11 @@ channel.get("/", async (req, response) => {
               let channel = {
                 id_channel: channelId,
                 create_at: time,
-                id_user: id_user,
-                id_service_line: id_service_line,
+                id_member: idMember,
+                id_service_line: idServiceLine,
+                id_user: 3,
               };
-              rethinkdb
-                .table("channels")
+              r.table("channels")
                 .insert(channel)
                 .run(conn, function (err, _res) {
                   if (err) response.sendStatus(500);
@@ -62,12 +61,11 @@ channel.get("/", async (req, response) => {
 });
 
 // get channels by product
-channel.get("/by-product", async (req, response) => {
+channel.get("/by-collab", async (req, response) => {
   const conn = await getRethinkDB();
-  const id_product = req.query.id_product;
-  rethinkdb
-    .table("channels")
-    .filter({ id_product: id_product })
+  const idUser = req.query.id_user;
+  r.table("channels")
+    .filter({ id_user: idUser })
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
@@ -83,9 +81,9 @@ channel.get("/by-product", async (req, response) => {
 channel.post("/", async (req, response) => {
   try {
     const channel = req.body;
+    channel.id_user = 3;
     const conn = await getRethinkDB();
-    rethinkdb
-      .table("channels")
+    r.table("channels")
       .insert(channel)
       .run(conn, function (err, _res) {
         if (err) throw err;
