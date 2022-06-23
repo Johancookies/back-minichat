@@ -14,7 +14,6 @@ channel.use((err, req, res, next) => {
 });
 
 // get to send or insert the channel
-
 channel.get("/", async (req, response) => {
   try {
     const conn = await getRethinkDB();

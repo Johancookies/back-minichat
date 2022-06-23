@@ -13,6 +13,7 @@ const getRethinkDB = require("./config/db");
 const serviceLines = require("./routes/service_lines");
 const channel = require("./routes/channels");
 const messages = require("./routes/messages");
+const uploadFiles = require("./routes/upload");
 
 const app = express(); // initial express
 app.use(cors());
@@ -42,6 +43,7 @@ app.get("/", (_, res) => {
 app.use("/service-lines", serviceLines);
 app.use("/channels", channel);
 app.use("/messages", messages);
+app.use("/upload", uploadFiles);
 
 // socket middleware
 io.use((socket, next) => {
@@ -62,7 +64,7 @@ io.on("connection", (socket) => {
     socket.emit("pong", 1);
   });
 
-  // changefeed messages
+  // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
     socket.join(room); // join to the room user_id + service_lines
@@ -88,7 +90,10 @@ io.on("connection", (socket) => {
                   if (err) console.error(err);
                   cursor.each((err, result) => {
                     if (err) console.log(err);
-                    io.to(room).emit("receive_message", result.new_val);
+                    io.to(room).emit("receive_message", {
+                      ...result.new_val,
+                      status: "sent",
+                    });
                   });
                 });
             }
@@ -97,6 +102,24 @@ io.on("connection", (socket) => {
     } catch (e) {
       console.error(e);
     }
+  });
+
+  socket.on("receive_message", async (data) => {
+    console.log(data);
+    const conn = await getRethinkDB();
+    let messageStatus = {
+      id_message: data.id_message,
+      status: "received",
+    };
+    r.table("message_status")
+      .insert(messageStatus)
+      .run(conn, (err, res) => {
+        if (err) console.log(err);
+        io.to(data.id_channel).emit("change_status", {
+          id_message: data.id_message,
+          status: "received",
+        });
+      });
   });
 
   socket.on("disconnect", () => {
