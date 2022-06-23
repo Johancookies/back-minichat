@@ -1,6 +1,6 @@
 const express = require("express");
 
-const r = require("r");
+const r = require("rethinkdb");
 const getRethinkDB = require("../config/db");
 
 const channel = express.Router();
