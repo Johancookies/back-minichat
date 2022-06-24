@@ -114,6 +114,24 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("join_channels", (userId) => {
+    socket.join(userId);
+    const conn = await getRethinkDB();
+
+    r.table("channels")
+      .eqJoin(r.row("id_member"), r.table("members"))
+      .without({ right: "id" })
+      .zip()
+      .filter({ id_user: idUser }).changes()
+      .run(conn, (err, cursor) => {
+        if (err) console.log(err);
+        cursor.each((err, result) => {
+          if (err) console.log(err);
+          io.to(userId).emmit("new_channels", result.new_val)
+        });
+      });
+  });
+
   socket.on("receive_message", async (data) => {
     const conn = await getRethinkDB();
     let messageStatus = {

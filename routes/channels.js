@@ -128,6 +128,7 @@ channel.get("/by-collab", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
+        
         response.json({
           data: result,
         });
