@@ -21,7 +21,7 @@ upload.get("/", (req, res) => {
   res.send("funciona upload");
 });
 
-upload.post("/", async, uploadAWS.array("file"), (req, res) => {
+upload.post("/", uploadAWS.array("file"), async(req, res) => {
   try {
     if (!req.files) {
       res.send({
