@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const morgan = require("morgan");
+const bodyParser = require("body-parser")
 const { Server } = require("socket.io");
 require("dotenv").config();
 
@@ -17,7 +18,8 @@ const uploadFiles = require("./routes/upload");
 
 const app = express(); // initial express
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(morgan("dev"));
 
 const server = http.createServer(app);
@@ -114,7 +116,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("join_channels", (userId) => {
+  socket.on("join_channels", async(userId) => {
     socket.join(userId);
     const conn = await getRethinkDB();
 
