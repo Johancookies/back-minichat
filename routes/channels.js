@@ -42,68 +42,66 @@ channel.post("/", async (req, response) => {
                   .filter({ id_channel: channelId })
                   .run(conn, (err, cursor) => {
                     if (err) response.sendStatus(500);
-                    if (cursor) {
-                      cursor.toArray((err, result) => {
-                        if (err) response.sendStatus(500);
-                        if (result.length === 0) {
-                          const time = new Date(); // creaate the time of the channel
-                          let channel = {
-                            id_channel: channelId,
-                            create_at: time,
-                            id_member: res.generated_keys[0],
-                            id_service_line: idServiceLine,
-                            id_user: "3",
-                          };
-                          r.table("channels")
-                            .insert(channel)
-                            .run(conn, function (err, _res) {
-                              if (err) response.sendStatus(500);
-                              response.json({
-                                id_channel: channel.id_channel,
-                              });
+                    cursor.toArray((err, result) => {
+                      if (err) response.sendStatus(500);
+                      if (result.length === 0) {
+                        const time = new Date(); // creaate the time of the channel
+                        let channel = {
+                          id_channel: channelId,
+                          create_at: time,
+                          id_member: res.generated_keys[0],
+                          id_service_line: idServiceLine,
+                          id_user: "3",
+                        };
+                        r.table("channels")
+                          .insert(channel)
+                          .run(conn, function (err, res) {
+                            if (err) response.sendStatus(500);
+                            response.json({
+                              id_channel: channel.id_channel,
                             });
-                        } else {
-                          response.json({
-                            id_channel: result[0].id_channel,
                           });
-                        }
-                      });
-                    }
+                      } else {
+                        response.json({
+                          id_channel: result[0].id_channel,
+                        });
+                      }
+                    });
                   });
               });
-          }else{
+          } else {
             r.table("channels")
-                  .filter({ id_channel: channelId })
-                  .run(conn, (err, cursor) => {
+              .filter({ id_channel: channelId })
+              .run(conn, (err, cursor) => {
+                if (err) response.sendStatus(500);
+                if (cursor) {
+                  cursor.toArray((err, result) => {
                     if (err) response.sendStatus(500);
-                    if (cursor) {
-                      cursor.toArray((err, result) => {
-                        if (err) response.sendStatus(500);
-                        if (result.length === 0) {
-                          const time = new Date(); // creaate the time of the channel
-                          let channel = {
-                            id_channel: channelId,
-                            create_at: time,
-                            id_member: res[0].id,
-                            id_service_line: idServiceLine,
-                            id_user: "3",
-                          };
-                          r.table("channels")
-                            .insert(channel)
-                            .run(conn, function (err, _res) {
-                              if (err) response.sendStatus(500);
-                              response.json({
-                                id_channel: channel.id_channel,
-                              });
-                            });
-                        } else {
+                    if (result.length === 0) {
+                      const time = new Date(); // creaate the time of the channel
+                      let channel = {
+                        id_channel: channelId,
+                        create_at: time,
+                        id_member: res[0].id,
+                        id_service_line: idServiceLine,
+                        id_user: "3",
+                      };
+                      r.table("channels")
+                        .insert(channel)
+                        .run(conn, function (err, _res) {
+                          if (err) response.sendStatus(500);
                           response.json({
-                            id_channel: result[0].id_channel,
+                            id_channel: channel.id_channel,
                           });
-                        }
+                        });
+                    } else {
+                      response.json({
+                        id_channel: result[0].id_channel,
                       });
                     }
                   });
+                }
+              });
           }
         });
       });
@@ -128,7 +126,7 @@ channel.get("/by-collab", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
-        
+
         response.json({
           data: result,
         });

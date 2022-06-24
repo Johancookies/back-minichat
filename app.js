@@ -116,22 +116,25 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("join_channels", async(userId) => {
+  socket.on("join_channels", async (userId) => {
     socket.join(userId);
     const conn = await getRethinkDB();
 
-    r.table("channels")
-      .eqJoin(r.row("id_member"), r.table("members"))
-      .without({ right: "id" })
-      .zip()
-      .filter({ id_user: idUser }).changes()
-      .run(conn, (err, cursor) => {
-        if (err) console.log(err);
-        cursor.each((err, result) => {
-          if (err) console.log(err);
-          io.to(userId).emmit("new_channels", result.new_val)
-        });
-      });
+    console.log('register');
+
+    r.table("channels").filter({id_user:'3'}).changes().run (conn, (err, cursor) => {
+      if(err) console.log(err)
+      cursor.each((err, resultChannel)=> {
+        if(err) console.log(err)
+        r.table("members").filter({ id_user: resultChannel.id_member }).run(conn, (err, cursor) =>{
+          cursor.toArray((err, result) => {
+
+            console.log({ ...resultChannel.new_val, ...result });
+          })
+        })
+      })
+    });
+
   });
 
   socket.on("receive_message", async (data) => {
