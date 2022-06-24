@@ -3,7 +3,7 @@ const fileupload = require("express-fileupload");
 
 const upload = express.Router();
 
-const uploadFile = require("../aws/aws");
+const uploadAWS = require("../aws/aws");
 
 upload.use((err, req, res, next) => {
   if (err) res.json({ error: err, status: 500 });
@@ -21,7 +21,7 @@ upload.get("/", (req, res) => {
   res.send("funciona upload");
 });
 
-upload.post("/", async (req, res) => {
+upload.post("/", async, uploadAWS.array("file"), (req, res) => {
   try {
     if (!req.files) {
       res.send({
@@ -29,19 +29,18 @@ upload.post("/", async (req, res) => {
         message: "No file uploaded",
       });
     } else {
-      let file = req.files.file;
-
-      console.log(req.files);
-
-      file.mv("./uploads/" + file.name);
-
       res.send({
         status: "success",
         message: "File is uploaded",
         data: {
-          name: file.name,
-          mimetype: file.mimetype,
-          size: file.size,
+          url: req.files.map(function (file) {
+            return {
+              url: file.location,
+              name: file.key,
+              type: file.mimetype,
+              size: file.size,
+            };
+          }),
         },
       });
     }
