@@ -42,7 +42,6 @@ channel.post("/", async (req, response) => {
                   .filter({ id_channel: channelId })
                   .run(conn, (err, cursor) => {
                     if (err) response.sendStatus(500);
-                    if (cursor) {
                       cursor.toArray((err, result) => {
                         if (err) response.sendStatus(500);
                         if (result.length === 0) {
@@ -68,7 +67,6 @@ channel.post("/", async (req, response) => {
                           });
                         }
                       });
-                    }
                   });
               });
           }else{
@@ -128,7 +126,7 @@ channel.get("/by-collab", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
-        
+
         response.json({
           data: result,
         });
