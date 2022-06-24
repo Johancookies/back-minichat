@@ -1,4 +1,5 @@
 const express = require("express");
+const fileupload = require("express-fileupload");
 
 const upload = express.Router();
 
@@ -10,20 +11,42 @@ upload.use((err, req, res, next) => {
   res.sendStatus(204);
 });
 
-upload.post("/", (req, res) => {
-	const data = req.body;
-	// data.type => type of file
+upload.use(
+  fileupload({
+    createParentPath: true,
+  })
+);
+
+upload.get("/", (req, res) => {
+  res.send("funciona upload");
+});
+
+upload.post("/", async (req, res) => {
   try {
-    uploadFile(data.fileName, data.key)
-      .then((data) => {
-        res.json({ data: data, status: 200 });
-      })
-      .catch((e) => {
-        res.json({ error: e, status: 500 });
+    if (!req.files) {
+      res.send({
+        status: "failed",
+        message: "No file uploaded",
       });
-    res.json({ menssage: "file uploaded", status: 200 });
-  } catch (e) {
-    res.json({ error: e, status: 500 });
+    } else {
+      let file = req.files.file;
+
+      console.log(req.files);
+
+      file.mv("./uploads/" + file.name);
+
+      res.send({
+        status: "success",
+        message: "File is uploaded",
+        data: {
+          name: file.name,
+          mimetype: file.mimetype,
+          size: file.size,
+        },
+      });
+    }
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
