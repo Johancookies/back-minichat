@@ -46,32 +46,41 @@ messages.post("/", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
-        if (result[0].status === "waiting") {
-          r.table("meetings")
-            .filter({ id: result[0].id })
-            .update({ status: "active" })
-            .run(conn, (err, res) => {
-              if (err) console.log(err);
-            });
+        if (result.length === 0) {
+          createMeeting({
+            con: conn,
+            data: message,
+            response: response,
+            idChannel: message.id_channel,
+          });
+        } else {
+          if (result[0].status === "waiting") {
+            r.table("meetings")
+              .filter({ id: result[0].id })
+              .update({ status: "active" })
+              .run(conn, (err, res) => {
+                if (err) console.log(err);
+              });
+          }
+          const timeout = setTimeout(() => {
+            r.table("meetings")
+              .filter({ id: result[0].id })
+              .update({ status: "inactive" })
+              .run(conn, (err, res) => {
+                if (err) console.log(err);
+                console.log("inactive meeting" + result[0].id);
+                ioEmmit.log({ key: "close_meeting", data: result[0].id });
+              });
+          }, 600000);
+          if (url_taskMap[result[0].id]) {
+            clearTimeout(url_taskMap[result[0].id]);
+          }
+          url_taskMap[result[0].id] = timeout;
+          meet_id = result[0].id;
+          message.id_meet = meet_id;
+          message.create_at = currentDate;
+          insertMessage(conn, message, response);
         }
-        const timeout = setTimeout(() => {
-          r.table("meetings")
-            .filter({ id: result[0].id })
-            .update({ status: "inactive" })
-            .run(conn, (err, res) => {
-              if (err) console.log(err);
-              console.log("inactive meeting" + result[0].id);
-              ioEmmit.log({ key: "close_meeting", data: result[0].id });
-            });
-        }, 600000);
-        if (url_taskMap[result[0].id]) {
-          clearTimeout(url_taskMap[result[0].id]);
-        }
-        url_taskMap[result[0].id] = timeout;
-        meet_id = result[0].id;
-        message.id_meet = meet_id;
-        message.create_at = currentDate;
-        insertMessage(conn, message, response);
       });
     });
 });
@@ -95,6 +104,39 @@ function insertMessage(con, data, response) {
       });
   } catch (e) {
     response.json({ error: e, status: 500 });
+  }
+}
+
+function createMeeting({ con, idChannel, data, response }) {
+  try {
+    const currentDate = new Date();
+    let dataMeeting = {
+      id_channel: idChannel,
+      status: "active",
+      create_at: currentDate,
+    };
+    r.table("meetings")
+      .insert(dataMeeting)
+      .run(con, (err, res) => {
+        if (err) console.log(err);
+        meet_id = res[0].id;
+        data.id_meet = meet_id;
+        data.create_at = currentDate;
+        insertMessage(con, data, response);
+        const timeout = setTimeout(() => {
+          r.table("meetings")
+            .filter({ id: res[0].id })
+            .update({ status: "inactive" })
+            .run(conn, (err, result) => {
+              if (err) console.log(err);
+              console.log("inactive meeting" + res[0].id);
+              ioEmmit.log({ key: "close_meeting", data: res[0].id });
+            });
+        }, 600000);
+        url_taskMap[res[0].id] = timeout;
+      });
+  } catch (e) {
+    console.log(e);
   }
 }
 

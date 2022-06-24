@@ -70,6 +70,7 @@ io.on("connection", (socket) => {
     socket.join(room); // join to the room user_id + service_lines
     try {
       const conn = await getRethinkDB(); // connect whit the database
+
       r.table("meetings")
         .filter(
           r
@@ -89,12 +90,21 @@ io.on("connection", (socket) => {
                 .run(conn, (err, cursor) => {
                   if (err) console.error(err);
                   cursor.each((err, result) => {
+                    console.log(result.new_val);
                     if (err) console.log(err);
                     io.to(room).emit("receive_message", {
                       ...result.new_val,
                       status: "sent",
                     });
                   });
+                });
+            } else if (result[0].status === "waiting") {
+              r.table("meetings")
+                .filter({ id: result[0].id })
+                .update({ status: "active" })
+                .run(conn, (err, res) => {
+                  if (err) console.log(err);
+                  console.log("change meeting status " + result[0].id);
                 });
             }
           });
@@ -105,7 +115,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("receive_message", async (data) => {
-    console.log(data);
     const conn = await getRethinkDB();
     let messageStatus = {
       id_message: data.id_message,
@@ -119,6 +128,17 @@ io.on("connection", (socket) => {
           id_message: data.id_message,
           status: "received",
         });
+      });
+  });
+
+  socket.on("change_waiting", async (message) => {
+    const conn = await getRethinkDB();
+    r.table("meetings")
+      .filter({ id: message.id_meet })
+      .update({ status: "waiting" })
+      .run(conn, (err, res) => {
+        if (err) console.log(err);
+        console.log("change meeting status " + message.id_meet);
       });
   });
 
@@ -136,7 +156,7 @@ server.listen(process.env.PORT, () => {
 });
 
 function createMeeting(con, idChannel) {
-  try { 
+  try {
     const currentDate = new Date();
     let dataMeeting = {
       id_channel: idChannel,
