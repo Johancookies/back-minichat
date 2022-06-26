@@ -3,6 +3,7 @@ const r = require("rethinkdb");
 const getRethinkDB = require("../config/db");
 const messages = express.Router();
 const ioEmmit = require("../app");
+const upload = require("../routes/upload");
 
 const url_taskMap = {};
 
@@ -12,6 +13,8 @@ messages.use((err, req, res, next) => {
   if (req.body) next("router");
   res.sendStatus(204);
 });
+
+messages.use("/upload", upload);
 
 // get messages by channel
 messages.get("/by-channel", async (req, response) => {
@@ -87,21 +90,45 @@ messages.post("/", async (req, response) => {
 
 function insertMessage(con, data, response) {
   try {
-    r.table("messages")
-      .insert(data)
-      .run(con, (err, res) => {
-        if (err) console.log(err);
-        let messageStatus = {
-          id_message: res.generated_keys[0],
-          status: "sent",
-        };
-        r.table("message_status")
-          .insert(messageStatus)
-          .run(con, (err, res) => {
-            if (err) console.log(err);
-            response.sendStatus(200);
-          });
+    if (data.type === "text") {
+      r.table("messages")
+        .insert(data)
+        .run(con, (err, res) => {
+          if (err) console.log(err);
+          let messageStatus = {
+            id_message: res.generated_keys[0],
+            status: "sent",
+          };
+          r.table("message_status")
+            .insert(messageStatus)
+            .run(con, (err, res) => {
+              if (err) console.log(err);
+              response.sendStatus(200);
+            });
+        });
+    } else {
+      messages.post("/upload", (req, res) => {
+        try {
+          r.table("messages")
+            .insert(data)
+            .run(con, (err, res) => {
+              if (err) console.log(err);
+              let messageStatus = {
+                id_message: res.generated_keys[0],
+                status: "sent",
+              };
+              r.table("message_status")
+                .insert(messageStatus)
+                .run(con, (err, res) => {
+                  if (err) console.log(err);
+                  response.sendStatus(200);
+                });
+            });
+        } catch (e) {
+          console.log(e);
+        }
       });
+    }
   } catch (e) {
     response.json({ error: e, status: 500 });
   }
