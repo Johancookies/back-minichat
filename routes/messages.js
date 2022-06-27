@@ -4,6 +4,7 @@ const getRethinkDB = require("../config/db");
 const messages = express.Router();
 const ioEmmit = require("../app");
 const upload = require("../routes/upload");
+const uploadAWS = require("../aws/aws");
 
 const url_taskMap = {};
 
@@ -32,10 +33,15 @@ messages.get("/by-channel", async (req, response) => {
 });
 
 // create messages
-messages.post("/", async (req, response) => {
+messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
   const conn = await getRethinkDB();
   const message = req.body;
   const currentDate = new Date();
+
+  let file = null;
+  if (req.files && req.files.length > 0) {
+    file = req.files[0].location;
+  }
 
   let meet_id = "";
   r.table("meetings")
@@ -55,6 +61,7 @@ messages.post("/", async (req, response) => {
             data: message,
             response: response,
             idChannel: message.id_channel,
+            file: file,
           });
         } else {
           if (result[0].status === "waiting") {
@@ -82,13 +89,13 @@ messages.post("/", async (req, response) => {
           meet_id = result[0].id;
           message.id_meet = meet_id;
           message.create_at = currentDate;
-          insertMessage(conn, message, response);
+          insertMessage(conn, message, response, file);
         }
       });
     });
 });
 
-function insertMessage(con, data, response) {
+function insertMessage(con, data, response, file) {
   try {
     if (data.type === "text") {
       r.table("messages")
@@ -107,34 +114,32 @@ function insertMessage(con, data, response) {
             });
         });
     } else {
-      messages.post("/upload", (req, res) => {
-        try {
-          r.table("messages")
-            .insert(data)
+      data.url_file = file;
+      r.table("messages")
+        .insert(data)
+        .run(con, (err, res) => {
+          if (err) console.log(err);
+          let messageStatus = {
+            id_message: res.generated_keys[0],
+            status: "sent",
+          };
+          r.table("message_status")
+            .insert(messageStatus)
             .run(con, (err, res) => {
               if (err) console.log(err);
-              let messageStatus = {
-                id_message: res.generated_keys[0],
-                status: "sent",
-              };
-              r.table("message_status")
-                .insert(messageStatus)
-                .run(con, (err, res) => {
-                  if (err) console.log(err);
-                  response.sendStatus(200);
-                });
+              response.send({
+                message: "Uploaded!",
+                status: 200,
+              });
             });
-        } catch (e) {
-          console.log(e);
-        }
-      });
+        });
     }
   } catch (e) {
     response.json({ error: e, status: 500 });
   }
 }
 
-function createMeeting({ con, idChannel, data, response }) {
+function createMeeting({ con, idChannel, data, response, file }) {
   try {
     const currentDate = new Date();
     let dataMeeting = {
@@ -149,7 +154,7 @@ function createMeeting({ con, idChannel, data, response }) {
         meet_id = res[0].id;
         data.id_meet = meet_id;
         data.create_at = currentDate;
-        insertMessage(con, data, response);
+        insertMessage(con, data, response, file);
         const timeout = setTimeout(() => {
           r.table("meetings")
             .filter({ id: res[0].id })
