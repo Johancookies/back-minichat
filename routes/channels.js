@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
+import r from "rethinkdb";
+import getRethinkDB from "../config/db.js";
 
-const r = require("rethinkdb");
-const getRethinkDB = require("../config/db");
 const channel = express.Router();
 
 // middleware
@@ -34,6 +34,7 @@ channel.post("/", async (req, response) => {
               mobile_phone: member.mobile_phone,
               document_number: member.document_number,
             };
+            console.log(dataMember);
             r.table("members")
               .insert(dataMember)
               .run(conn, (err, res) => {
@@ -43,6 +44,7 @@ channel.post("/", async (req, response) => {
                   .run(conn, (err, cursor) => {
                     if (err) response.sendStatus(500);
                     cursor.toArray((err, result) => {
+                      console.log(result);
                       if (err) response.sendStatus(500);
                       if (result.length === 0) {
                         const time = new Date(); // creaate the time of the channel
@@ -53,10 +55,12 @@ channel.post("/", async (req, response) => {
                           id_service_line: idServiceLine,
                           id_user: "3",
                         };
+                        console.log(channel);
                         r.table("channels")
                           .insert(channel)
                           .run(conn, function (err, res) {
-                            if (err) response.sendStatus(500);
+                            console.log(res);
+                            if (err) console.log(err);
                             response.json({
                               id_channel: channel.id_channel,
                             });
@@ -88,7 +92,7 @@ channel.post("/", async (req, response) => {
                       };
                       r.table("channels")
                         .insert(channel)
-                        .run(conn, function (err, _res) {
+                        .run(conn, function (err, res) {
                           if (err) response.sendStatus(500);
                           response.json({
                             id_channel: channel.id_channel,
@@ -134,4 +138,4 @@ channel.get("/by-collab", async (req, response) => {
     });
 });
 
-module.exports = channel;
+export default channel;

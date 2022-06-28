@@ -1,7 +1,6 @@
-const express = require("express");
-
-const rethinkdb = require("rethinkdb");
-const getRethinkDB = require("../config/db");
+import express from "express";
+import rethinkdb from "rethinkdb";
+import getRethinkDB from "../config/db.js";
 
 const serviceLines = express.Router();
 
@@ -44,4 +43,4 @@ serviceLines.post("/", async (req, response) => {
   }
 });
 
-module.exports = serviceLines;
+export default serviceLines;

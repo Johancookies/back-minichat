@@ -1,25 +1,25 @@
-const express = require("express");
-const http = require("http");
-const cors = require("cors");
-const morgan = require("morgan");
-const bodyParser = require("body-parser")
-const { Server } = require("socket.io");
-require("dotenv").config();
+import express from "express";
+import http from "http";
+import cors from "cors";
+import morgan from "morgan";
+import bodyParser from "body-parser";
+import { Server } from "socket.io";
+import "dotenv/config.js";
 
 // db
-const r = require("rethinkdb");
-const getRethinkDB = require("./config/db");
+import r from "rethinkdb";
+import getRethinkDB from "./config/db.js";
 
 // import routes
-const serviceLines = require("./routes/service_lines");
-const channel = require("./routes/channels");
-const messages = require("./routes/messages");
-const uploadFiles = require("./routes/upload");
+import serviceLines from "./routes/service_lines.js";
+import channel from "./routes/channels.js";
+import messages from "./routes/messages.js";
+import notifications from "./routes/notifications.js";
 
 const app = express(); // initial express
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 const server = http.createServer(app);
@@ -45,7 +45,8 @@ app.get("/", (_, res) => {
 app.use("/service-lines", serviceLines);
 app.use("/channels", channel);
 app.use("/messages", messages);
-app.use("/upload", uploadFiles);
+app.use("/send-push", notifications);
+// app.use("/upload", uploadFiles);
 
 // socket middleware
 io.use((socket, next) => {
@@ -119,22 +120,29 @@ io.on("connection", (socket) => {
   socket.on("join_channels", async (userId) => {
     socket.join(userId);
     const conn = await getRethinkDB();
+    console.log("join channels " + userId);
 
-    console.log('register');
+    r.table("channels")
+      .filter({ id_user: userId.toString() })
+      .changes()
 
-    r.table("channels").filter({id_user:'3'}).changes().run (conn, (err, cursor) => {
-      if(err) console.log(err)
-      cursor.each((err, resultChannel)=> {
-        if(err) console.log(err)
-        r.table("members").filter({ id_user: resultChannel.id_member }).run(conn, (err, cursor) =>{
-          cursor.toArray((err, result) => {
-
-            console.log({ ...resultChannel.new_val, ...result });
-          })
-        })
-      })
-    });
-
+      .run(conn, (err, cursor) => {
+        if (err) console.log(err);
+        cursor.each((err, resultChannel) => {
+          if (err) console.log(err);
+          r.table("members")
+            .filter({ id: resultChannel.new_val.id_member })
+            .run(conn, (err, cursor) => {
+              cursor.toArray((err, result) => {
+                if (err) console.log(err);
+                io.emit("new_channels", {
+                  ...resultChannel.new_val,
+                  ...result[0],
+                });
+              });
+            });
+        });
+      });
   });
 
   socket.on("receive_message", async (data) => {
@@ -156,13 +164,15 @@ io.on("connection", (socket) => {
 
   socket.on("change_waiting", async (message) => {
     const conn = await getRethinkDB();
-    r.table("meetings")
-      .filter({ id: message.id_meet })
-      .update({ status: "waiting" })
-      .run(conn, (err, res) => {
-        if (err) console.log(err);
-        console.log("change meeting status " + message.id_meet);
-      });
+    if (message && Object.keys(message).length > 0) {
+      r.table("meetings")
+        .filter({ id: message.id_meet })
+        .update({ status: "waiting" })
+        .run(conn, (err, res) => {
+          if (err) console.log(err);
+          console.log("change meeting status " + message.id_meet);
+        });
+    }
   });
 
   socket.on("disconnect", () => {
@@ -196,4 +206,4 @@ function createMeeting(con, idChannel) {
   }
 }
 
-module.exports.log = ioEmmit;
+export default ioEmmit;

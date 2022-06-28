@@ -1,4 +1,4 @@
-const rethinkdb = require("rethinkdb");
+import rethinkdb from "rethinkdb";
 
 // database connection
 let rdbConn = null;
@@ -33,4 +33,4 @@ const getRethinkDB = async function () {
   return await rdbConnect();
 };
 
-module.exports = getRethinkDB;
+export default getRethinkDB;

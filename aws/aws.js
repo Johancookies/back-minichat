@@ -1,8 +1,9 @@
-const fs = require("fs");
-const AWS = require("aws-sdk");
-const multer = require("multer");
-const multerS3 = require("multer-s3-v2");
-require("dotenv").config();
+import AWS from "aws-sdk";
+import multer from "multer";
+import multerS3 from "multer-s3-v2";
+
+import "dotenv/config.js";
+
 
 // config aws s3
 const s3 = new AWS.S3({
@@ -25,5 +26,4 @@ const uploadAWS = multer({
 });
 
 // function to upload a file
-
-module.exports = uploadAWS;
+export default uploadAWS;

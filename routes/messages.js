@@ -1,10 +1,10 @@
-const express = require("express");
-const r = require("rethinkdb");
-const getRethinkDB = require("../config/db");
+import express from "express";
+import r from "rethinkdb";
+import getRethinkDB from "../config/db.js";
+import ioEmmit from "../app.js";
+import uploadAWS from "../aws/aws.js";
+
 const messages = express.Router();
-const ioEmmit = require("../app");
-const upload = require("../routes/upload");
-const uploadAWS = require("../aws/aws");
 
 const url_taskMap = {};
 
@@ -15,14 +15,13 @@ messages.use((err, req, res, next) => {
   res.sendStatus(204);
 });
 
-messages.use("/upload", upload);
-
 // get messages by channel
 messages.get("/by-channel", async (req, response) => {
   const conn = await getRethinkDB();
   const idChannel = req.query.id_channel;
   r.table("messages")
     .filter({ id_channel: idChannel })
+    .orderBy("create_at")
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
@@ -79,7 +78,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
               .run(conn, (err, res) => {
                 if (err) console.log(err);
                 console.log("inactive meeting" + result[0].id);
-                ioEmmit.log({ key: "close_meeting", data: result[0].id });
+                ioEmmit({ key: "close_meeting", data: result[0].id });
               });
           }, 600000);
           if (url_taskMap[result[0].id]) {
@@ -162,7 +161,7 @@ function createMeeting({ con, idChannel, data, response, file }) {
             .run(con, (err, result) => {
               if (err) console.log(err);
               console.log("inactive meeting" + res[0].id);
-              ioEmmit.log({ key: "close_meeting", data: res[0].id });
+              ioEmmit({ key: "close_meeting", data: res[0].id });
             });
         }, 600000);
         url_taskMap[res[0].id] = timeout;
@@ -172,4 +171,4 @@ function createMeeting({ con, idChannel, data, response, file }) {
   }
 }
 
-module.exports = messages;
+export default messages;
