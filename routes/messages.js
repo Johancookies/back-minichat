@@ -159,7 +159,7 @@ function createMeeting({ con, idChannel, data, response, file }) {
           r.table("meetings")
             .filter({ id: res[0].id })
             .update({ status: "inactive" })
-            .run(conn, (err, result) => {
+            .run(con, (err, result) => {
               if (err) console.log(err);
               console.log("inactive meeting" + res[0].id);
               ioEmmit.log({ key: "close_meeting", data: res[0].id });
