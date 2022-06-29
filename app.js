@@ -15,6 +15,7 @@ import serviceLines from "./routes/service_lines.js";
 import channel from "./routes/channels.js";
 import messages from "./routes/messages.js";
 import notifications from "./routes/notifications.js";
+import members from "./routes/members.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -46,7 +47,7 @@ app.use("/service-lines", serviceLines);
 app.use("/channels", channel);
 app.use("/messages", messages);
 app.use("/send-push", notifications);
-// app.use("/upload", uploadFiles);
+app.use("/members", members);
 
 // socket middleware
 io.use((socket, next) => {
@@ -70,9 +71,9 @@ io.on("connection", (socket) => {
   // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    socket.join(room); // join to the room user_id + service_lines
+    socket.join(room);
     try {
-      const conn = await getRethinkDB(); // connect whit the database
+      const conn = await getRethinkDB();
 
       r.table("meetings")
         .filter(

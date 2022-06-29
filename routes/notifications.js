@@ -1,18 +1,21 @@
 import express from "express";
 import fetch from "node-fetch";
 import r from "rethinkdb";
-import getRethinkDB from "../config/db";
+import getRethinkDB from "../config/db.js";
 
 const notification = express.Router();
 
 notification.post("/", (req, res) => {
   let notification = {
     title: "Esto es una notificación",
-    text: "No puede ser envié una notificación :3",
+    body: {
+      content: "No puede ser, envié una notificación :3",
+      id_channel: null,
+    },
   };
 
   let fcm_tokens = [
-    "fOuR4yqdja4TNHU442oGLZ:APA91bGu_MwiA3oYulmYmOWKuwi-yW-Auz6Bwj3OSxHhW3vsDhn9OdyEYyuL2jUnaPPXhpiYQstO5jiJUkYYUH-tOzg5kddsYuShiDc685gYCyHCuwOL9FI7MQGuEbp0_N5CAcU2P7Et",
+    "fOuR4yqdja4TNHU442oGLZ:APA91bGJ4HWZAdZvnh7sQfC89MGTeNcqcTyX8_MQ00ErhA-ywMr12thvqqXY563V-A-KwkTezBKYqcqc0YaPep3oL7hxpwFQ4E3625P_FVRJjuUM-x8bGGxkoFpVedP44zorMvEZLW6f",
   ];
   let notification_body = {
     notification: notification,

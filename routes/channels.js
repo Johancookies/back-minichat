@@ -34,17 +34,41 @@ channel.post("/", async (req, response) => {
               mobile_phone: member.mobile_phone,
               document_number: member.document_number,
             };
-            console.log(dataMember);
             r.table("members")
               .insert(dataMember)
               .run(conn, (err, res) => {
                 if (err) console.log(err);
+                if (member.token) {
+                  let token = {
+                    device: member.device,
+                    type: member.type,
+                    id_user: member.id_user ?? null,
+                    id_member: member.id ?? null,
+                    token: member.token,
+                  };
+                  r.table("token_notification")
+                    .insert(token)
+                    .run(conn, (err, res) => {
+                      if (err) {
+                        response.status(400);
+                        response.json({
+                          message: "Error to save member token",
+                          status: 400,
+                        });
+                      } else {
+                        response.status(200);
+                        response.json({
+                          message: "Save member token successfully",
+                          status: 200,
+                        });
+                      }
+                    });
+                }
                 r.table("channels")
                   .filter({ id_channel: channelId })
                   .run(conn, (err, cursor) => {
                     if (err) response.sendStatus(500);
                     cursor.toArray((err, result) => {
-                      console.log(result);
                       if (err) response.sendStatus(500);
                       if (result.length === 0) {
                         const time = new Date(); // creaate the time of the channel
@@ -55,11 +79,9 @@ channel.post("/", async (req, response) => {
                           id_service_line: idServiceLine,
                           id_user: "3",
                         };
-                        console.log(channel);
                         r.table("channels")
                           .insert(channel)
                           .run(conn, function (err, res) {
-                            console.log(res);
                             if (err) console.log(err);
                             response.json({
                               id_channel: channel.id_channel,
