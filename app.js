@@ -16,6 +16,7 @@ import channel from "./routes/channels.js";
 import messages from "./routes/messages.js";
 import notifications from "./routes/notifications.js";
 import members from "./routes/members.js";
+import users from "./routes/users.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -48,6 +49,7 @@ app.use("/channels", channel);
 app.use("/messages", messages);
 app.use("/send-push", notifications);
 app.use("/members", members);
+app.use("/users", users);
 
 // socket middleware
 io.use((socket, next) => {

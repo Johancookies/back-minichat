@@ -44,15 +44,53 @@ notification.post("/add-token", async (req, response) => {
   const conn = await getRethinkDB();
   if (token.token) {
     r.table("token_notification")
-      .insert(token)
-      .run(conn, (err, res) => {
+      .filter({ id_user: token.id_user })
+      .run(conn, (err, cursor) => {
         if (err) {
           console.log(err);
-          response.status(400);
-          response.json({ message: "Something went wrong!", status: 400 });
         } else {
-          response.status(200);
-          response.json({ message: "Token added successfully", status: 200 });
+          cursor.toArray((err, result) => {
+            if (resutl && result.length > 0) {
+              r.table("token_notification")
+                .filter({ id_user: token.id_user })
+                .update({ token: token.token })
+                .run(conn, (err, res) => {
+                  if (err) {
+                    console.log(err);
+                    response.status(400);
+                    response.json({
+                      message: "Something went wrong!",
+                      status: 400,
+                    });
+                  } else {
+                    response.status(200);
+                    response.json({
+                      message: "Token added successfully",
+                      status: 200,
+                    });
+                  }
+                });
+            } else {
+              r.table("token_notification")
+                .insert(token)
+                .run(conn, (err, res) => {
+                  if (err) {
+                    console.log(err);
+                    response.status(400);
+                    response.json({
+                      message: "Something went wrong!",
+                      status: 400,
+                    });
+                  } else {
+                    response.status(200);
+                    response.json({
+                      message: "Token added successfully",
+                      status: 200,
+                    });
+                  }
+                });
+            }
+          });
         }
       });
   } else {
