@@ -47,7 +47,7 @@ app.get("/", (_, res) => {
 app.use("/service-lines", serviceLines);
 app.use("/channels", channel);
 app.use("/messages", messages);
-app.use("/send-push", notifications);
+app.use("/notifications", notifications);
 app.use("/members", members);
 app.use("/users", users);
 

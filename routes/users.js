@@ -46,3 +46,5 @@ users.post("/", async (req, response) => {
       }
     });
 });
+
+export default users;
