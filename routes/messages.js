@@ -39,7 +39,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
 
   let file = null;
   if (req.files && req.files.length > 0) {
-    file = req.files[0].location;
+		file = req.files[0]
   }
 
   let meet_id = "";
@@ -113,7 +113,9 @@ function insertMessage(con, data, response, file) {
             });
         });
     } else {
-      data.url_file = file;
+			data.url_file = file.location;
+			data.name_file = file.originalname;
+			data.size_file = file.size
       r.table("messages")
         .insert(data)
         .run(con, (err, res) => {

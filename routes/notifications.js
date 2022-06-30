@@ -10,7 +10,7 @@ notification.post("/", (req, res) => {
     title: "Esto es una notificación",
     body: {
       content: "No puede ser, envié una notificación :3",
-      id_channel: null,
+      id_channel: 78783354321,
     },
   };
 
