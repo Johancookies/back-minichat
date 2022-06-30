@@ -128,7 +128,7 @@ function insertMessage(con, data, response, file) {
               if (err) console.log(err);
               response.send({
                 message: "Uploaded!",
-                status: 200,
+                status: "success",
               });
             });
         });

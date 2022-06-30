@@ -53,13 +53,13 @@ channel.post("/", async (req, response) => {
                         response.status(400);
                         response.json({
                           message: "Error to save member token",
-                          status: 400,
+                          status: "error",
                         });
                       } else {
                         response.status(200);
                         response.json({
                           message: "Save member token successfully",
-                          status: 200,
+                          status: "success",
                         });
                       }
                     });

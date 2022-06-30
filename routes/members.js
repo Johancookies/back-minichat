@@ -55,10 +55,10 @@ members.post("/", async (req, response) => {
       if (err) {
         console.log(err);
         response.send(400);
-        response.json({ message: "Something went wrong!", status: 400 });
+        response.json({ message: "Something went wrong!", status: "error" });
       } else {
         response.status(200);
-        response.json({ message: "Member added successfully", status: 200 });
+        response.json({ message: "Member added successfully", status: "success" });
       }
     });
 });

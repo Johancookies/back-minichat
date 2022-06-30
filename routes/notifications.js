@@ -60,13 +60,13 @@ notification.post("/add-token", async (req, response) => {
                     response.status(400);
                     response.json({
                       message: "Something went wrong!",
-                      status: 400,
+                      status: "error",
                     });
                   } else {
                     response.status(200);
                     response.json({
                       message: "Token added successfully",
-                      status: 200,
+                      status: "success",
                     });
                   }
                 });
@@ -79,13 +79,13 @@ notification.post("/add-token", async (req, response) => {
                     response.status(400);
                     response.json({
                       message: "Something went wrong!",
-                      status: 400,
+                      status: "error",
                     });
                   } else {
                     response.status(200);
                     response.json({
                       message: "Token added successfully",
-                      status: 200,
+                      status: "success",
                     });
                   }
                 });
@@ -94,7 +94,7 @@ notification.post("/add-token", async (req, response) => {
         }
       });
   } else {
-    response.json({ message: "You did not send any token", status: 400 });
+    response.json({ message: "You did not send any token", status: "error" });
   }
 });
 
