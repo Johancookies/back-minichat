@@ -3,6 +3,7 @@ import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
 import ioEmmit from "../app.js";
 import uploadAWS from "../aws/aws.js";
+import fetch from "node-fetch";
 
 const messages = express.Router();
 
@@ -39,7 +40,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
 
   let file = null;
   if (req.files && req.files.length > 0) {
-		file = req.files[0]
+    file = req.files[0];
   }
 
   let meet_id = "";
@@ -111,11 +112,52 @@ function insertMessage(con, data, response, file) {
               if (err) console.log(err);
               response.sendStatus(200);
             });
+          r.table("channels")
+            .filter({ id_channel: data.id_channel })
+            .run(con, (err, cursor) => {
+              if (err) console.log(err);
+              cursor.toArray((err, result) => {
+                if (err) console.log(err);
+                if (result.length > 0) {
+                  if (data.author_type === "member") {
+                    r.table("token_notification")
+                      .filter({
+                        id_user: Number(result[0].id_user),
+                      })
+                      .run(con, (err, cursor) => {
+                        if (err) console.log(err);
+                        cursor.toArray((err, res) => {
+                          if (err) console.log(err);
+                          if (res.length > 0) {
+                            let tokens = res.map((token) => token.token);
+                            sendPush({ message: data, tokens: tokens });
+                          }
+                        });
+                      });
+                  } else {
+                    r.table("token_notification")
+                      .filter({
+                        id_member: Number(result[0].id_member),
+                      })
+                      .run(con, (err, cursor) => {
+                        if (err) console.log(err);
+                        cursor.toArray((err, res) => {
+                          if (err) console.log(err);
+                          if (res.length > 0) {
+                            let tokens = res.map((token) => token.token);
+                            sendPush({ message: data, tokens: tokens });
+                          }
+                        });
+                      });
+                  }
+                }
+              });
+            });
         });
     } else {
-			data.url_file = file.location;
-			data.name_file = file.originalname;
-			data.size_file = file.size
+      data.url_file = file.location;
+      data.name_file = file.originalname;
+      data.size_file = file.size;
       r.table("messages")
         .insert(data)
         .run(con, (err, res) => {
@@ -171,6 +213,33 @@ function createMeeting({ con, idChannel, data, response, file }) {
   } catch (e) {
     console.log(e);
   }
+}
+
+function sendPush({ message, tokens }) {
+  let notification = {
+    title: message.author_name,
+    body: message,
+  };
+
+  let notification_body = {
+    notification: notification,
+    registration_ids: tokens,
+  };
+
+  fetch("https://fcm.googleapis.com/fcm/send", {
+    method: "POST",
+    headers: {
+      Authorization: "key=" + process.env.FCM_TOKEN,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(notification_body),
+  })
+    .then(() => {
+      console.log("Notification send successfully");
+    })
+    .catch((err) => {
+      console.log("Something went wrong!", err);
+    });
 }
 
 export default messages;

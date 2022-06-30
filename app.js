@@ -178,6 +178,32 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("reactive_changefeed", async (room, message) => {
+    const conn = await getRethinkDB();
+    r.table("messages")
+      .filter({ id_channel: room })
+      .changes()
+      .run(conn, (err, cursor) => {
+        if (err) console.error(err);
+        cursor.each((err, result) => {
+          console.log(result.new_val);
+          if (err) console.log(err);
+          io.to(room).emit("receive_message", {
+            ...result.new_val,
+            status: "sent",
+          });
+        });
+      });
+    if (message.id_meet) {
+      r.table("meetings")
+        .filter({ id: message.id_meet })
+        .update({ status: "active" })
+        .run(conn, (err, res) => {
+          if (err) console.log(err);
+        }); 
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`User Disconnected ${socket.id}`);
   });
