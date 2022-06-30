@@ -39,7 +39,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
 
   let file = null;
   if (req.files && req.files.length > 0) {
-		file = req.files[0]
+    file = req.files[0];
   }
 
   let meet_id = "";
@@ -94,6 +94,22 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
     });
 });
 
+messages.post("/close-meeting", async (req, res) => {
+  const conn = await getRethinkDB();
+  const { id_channel } = req.body;
+  if (!id_channel) res.sendStatus(204);
+  r.table("meetings")
+    .filter({ id_channel: id_channel })
+    .update({ status: "inactive" })
+    .run(conn, (err, response) => {
+			if (err) {
+				console.log(err)
+				res.json({menssage: "error", status: 200})
+      }
+      res.json({ menssage: "meeting closed", status: 200 });
+    });
+});
+
 function insertMessage(con, data, response, file) {
   try {
     if (data.type === "text") {
@@ -113,9 +129,9 @@ function insertMessage(con, data, response, file) {
             });
         });
     } else {
-			data.url_file = file.location;
-			data.name_file = file.originalname;
-			data.size_file = file.size
+      data.url_file = file.location;
+      data.name_file = file.originalname;
+      data.size_file = file.size;
       r.table("messages")
         .insert(data)
         .run(con, (err, res) => {
