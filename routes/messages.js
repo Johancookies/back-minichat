@@ -105,7 +105,7 @@ messages.post("/close-meeting", async (req, res) => {
     .run(conn, (err, response) => {
 			if (err) {
 				console.log(err)
-				res.json({menssage: "error", status: 200})
+				res.json({menssage: "error", status: 500})
       }
       res.json({ menssage: "meeting closed", status: 200 });
     });
