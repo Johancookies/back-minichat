@@ -81,7 +81,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
                 console.log("inactive meeting" + result[0].id);
                 ioEmmit({ key: "close_meeting", data: result[0].id });
               });
-          }, 600000);
+          }, 60000);
           if (url_taskMap[result[0].id]) {
             clearTimeout(url_taskMap[result[0].id]);
           }
@@ -103,9 +103,9 @@ messages.post("/close-meeting", async (req, res) => {
     .filter({ id_channel: id_channel })
     .update({ status: "inactive" })
     .run(conn, (err, response) => {
-			if (err) {
-				console.log(err)
-				res.json({menssage: "error", status: 500})
+      if (err) {
+        console.log(err);
+        res.json({ menssage: "error", status: 500 });
       }
       res.json({ menssage: "meeting closed", status: 200 });
     });
@@ -151,18 +151,28 @@ function insertMessage(con, data, response, file) {
                         });
                       });
                   } else {
-                    r.table("token_notification")
+                    r.table("members")
                       .filter({
-                        id_member: Number(result[0].id_member),
+                        id: result[0].id_member,
                       })
                       .run(con, (err, cursor) => {
                         if (err) console.log(err);
                         cursor.toArray((err, res) => {
                           if (err) console.log(err);
-                          if (res.length > 0) {
-                            let tokens = res.map((token) => token.token);
-                            sendPush({ message: data, tokens: tokens });
-                          }
+                          r.table("token_notification")
+                            .filter({
+                              id_member: res[0].id_member,
+                            })
+                            .run(con, (err, cursor) => {
+                              if (err) console.log(err);
+                              cursor.toArray((err, res) => {
+                                if (err) console.log(err);
+                                if (res.length > 0) {
+                                  let tokens = res.map((token) => token.token);
+                                  sendPush({ message: data, tokens: tokens });
+                                }
+                              });
+                            });
                         });
                       });
                   }
@@ -210,21 +220,21 @@ function createMeeting({ con, idChannel, data, response, file }) {
       .insert(dataMeeting)
       .run(con, (err, res) => {
         if (err) console.log(err);
-        meet_id = res[0].id;
+        const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
         data.create_at = currentDate;
         insertMessage(con, data, response, file);
         const timeout = setTimeout(() => {
           r.table("meetings")
-            .filter({ id: res[0].id })
+            .filter({ id: res.generated_keys[0] })
             .update({ status: "inactive" })
             .run(con, (err, result) => {
               if (err) console.log(err);
-              console.log("inactive meeting" + res[0].id);
-              ioEmmit({ key: "close_meeting", data: res[0].id });
+              console.log("inactive meeting" + res.generated_keys[0]);
+              ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
             });
-        }, 600000);
-        url_taskMap[res[0].id] = timeout;
+        }, 60000);
+        url_taskMap[res.generated_keys[0]] = timeout;
       });
   } catch (e) {
     console.log(e);

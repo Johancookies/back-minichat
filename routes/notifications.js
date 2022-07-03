@@ -15,7 +15,7 @@ notification.post("/", (req, res) => {
   };
 
   let fcm_tokens = [
-    "fOuR4yqdja4TNHU442oGLZ:APA91bGJ4HWZAdZvnh7sQfC89MGTeNcqcTyX8_MQ00ErhA-ywMr12thvqqXY563V-A-KwkTezBKYqcqc0YaPep3oL7hxpwFQ4E3625P_FVRJjuUM-x8bGGxkoFpVedP44zorMvEZLW6f",
+    "cBNYr2d1Qw2sqP1dv-Y98B:APA91bE0iIbI2CVNak-ohyVzjA0COb6G_B5LD4xI7tWDAA2YcbUXEUolgboAALvFf4h88koRhwdCP1lQbop0m3s-UKZHWai6iXg31m7ayggagy4g5yf_HUJAYInNM_dujgGFW4ZjElbf",
   ];
   let notification_body = {
     notification: notification,

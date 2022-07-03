@@ -49,19 +49,7 @@ channel.post("/", async (req, response) => {
                   r.table("token_notification")
                     .insert(token)
                     .run(conn, (err, res) => {
-                      if (err) {
-                        response.status(400);
-                        response.json({
-                          message: "Error to save member token",
-                          status: "error",
-                        });
-                      } else {
-                        response.status(200);
-                        response.json({
-                          message: "Save member token successfully",
-                          status: "success",
-                        });
-                      }
+                      if (err) console.log(err);
                     });
                 }
                 r.table("channels")
@@ -152,7 +140,6 @@ channel.get("/by-collab", async (req, response) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
         if (err) console.log(err);
-
         response.json({
           data: result,
         });

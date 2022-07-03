@@ -84,6 +84,7 @@ io.on("connection", (socket) => {
             .eq(room)
             .and(r.row("status").eq("active").or(r.row("status").eq("waiting")))
         )
+        .limit(1)
         .run(conn, (err, cursor) => {
           if (err) console.log(err);
           cursor.toArray((err, result) => {
@@ -165,20 +166,20 @@ io.on("connection", (socket) => {
       });
   });
 
-  socket.on("change_waiting", async (message) => {
+  socket.on("change_waiting", async (channel) => {
     const conn = await getRethinkDB();
-    if (message && Object.keys(message).length > 0) {
-      r.table("meetings")
-        .filter({ id: message.id_meet })
-        .update({ status: "waiting" })
-        .run(conn, (err, res) => {
-          if (err) console.log(err);
-          console.log("change meeting status " + message.id_meet);
-        });
-    }
+    r.table("meetings")
+      .filter(r.row("id_channel").eq(channel).and(r.row("status").eq("active")))
+      .limit(1)
+      .update({ status: "waiting" })
+      .run(conn, (err, res) => {
+        if (err) console.log(err);
+        console.log("change meeting status successfully");
+      });
   });
 
-  socket.on("reactive_changefeed", async (room, message) => {
+  socket.on("reactive_changefeed", async (room) => {
+    console.log("reactive change feed");
     const conn = await getRethinkDB();
     r.table("messages")
       .filter({ id_channel: room })
@@ -194,14 +195,13 @@ io.on("connection", (socket) => {
           });
         });
       });
-    if (message.id_meet) {
-      r.table("meetings")
-        .filter({ id: message.id_meet })
-        .update({ status: "active" })
-        .run(conn, (err, res) => {
-          if (err) console.log(err);
-        }); 
-    }
+    r.table("meetings")
+      .filter({ id_channel: room })
+      .limit(1)
+      .update({ status: "active" })
+      .run(conn, (err, res) => {
+        if (err) console.log(err);
+      });
   });
 
   socket.on("disconnect", () => {
