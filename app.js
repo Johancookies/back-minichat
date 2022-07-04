@@ -89,20 +89,30 @@ io.on("connection", (socket) => {
           if (err) console.log(err);
           cursor.toArray((err, result) => {
             if (err) console.log(err);
+
             if (result.length === 0) {
+              let createdMeet = null;
               createMeeting(conn, room);
               r.table("messages")
                 .filter({ id_channel: room })
                 .changes()
-                .run(conn, (err, cursor) => {
+                .run(conn, (err, cursorChanges) => {
                   if (err) console.error(err);
-                  cursor.each((err, result) => {
-                    console.log(result.new_val);
+                  cursorChanges.each((err, result) => {
                     if (err) console.log(err);
-                    io.to(room).emit("receive_message", {
-                      ...result.new_val,
-                      status: "sent",
-                    });
+                    if (createdMeet !== null) {
+                      if (createdMeet !== result.new_val.id_meet) {
+                        console.log("close changes");
+                        cursorChanges.close();
+                      } else {
+                        console.log(result.new_val);
+                        createdMeet = result.new_val.id_meet;
+                        io.to(room).emit("receive_message", {
+                          ...result.new_val,
+                          status: "sent",
+                        });
+                      }
+                    }
                   });
                 });
             } else if (result[0].status === "waiting") {
