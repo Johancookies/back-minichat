@@ -50,7 +50,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
         .row("id_channel")
         .eq(message.id_channel)
         .and(r.row("status").eq("active").or(r.row("status").eq("waiting")))
-    )
+    ).limit(1)
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
