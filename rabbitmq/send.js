@@ -32,6 +32,9 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
         },
         { noAck: true }
       );
+      channel.close(() => {
+        conn.close();
+      });
     });
   });
 };
