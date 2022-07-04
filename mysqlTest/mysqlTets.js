@@ -6,6 +6,7 @@ connectMysql((conn) => {
     console.log("connected");
   });
   const sql = "SELECT * FROM movies";
+  // const qyery2 =`INSERT INTO messages (id, content) VALUES(${data.id})`
   conn.query(sql, (err, result) => {
     if (err) console.log(err);
     else {

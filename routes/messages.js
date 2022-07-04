@@ -5,6 +5,7 @@ import ioEmmit from "../app.js";
 import uploadAWS from "../aws/aws.js";
 import fetch from "node-fetch";
 import sendMessageRabbit from "../rabbitmq/send.js";
+import connectMysql from "../config/mysql.js";
 
 const messages = express.Router();
 
@@ -278,4 +279,18 @@ function sendPush({ message, tokens }) {
     });
 }
 
-export default messages;
+// MySql queries
+const addMessageInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+    });
+    const query = `INSERT INTO messages (id, author, author_name, author_type, content, create_at, type, name_file, size_file, url_file, id_channel, id_meet) VALUES (${data.id}, ${data.author}, ${data.author_name}, ${data.author_type}, ${data.content} ${data.create_at}, ${data.type}, ${data.name_file}, ${data.size_file}, ${data.url_file}, ${data.id_channel}, ${data.id_meet})`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Insert Message in mysql: ", result);
+    });
+  });
+};
+
+export default { messages, addMessageInMySql };

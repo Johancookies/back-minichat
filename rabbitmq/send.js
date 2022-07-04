@@ -1,4 +1,5 @@
 import rabbitConnect from "../config/rabbitConnect.js";
+import addMessageInMySql from "../routes/messages.js";
 
 const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
   rabbitConnect((conn) => {
@@ -25,6 +26,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
         queue,
         (msg) => {
           // insert to database
+          addMessageInMySql(msg);
           const datamsg = console.log("menssage: ", msg);
           callback(datamsg);
         },
