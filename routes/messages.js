@@ -121,13 +121,12 @@ function insertMessage(con, data, response, file) {
         .insert(data)
         .run(con, (err, res) => {
           if (err) console.log(err);
+          data.id = res.generated_keys[0];
           sendMessageRabbit({
             id_channel: data.id_channel,
-            msg: JSON.stringify(data),
+            msg: data,
             res: response,
-            callback: (data) => {
-              console.log(data);
-            },
+            queryMySql: addMessageInMySql,
           });
           let messageStatus = {
             id_message: res.generated_keys[0],
@@ -280,17 +279,26 @@ function sendPush({ message, tokens }) {
 }
 
 // MySql queries
-const addMessageInMySql = (data) => {
+export const addMessageInMySql = (data) => {
+  console.log("data", data);
   connectMysql((conn) => {
     conn.connect((err) => {
       if (err) console.log(err);
+      console.log("connected");
     });
-    const query = `INSERT INTO messages (id, author, author_name, author_type, content, create_at, type, name_file, size_file, url_file, id_channel, id_meet) VALUES (${data.id}, ${data.author}, ${data.author_name}, ${data.author_type}, ${data.content} ${data.create_at}, ${data.type}, ${data.name_file}, ${data.size_file}, ${data.url_file}, ${data.id_channel}, ${data.id_meet})`;
+    const query = `INSERT INTO messages (id, author, author_name, author_type, content, create_at, type, name_file, size_file, url_file, id_channel, id_meet) VALUES ("${
+      data.id
+    }", "${data.author}", "${data.author_name}", "${data.author_type}", "${
+      data.content
+    }", "${data.create_at}", "${data.type}", ${data.name_file ?? null}, ${
+      data.size_file ?? null
+    }, ${data.url_file ?? null}, "${data.id_channel}", "${data.id_meet}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Message in mysql: ", result);
     });
+    conn.end();
   });
 };
 
-export default { messages, addMessageInMySql };
+export default messages;

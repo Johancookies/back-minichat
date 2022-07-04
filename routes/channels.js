@@ -1,6 +1,9 @@
 import express from "express";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
+import connectMysql from "../config/mysql.js";
+import sendMessageRabbit from "../rabbitmq/send.js";
+import { addMemberInMySql } from "../routes/members.js";
 
 const channel = express.Router();
 
@@ -38,6 +41,13 @@ channel.post("/", async (req, response) => {
               .insert(dataMember)
               .run(conn, (err, res) => {
                 if (err) console.log(err);
+                dataMember.id = res.generated_keys[0];
+                sendMessageRabbit({
+                  id_channel: "create_members",
+                  msg: dataMember,
+                  res: response,
+                  queryMySql: addMemberInMySql,
+                });
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -71,6 +81,12 @@ channel.post("/", async (req, response) => {
                           .insert(channel)
                           .run(conn, function (err, res) {
                             if (err) console.log(err);
+                            sendMessageRabbit({
+                              id_channel: res.generated_keys[0],
+                              msg: channel,
+                              res: response,
+                              queryMySql: addChannelsInMySql,
+                            });
                             response.json({
                               id_channel: channel.id_channel,
                             });
@@ -146,5 +162,21 @@ channel.get("/by-collab", async (req, response) => {
       });
     });
 });
+
+// MySql Queries
+export const addChannelsInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `INSERT INTO channels (id, id_channel, create_at, id_service_line, id_user, id_member) VALUES ("${data.id}", "${data.id_channel}", "${data.create_at}", "${data.id_service_line}", "${data.id_user}", "${data.id_member}");`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Insert Channel in mysql: ", data.id);
+    });
+    conn.end();
+  });
+};
 
 export default channel;

@@ -1,15 +1,14 @@
 import rabbitConnect from "../config/rabbitConnect.js";
-import addMessageInMySql from "../routes/messages.js";
 
-const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
+const sendMessageRabbit = ({ id_channel, msg, res, queryMySql, }) => {
   rabbitConnect((conn) => {
     conn.createChannel((err, channel) => {
       if (err)
         res.json({ message: "error at create channel rabbit", status: 500 });
       const queue = id_channel;
-      const message = msg;
+      const message = Buffer.from(JSON.stringify(msg));
       channel.assertQueue(queue, { durable: true });
-      channel.sendToQueue(queue, Buffer.from(message), { persistent: true });
+      channel.sendToQueue(queue, message, { persistent: true });
       channel.close(() => {
         conn.close();
       });
@@ -25,16 +24,15 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
       channel.consume(
         queue,
         (msg) => {
+          var buf = JSON.parse(msg.content);
           // insert to database
-          addMessageInMySql(msg);
-          const datamsg = console.log("menssage: ", msg);
-          callback(datamsg);
+          queryMySql(buf);
         },
         { noAck: true }
       );
-      channel.close(() => {
-        conn.close();
-      });
+      // channel.close(() => {
+      //   conn.close();
+      // });
     });
   });
 };
