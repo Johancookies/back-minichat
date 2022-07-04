@@ -14,10 +14,11 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
       });
     });
   });
-	rabbitConnect((conn) => {
+  rabbitConnect((conn) => {
     conn.createChannel((err, channel) => {
       if (err)
         res.json({ message: "error at create channel rabbit", status: 500 });
+      const queue = id_channel;
       channel.assertQueue(queue, { durable: true });
       channel.prefetch(1);
       channel.consume(
