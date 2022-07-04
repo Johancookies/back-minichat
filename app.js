@@ -189,6 +189,7 @@ io.on("connection", (socket) => {
 
   socket.on("reactive_changefeed", async (room) => {
     console.log("reactive change feed");
+    io.to(room).emit("recharge_messages");
     const conn = await getRethinkDB();
     r.table("messages")
       .filter({ id_channel: room })

@@ -4,6 +4,7 @@ import getRethinkDB from "../config/db.js";
 import ioEmmit from "../app.js";
 import uploadAWS from "../aws/aws.js";
 import fetch from "node-fetch";
+import sendMessageRabbit from "../rabbitmq/send.js";
 
 const messages = express.Router();
 
@@ -50,7 +51,8 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
         .row("id_channel")
         .eq(message.id_channel)
         .and(r.row("status").eq("active").or(r.row("status").eq("waiting")))
-    ).limit(1)
+    )
+    .limit(1)
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
@@ -118,6 +120,14 @@ function insertMessage(con, data, response, file) {
         .insert(data)
         .run(con, (err, res) => {
           if (err) console.log(err);
+          sendMessageRabbit({
+            id_channel: data.id_channel,
+            msg: JSON.stringify(data),
+            res: response,
+            callback: (data) => {
+              console.log(data);
+            },
+          });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
