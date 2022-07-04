@@ -102,7 +102,6 @@ io.on("connection", (socket) => {
                     if (err) console.log(err);
                     if (createdMeet !== null) {
                       if (createdMeet !== result.new_val.id_meet) {
-                        console.log("close changes");
                         cursorChanges.close();
                       } else {
                         console.log(result.new_val);
