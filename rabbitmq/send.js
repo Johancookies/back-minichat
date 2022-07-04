@@ -14,24 +14,22 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
       });
     });
   });
-  callback(() => {
-    rabbitConnect((conn) => {
-      conn.createChannel((err, channel) => {
-        if (err)
-          res.json({ message: "error at create channel rabbit", status: 500 });
-        channel.assertQueue(queue, { durable: true });
-        channel.prefetch(1);
-        channel.consume(
-          queue,
-          (msg) => {
-            // insert to database
-            console.log("menssage: ", msg);
-          },
-          { noAck: true }
-        );
-      });
+	rabbitConnect((conn) => {
+    conn.createChannel((err, channel) => {
+      if (err)
+        res.json({ message: "error at create channel rabbit", status: 500 });
+      channel.assertQueue(queue, { durable: true });
+      channel.prefetch(1);
+      channel.consume(
+        queue,
+        (msg) => {
+          // insert to database
+          const datamsg = console.log("menssage: ", msg);
+          callback(datamsg);
+        },
+        { noAck: true }
+      );
     });
-    return "sent to database mysql";
   });
 };
 
