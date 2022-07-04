@@ -14,7 +14,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, callback }) => {
       });
     });
   });
-  rabbitConnect((conn) => {
+	rabbitConnect((conn) => {
     conn.createChannel((err, channel) => {
       if (err)
         res.json({ message: "error at create channel rabbit", status: 500 });
