@@ -15,13 +15,14 @@ const uploadAWS = multer({
   storage: multerS3({
     s3: s3,
 		bucket: process.env.AWS_BUCKET_NAME,
+		contentType: multerS3.AUTO_CONTENT_TYPE,
 		acl: "public-read",
     metadata: function (req, file, cb) {
       cb(null, { fileName: file.fieldname });
 		},
     key: function (rq, file, cb) {
       cb(null, Date.now().toString());
-    },
+		},
   }),
 });
 
