@@ -211,6 +211,57 @@ function insertMessage(con, data, response, file) {
                 status: "success",
               });
             });
+          r.table("channels")
+            .filter({ id_channel: data.id_channel })
+            .run(con, (err, cursor) => {
+              if (err) console.log(err);
+              cursor.toArray((err, result) => {
+                if (err) console.log(err);
+                if (result.length > 0) {
+                  if (data.author_type === "member") {
+                    r.table("token_notification")
+                      .filter({
+                        id_user: Number(result[0].id_user),
+                      })
+                      .run(con, (err, cursor) => {
+                        if (err) console.log(err);
+                        cursor.toArray((err, res) => {
+                          if (err) console.log(err);
+                          if (res.length > 0) {
+                            let tokens = res.map((token) => token.token);
+                            sendPush({ message: data, tokens: tokens });
+                          }
+                        });
+                      });
+                  } else {
+                    r.table("members")
+                      .filter({
+                        id: result[0].id_member,
+                      })
+                      .run(con, (err, cursor) => {
+                        if (err) console.log(err);
+                        cursor.toArray((err, res) => {
+                          if (err) console.log(err);
+                          r.table("token_notification")
+                            .filter({
+                              id_member: res[0].id_member,
+                            })
+                            .run(con, (err, cursor) => {
+                              if (err) console.log(err);
+                              cursor.toArray((err, res) => {
+                                if (err) console.log(err);
+                                if (res.length > 0) {
+                                  let tokens = res.map((token) => token.token);
+                                  sendPush({ message: data, tokens: tokens });
+                                }
+                              });
+                            });
+                        });
+                      });
+                  }
+                }
+              });
+            });
         });
     }
   } catch (e) {
