@@ -75,14 +75,15 @@ channel.post("/", async (req, response) => {
                           create_at: time,
                           id_member: res.generated_keys[0],
                           id_service_line: idServiceLine,
-                          id_user: "3",
+                          id_user: "652",
                         };
                         r.table("channels")
                           .insert(channel)
                           .run(conn, function (err, res) {
                             if (err) console.log(err);
+                            channel.id = res.generated_keys[0];
                             sendMessageRabbit({
-                              id_channel: res.generated_keys[0],
+                              id_channel: "create_channels",
                               msg: channel,
                               res: response,
                               queryMySql: addChannelsInMySql,

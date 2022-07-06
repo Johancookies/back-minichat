@@ -143,7 +143,7 @@ const addUsersInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO users (id, first_name, last_name, role_id, id_user) VALUES ("${data.id}", "${data.first_name}", "${data.last_name}", "${data.role_id}", "${data.id_user}");`;
+    const query = `INSERT INTO users (id, first_name, last_name, role_id, id_user, status) VALUES ("${data.id}", "${data.first_name}", "${data.last_name}", "${data.role_id}", "${data.id_user}", "${data.status}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert users in mysql: ", data.id);

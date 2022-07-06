@@ -10,12 +10,12 @@ notification.post("/", (req, res) => {
     title: "Esto es una notificación",
     body: {
       content: "No puede ser, envié una notificación :3",
-      id_channel: 78783354321,
+      id_channel: 876567899012345,
     },
   };
 
   let fcm_tokens = [
-    "cBNYr2d1Qw2sqP1dv-Y98B:APA91bE0iIbI2CVNak-ohyVzjA0COb6G_B5LD4xI7tWDAA2YcbUXEUolgboAALvFf4h88koRhwdCP1lQbop0m3s-UKZHWai6iXg31m7ayggagy4g5yf_HUJAYInNM_dujgGFW4ZjElbf",
+    "cvreZbEMlZGGgU_79GXme-:APA91bHN7pw_MgOZIZ7gIlXJeIETLy_uPiG0eOy8ja9k_YHAQsbbK2YON1gV7g_Hy9YFR6xte3eha3_N_ZmUp-edLTiFc1yHieBvd51zgdmkMwV74UsMYN8HNT1htuURVBG54lBAUEn3"
   ];
   let notification_body = {
     notification: notification,
