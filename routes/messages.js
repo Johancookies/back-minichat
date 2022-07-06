@@ -280,6 +280,7 @@ function createMeeting({ con, idChannel, data, response, file }) {
       .run(con, (err, res) => {
         if (err) console.log(err);
         dataMeeting.id = res.generated_keys[0];
+        dataMeeting.create_at = new Date().toISOString();
         sendMessageRabbit({
           id_channel: "create_meetings",
           msg: dataMeeting,
