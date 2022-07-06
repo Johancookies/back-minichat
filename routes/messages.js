@@ -294,6 +294,11 @@ function createMeeting({ con, idChannel, data, response, file }) {
             .update({ status: "inactive" })
             .run(con, (err, result) => {
               if (err) console.log(err);
+              sendMessageRabbit({
+                id_channel: "update_meeting_status",
+                msg: dataMeeting,
+                queryMySql: updateStatusMeetInMySql,
+              });
               console.log("inactive meeting" + res.generated_keys[0]);
               ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
             });
@@ -364,6 +369,21 @@ export const addMeetInMySql = (data) => {
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Message in mysql: ", data.id);
+    });
+    conn.end();
+  });
+};
+
+export const updateStatusMeetInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `UPDATE meetings SET status = "${data.status}" WHERE id = "${data.id_meet}"`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Update Meet in mysql: ", data.id_meet);
     });
     conn.end();
   });
