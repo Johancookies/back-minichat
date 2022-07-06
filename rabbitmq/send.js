@@ -26,7 +26,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql, }) => {
         (msg) => {
           var buf = JSON.parse(msg.content);
           // insert to database
-          queryMySql(buf);
+          // queryMySql(buf);
         },
         { noAck: true }
       );

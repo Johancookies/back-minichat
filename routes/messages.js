@@ -360,6 +360,21 @@ export const addMessageInMySql = (data) => {
   });
 };
 
+export const addMeetInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `INSERT INTO meetings (id, create_at, status, id_channel) VALUES ("${data.id}", "${data.create_at}", ${data.status}, "${data.id_channel}";)`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Insert Meet in mysql: ", data.id_meet);
+    });
+    conn.end();
+  });
+};
+
 export const updateStatusMeetInMySql = (data) => {
   connectMysql((conn) => {
     conn.connect((err) => {

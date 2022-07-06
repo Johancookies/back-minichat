@@ -4,6 +4,7 @@ import getRethinkDB from "../config/db.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
 import { addMemberInMySql } from "../routes/members.js";
+import { getRandomInt, listTowerControl } from "../helpers/helper_functions.js";
 
 const channel = express.Router();
 
@@ -45,7 +46,6 @@ channel.post("/", async (req, response) => {
                 sendMessageRabbit({
                   id_channel: "create_members",
                   msg: dataMember,
-                  res: response,
                   queryMySql: addMemberInMySql,
                 });
                 if (member.token) {
@@ -69,13 +69,14 @@ channel.post("/", async (req, response) => {
                     cursor.toArray((err, result) => {
                       if (err) response.sendStatus(500);
                       if (result.length === 0) {
+                        const randomUser = getRandomInt(0, 4);
                         const time = new Date(); // creaate the time of the channel
                         let channel = {
                           id_channel: channelId,
                           create_at: time,
                           id_member: res.generated_keys[0],
                           id_service_line: idServiceLine,
-                          id_user: "652",
+                          id_user: listTowerControl[randomUser],
                         };
                         r.table("channels")
                           .insert(channel)
@@ -85,7 +86,6 @@ channel.post("/", async (req, response) => {
                             sendMessageRabbit({
                               id_channel: "create_channels",
                               msg: channel,
-                              res: response,
                               queryMySql: addChannelsInMySql,
                             });
                             response.json({
@@ -110,12 +110,13 @@ channel.post("/", async (req, response) => {
                     if (err) response.sendStatus(500);
                     if (result.length === 0) {
                       const time = new Date(); // creaate the time of the channel
+                      const randomUser = getRandomInt(0, 4);
                       let channel = {
                         id_channel: channelId,
                         create_at: time,
                         id_member: res[0].id,
                         id_service_line: idServiceLine,
-                        id_user: "3",
+                        id_user: listTowerControl[randomUser],
                       };
                       r.table("channels")
                         .insert(channel)
