@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
@@ -28,6 +28,7 @@ users.post("/", async (req, response) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role_id: user.role_id,
+                status: "active",
               };
               r.table("users")
                 .insert(dataUser)
@@ -96,6 +97,46 @@ users.post("/", async (req, response) => {
       }
     });
 });
+
+users.post("/change-status", async (res, response) => {
+  const conn = await getRethinkDB();
+  const data = req.body;
+  r.table("users")
+    .filter({ id_user: data.id_user })
+    .update({ status: data.status })
+    .run(conn, (err, res) => {
+      if (err) console.log(err);
+      sendMessageRabbit({
+        id_channel: "update_user_status",
+        msg: data,
+        queryMySql: updateStatusUserMySql,
+      });
+      response.json({
+        message: "Change status successfully",
+        status: "success",
+      });
+    });
+});
+
+users.get("/active", (req, res) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = 'SELECT * FROM users WHERE status = "active"';
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      res.json({
+        status: "success",
+        data: result,
+      });
+    });
+    conn.end();
+  });
+});
+
+// mysql queries
 const addUsersInMySql = (data) => {
   connectMysql((conn) => {
     conn.connect((err) => {
@@ -106,6 +147,21 @@ const addUsersInMySql = (data) => {
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert users in mysql: ", data.id);
+    });
+    conn.end();
+  });
+};
+
+const updateStatusUserMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log(connect);
+    });
+    const query = `UPDATE users SET status = "${data.status}" WHERE id_user = "${data.id_user}"`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Update user in mysql: ", data.id_user);
     });
     conn.end();
   });

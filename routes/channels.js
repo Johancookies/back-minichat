@@ -143,6 +143,26 @@ channel.post("/", async (req, response) => {
   }
 });
 
+channel.post("/reassign", async (req, res) => {
+  const data = req.body;
+  const conn = await getRethinkDB();
+  r.table("channels")
+    .filter({ id_channel: data.id_channel })
+    .update({ id_user: data.id_user })
+    .run(conn, (err, res) => {
+      sendMessageRabbit({
+        id_channel: "update_user_channel",
+        msg: data,
+        queryMySql: updateChannelUserMySql,
+      });
+      if (err) console.log(err);
+      res.json({
+        status: "success",
+        message: "Channel reassigned successfully",
+      });
+    });
+});
+
 // get channels by product
 channel.get("/by-collab", async (req, response) => {
   const conn = await getRethinkDB();
@@ -174,6 +194,21 @@ export const addChannelsInMySql = (data) => {
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Channel in mysql: ", data.id);
+    });
+    conn.end();
+  });
+};
+
+const updateChannelUserMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `UPDATE channels SET id_user = "${data.id_user}" WHERE id_channel = "${data.id_channel}"`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Update Channel in mysql: ", data.id);
     });
     conn.end();
   });

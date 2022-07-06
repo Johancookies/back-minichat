@@ -364,6 +364,11 @@ export const addMeetInMySql = (data) => {
       console.log("connected");
     });
     const query = `INSERT INTO meetings (id, create_at, status, id_channel) VALUES ("${data.id}", "${data.create_at}", "${data.status}", "${data.id_channel}")`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Insert Message in mysql: ", data.id);
+    });
+    conn.end();
   });
 };
 
