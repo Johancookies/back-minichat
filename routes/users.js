@@ -37,12 +37,12 @@ users.post("/", async (req, response) => {
                     console.log(err);
                   } else {
                     dataUser.id = res.generated_keys[0];
-                    sendMessageRabbit({
-                      id_channel: "create_users",
-                      msg: dataUser,
-                      res: response,
-                      queryMySql: addUsersInMySql,
-                    });
+                    // sendMessageRabbit({
+                    //   id_channel: "create_users",
+                    //   msg: dataUser,
+                    //   res: response,
+                    //   queryMySql: addUsersInMySql,
+                    // });
                     const dataToken = {
                       device: user.device,
                       type: user.type,
@@ -106,11 +106,11 @@ users.post("/change-status", async (res, response) => {
     .update({ status: data.status })
     .run(conn, (err, res) => {
       if (err) console.log(err);
-      sendMessageRabbit({
-        id_channel: "update_user_status",
-        msg: data,
-        queryMySql: updateStatusUserMySql,
-      });
+      // sendMessageRabbit({
+      //   id_channel: "update_user_status",
+      //   msg: data,
+      //   queryMySql: updateStatusUserMySql,
+      // });
       response.json({
         message: "Change status successfully",
         status: "success",

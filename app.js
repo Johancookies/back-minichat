@@ -143,17 +143,19 @@ io.on("connection", (socket) => {
         if (err) console.log(err);
         cursor.each((err, resultChannel) => {
           if (err) console.log(err);
-          r.table("members")
-            .filter({ id: resultChannel.new_val.id_member })
-            .run(conn, (err, cursor) => {
-              cursor.toArray((err, result) => {
-                if (err) console.log(err);
-                io.emit("new_channels", {
-                  ...resultChannel.new_val,
-                  ...result[0],
+          if (resultChannel.new_val) {
+            r.table("members")
+              .filter({ id: resultChannel.new_val.id_member })
+              .run(conn, (err, cursor) => {
+                cursor.toArray((err, result) => {
+                  if (err) console.log(err);
+                  io.emit("new_channels", {
+                    ...resultChannel.new_val,
+                    ...result[0],
+                  });
                 });
               });
-            });
+          }
         });
       });
   });

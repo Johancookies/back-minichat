@@ -122,12 +122,12 @@ function insertMessage(con, data, response, file) {
         .run(con, (err, res) => {
           if (err) console.log(err);
           data.id = res.generated_keys[0];
-          sendMessageRabbit({
-            id_channel: data.id_channel,
-            msg: data,
-            res: response,
-            queryMySql: addMessageInMySql,
-          });
+          // sendMessageRabbit({
+          //   id_channel: data.id_channel,
+          //   msg: data,
+          //   res: response,
+          //   queryMySql: addMessageInMySql,
+          // });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
@@ -281,11 +281,11 @@ function createMeeting({ con, idChannel, data, response, file }) {
         if (err) console.log(err);
         dataMeeting.id = res.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
-        sendMessageRabbit({
-          id_channel: "create_meetings",
-          msg: dataMeeting,
-          queryMySql: addMeetInMySql,
-        });
+        // sendMessageRabbit({
+        //   id_channel: "create_meetings",
+        //   msg: dataMeeting,
+        //   queryMySql: addMeetInMySql,
+        // });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
         insertMessage(con, data, response, file);
@@ -295,11 +295,11 @@ function createMeeting({ con, idChannel, data, response, file }) {
             .update({ status: "inactive" })
             .run(con, (err, result) => {
               if (err) console.log(err);
-              sendMessageRabbit({
-                id_channel: "update_meeting_status",
-                msg: dataMeeting,
-                queryMySql: updateStatusMeetInMySql,
-              });
+              // sendMessageRabbit({
+              //   id_channel: "update_meeting_status",
+              //   msg: dataMeeting,
+              //   queryMySql: updateStatusMeetInMySql,
+              // });
               console.log("inactive meeting" + res.generated_keys[0]);
               ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
             });

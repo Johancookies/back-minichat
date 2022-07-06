@@ -43,11 +43,11 @@ channel.post("/", async (req, response) => {
               .run(conn, (err, res) => {
                 if (err) console.log(err);
                 dataMember.id = res.generated_keys[0];
-                sendMessageRabbit({
-                  id_channel: "create_members",
-                  msg: dataMember,
-                  queryMySql: addMemberInMySql,
-                });
+                // sendMessageRabbit({
+                //   id_channel: "create_members",
+                //   msg: dataMember,
+                //   queryMySql: addMemberInMySql,
+                // });
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -78,16 +78,17 @@ channel.post("/", async (req, response) => {
                           id_service_line: idServiceLine,
                           id_user: listTowerControl[randomUser],
                         };
+                        console.log(channel);
                         r.table("channels")
                           .insert(channel)
                           .run(conn, function (err, res) {
                             if (err) console.log(err);
                             channel.id = res.generated_keys[0];
-                            sendMessageRabbit({
-                              id_channel: "create_channels",
-                              msg: channel,
-                              queryMySql: addChannelsInMySql,
-                            });
+                            // sendMessageRabbit({
+                            //   id_channel: "create_channels",
+                            //   msg: channel,
+                            //   queryMySql: addChannelsInMySql,
+                            // });
                             response.json({
                               id_channel: channel.id_channel,
                             });
@@ -118,6 +119,7 @@ channel.post("/", async (req, response) => {
                         id_service_line: idServiceLine,
                         id_user: listTowerControl[randomUser],
                       };
+                      console.log(channel);
                       r.table("channels")
                         .insert(channel)
                         .run(conn, function (err, res) {
@@ -145,7 +147,7 @@ channel.post("/", async (req, response) => {
   }
 });
 
-channel.post("/reassign", async (req, res) => {
+channel.post("/reassign", async (req, response) => {
   const data = req.body;
   const conn = await getRethinkDB();
   r.table("channels")
@@ -158,7 +160,7 @@ channel.post("/reassign", async (req, res) => {
         queryMySql: updateChannelUserMySql,
       });
       if (err) console.log(err);
-      res.json({
+      response.json({
         status: "success",
         message: "Channel reassigned successfully",
       });
