@@ -281,6 +281,12 @@ function createMeeting({ con, idChannel, data, response, file }) {
       .insert(dataMeeting)
       .run(con, (err, res) => {
         if (err) console.log(err);
+        dataMeeting.id = res.generated_keys[0];
+        sendMessageRabbit({
+          id_channel: "create_meetings",
+          msg: dataMeeting,
+          queryMySql: addMeetInMySql,
+        });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
         data.create_at = currentDate;
@@ -331,7 +337,6 @@ function sendPush({ message, tokens }) {
 
 // MySql queries
 export const addMessageInMySql = (data) => {
-  console.log("data", data);
   connectMysql((conn) => {
     conn.connect((err) => {
       if (err) console.log(err);
@@ -346,9 +351,19 @@ export const addMessageInMySql = (data) => {
     }, ${data.url_file ?? null}, "${data.id_channel}", "${data.id_meet}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
-      console.log("Insert Message in mysql: ", result);
+      console.log("Insert Message in mysql: ", data.id);
     });
     conn.end();
+  });
+};
+
+export const addMeetInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `INSERT INTO meetings (id, create_at, status, id_channel) VALUES ("${data.id}", "${data.create_at}", "${data.status}", "${data.id_channel}")`;
   });
 };
 

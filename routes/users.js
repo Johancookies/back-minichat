@@ -2,6 +2,7 @@ import express from "express";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
+import connectMysql from "../config/mysql.js";
 
 const users = express.Router();
 
@@ -15,12 +16,11 @@ users.post("/", async (req, response) => {
     .filter({ id_user: user.id })
     .run(conn, (err, cursor) => {
       if (err) {
-        response.json({ message: "Something went wrong!", status: "error" });
+        console.log(err);
       } else {
         cursor.toArray((err, result) => {
           if (err) {
             console.log(err);
-            response.sendStatus(400);
           } else {
             if (result.length === 0) {
               let dataUser = {
@@ -33,7 +33,6 @@ users.post("/", async (req, response) => {
                 .insert(dataUser)
                 .run(conn, (err, res) => {
                   if (err) {
-                    response.sendStatus(500);
                     console.log(err);
                   } else {
                     dataUser.id = res.generated_keys[0];
@@ -53,19 +52,7 @@ users.post("/", async (req, response) => {
                     r.table("token_notification")
                       .insert(dataToken)
                       .run(conn, (err, res) => {
-                        if (err) {
-                          response.sendStatus(500);
-                          response.json({
-                            message: "Something went wrong!",
-                            status: "error",
-                          });
-                        } else {
-                          response.sendStatus(200);
-                          response.json({
-                            message: "User added successfully!",
-                            status: "success",
-                          });
-                        }
+                        if (err) console.log(err);
                       });
                   }
                 });
@@ -80,12 +67,10 @@ users.post("/", async (req, response) => {
                 .run(conn, (err, cursor) => {
                   if (err) {
                     console.log(err);
-                    response.sendStatus(400);
                   } else {
                     cursor.toArray((err, result) => {
                       if (err) {
                         console.log(err);
-                        response.sendStatus(400);
                       } else {
                         if (result.length === 0) {
                           const dataToken = {
@@ -98,16 +83,7 @@ users.post("/", async (req, response) => {
                           r.table("token_notification")
                             .insert(dataToken)
                             .run(conn, (err, res) => {
-                              if (err) {
-                                console.log(err);
-                                response.sendStatus(400);
-                              } else {
-                                response.sendStatus(200);
-                                response.json({
-                                  message: "Token added successfully",
-                                  status: "success",
-                                });
-                              }
+                              if (err) console.log(err);
                             });
                         }
                       }
@@ -126,7 +102,7 @@ const addUsersInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO users (id, first_name, email, last_name, role_id, id_user) VALUES ("${data.id}", "${data.first_name}", "${data.last_name}", "${data.role_id}", "${data.id_user}");`;
+    const query = `INSERT INTO users (id, first_name, last_name, role_id, id_user) VALUES ("${data.id}", "${data.first_name}", "${data.last_name}", "${data.role_id}", "${data.id_user}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert users in mysql: ", data.id);
