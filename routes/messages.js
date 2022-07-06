@@ -271,11 +271,9 @@ function insertMessage(con, data, response, file) {
 
 function createMeeting({ con, idChannel, data, response, file }) {
   try {
-    const currentDate = new Date();
     let dataMeeting = {
       id_channel: idChannel,
       status: "active",
-      create_at: currentDate,
     };
     r.table("meetings")
       .insert(dataMeeting)
@@ -289,7 +287,6 @@ function createMeeting({ con, idChannel, data, response, file }) {
         });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
-        data.create_at = currentDate;
         insertMessage(con, data, response, file);
         const timeout = setTimeout(() => {
           r.table("meetings")
