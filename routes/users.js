@@ -119,21 +119,42 @@ users.post("/change-status", async (res, response) => {
 });
 
 users.get("/active", (req, res) => {
-  connectMysql((conn) => {
-    conn.connect((err) => {
+  // connectMysql((conn) => {
+  //   conn.connect((err) => {
+  //     if (err) console.log(err);
+  //     console.log("connected");
+  //   });
+  //   const query = 'SELECT * FROM users WHERE status = "active"';
+  //   conn.query(query, (err, result) => {
+  //     if (err) console.log(err);
+  //     res.json({
+  //       status: "success",
+  //       data: result,
+  //     });
+  //   });
+  //   conn.end();
+  // });
+
+  const conn = await getRethinkDB();
+  r.table("users")
+    .filter({ status: "active" })
+    .run(conn, (err, cursor) => {
       if (err) console.log(err);
-      console.log("connected");
+      // sendMessageRabbit({
+      //   id_channel: "update_user_status",
+      //   msg: data,
+      //   queryMySql: updateStatusUserMySql,
+      // });
+      if(err)console.log(err)
+      cursor.toArray((err, result)=>{
+        if(err)console.log(err)
+        response.json({
+          data: result,
+          status: "success",
+        });
+      })
+      
     });
-    const query = 'SELECT * FROM users WHERE status = "active"';
-    conn.query(query, (err, result) => {
-      if (err) console.log(err);
-      res.json({
-        status: "success",
-        data: result,
-      });
-    });
-    conn.end();
-  });
 });
 
 // mysql queries

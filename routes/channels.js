@@ -34,8 +34,8 @@ channel.post("/", async (req, response) => {
               first_name: member.first_name,
               last_name: member.last_name,
               photo: member.photo,
-              email: member.email,
               mobile_phone: member.mobile_phone,
+              email: member.email,
               document_number: member.document_number,
             };
             r.table("members")

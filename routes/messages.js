@@ -91,7 +91,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
           url_taskMap[result[0].id] = timeout;
           meet_id = result[0].id;
           message.id_meet = meet_id;
-          message.create_at = currentDate;
+
           insertMessage(conn, message, response, file);
         }
       });
