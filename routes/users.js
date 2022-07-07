@@ -118,7 +118,7 @@ users.post("/change-status", async (res, response) => {
     });
 });
 
-users.get("/active", (req, res) => {
+users.get("/active", async (req, response) => {
   // connectMysql((conn) => {
   //   conn.connect((err) => {
   //     if (err) console.log(err);
