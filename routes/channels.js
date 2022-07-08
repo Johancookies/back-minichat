@@ -44,11 +44,11 @@ channel.post("/", async (req, response) => {
               .run(conn, (err, res) => {
                 if (err) console.log(err);
                 dataMember.id = res.generated_keys[0];
-                // sendMessageRabbit({
-                //   id_channel: "create_members",
-                //   msg: dataMember,
-                //   queryMySql: addMemberInMySql,
-                // });
+                sendMessageRabbit({
+                  id_channel: "create_members",
+                  msg: dataMember,
+                  queryMySql: addMemberInMySql,
+                });
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -75,13 +75,13 @@ channel.post("/", async (req, response) => {
                       .then((res) => res.json())
                       .then((res) => {
                         if (res.data.length > 0) {
-                          for (i = 0; i <= res.data.length; i++) {
+                          for (var i = 0; i < res.data.length; i++) {
                             let token = {
-                              device: res[i].device,
-                              type: member.type,
+                              device: res.data[i].device,
+                              type: res.data[i].os,
                               id_user: member.id_user ?? null,
                               id_member: member.id ?? null,
-                              token: res[i].token,
+                              token: res.data[i].token,
                             };
                             r.table("token_notification")
                               .insert(token)
@@ -129,11 +129,11 @@ channel.post("/", async (req, response) => {
                                   .run(conn, function (err, res) {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
-                                    // sendMessageRabbit({
-                                    //   id_channel: "create_channels",
-                                    //   msg: channel,
-                                    //   queryMySql: addChannelsInMySql,
-                                    // });
+                                    sendMessageRabbit({
+                                      id_channel: "create_channels",
+                                      msg: channel,
+                                      queryMySql: addChannelsInMySql,
+                                    });
                                     response.json({
                                       id_channel: channel.id_channel,
                                     });
@@ -172,7 +172,7 @@ channel.post("/", async (req, response) => {
                           cursor.toArray((err, result) => {
                             if (err) console.log(err);
                             if (result.length > 0) {
-                              const randomUser = getRandomInt(0, result.length);
+                              const randomUser = getRandomInt(0, result.length - 1);
                               const id_user = result[randomUser].id_user;
                               let channel = {
                                 id_channel: channelId,
@@ -224,11 +224,11 @@ channel.post("/reassign", async (req, response) => {
     .filter({ id_channel: data.id_channel })
     .update({ id_user: data.id_user })
     .run(conn, (err, res) => {
-      // sendMessageRabbit({
-      //   id_channel: "update_user_channel",
-      //   msg: data,
-      //   queryMySql: updateChannelUserMySql,
-      // });
+      sendMessageRabbit({
+        id_channel: "update_user_channel",
+        msg: data,
+        queryMySql: updateChannelUserMySql,
+      });
       if (err) console.log(err);
       response.json({
         status: "success",
@@ -240,12 +240,12 @@ channel.post("/reassign", async (req, response) => {
 // get channels by product
 channel.get("/by-collab", async (req, response) => {
   const conn = await getRethinkDB();
-  const idUser = req.query.id_user;
+  const idUser = parseInt(req.query.id_user);
   r.table("channels")
     .eqJoin(r.row("id_member"), r.table("members"))
     .without({ right: "id" })
     .zip()
-    .filter({ id_user: idUser.toString() })
+    .filter({ id_user: idUser })
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
