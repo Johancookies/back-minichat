@@ -5,6 +5,7 @@ import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
 import { addMemberInMySql } from "../routes/members.js";
 import { getRandomInt, listTowerControl } from "../helpers/helper_functions.js";
+import fetch from "node-fetch";
 
 const channel = express.Router();
 
@@ -62,17 +63,37 @@ channel.post("/", async (req, response) => {
                       if (err) console.log(err);
                     });
                 } else {
-                  // response.json({
-                  //   message: "fetch tocken"
-                  // })
-                  console.log("fetch")
-                  // fetch('', {
-                  //   method: 'POST', // or 'PUT'
-                  //   body: JSON.stringify(data), // data can be `string` or {object}!
-                  //   headers:{
-                  //     'Content-Type': 'application/json'
-                  //   }
-                  // }).then(res => res.json())
+                  try {
+                    fetch(process.env.API_FETCH + member.id, {
+                      method: "GET",
+                      headers: {
+                        Authorization: process.env.API_AUTHORIZATION,
+                        "x-bodytech-organization": process.env.API_ORGANIZATION,
+                        "x-bodytech-brand": process.env.API_BRAND,
+                      },
+                    })
+                      .then((res) => res.json())
+                      .then((res) => {
+                        if (res.data.length > 0) {
+                          for (i = 0; i <= res.data.length; i++) {
+                            let token = {
+                              device: res[i].device,
+                              type: member.type,
+                              id_user: member.id_user ?? null,
+                              id_member: member.id ?? null,
+                              token: res[i].token,
+                            };
+                            r.table("token_notification")
+                              .insert(token)
+                              .run(conn, (err, res) => {
+                                if (err) console.log(err);
+                              });
+                          }
+                        }
+                      });
+                  } catch (error) {
+                    console.log(error);
+                  }
                 }
                 r.table("channels")
                   .filter({ id_channel: channelId })
@@ -90,7 +111,7 @@ channel.post("/", async (req, response) => {
                               if (result.length > 0) {
                                 const randomUser = getRandomInt(
                                   0,
-                                  result.length -1
+                                  result.length - 1
                                 );
                                 const id_user = result[randomUser].id_user;
                                 console.log(id_user);
@@ -196,8 +217,6 @@ channel.post("/", async (req, response) => {
   }
 });
 
-
-
 channel.post("/reassign", async (req, response) => {
   const data = req.body;
   const conn = await getRethinkDB();
@@ -205,11 +224,11 @@ channel.post("/reassign", async (req, response) => {
     .filter({ id_channel: data.id_channel })
     .update({ id_user: data.id_user })
     .run(conn, (err, res) => {
-     // sendMessageRabbit({
-     //   id_channel: "update_user_channel",
-     //   msg: data,
-     //   queryMySql: updateChannelUserMySql,
-     // });
+      // sendMessageRabbit({
+      //   id_channel: "update_user_channel",
+      //   msg: data,
+      //   queryMySql: updateChannelUserMySql,
+      // });
       if (err) console.log(err);
       response.json({
         status: "success",
@@ -226,7 +245,7 @@ channel.get("/by-collab", async (req, response) => {
     .eqJoin(r.row("id_member"), r.table("members"))
     .without({ right: "id" })
     .zip()
-    .filter({ id_user: idUser })
+    .filter({ id_user: idUser.toString() })
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
