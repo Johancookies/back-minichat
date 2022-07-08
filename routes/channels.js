@@ -121,7 +121,7 @@ channel.post("/", async (req, response) => {
                                   create_at: time,
                                   id_member: res.generated_keys[0],
                                   id_service_line: idServiceLine,
-                                  id_user: id_user,
+                                  id_user: 653,
                                 };
                                 console.log(channel);
                                 r.table("channels")
@@ -179,7 +179,7 @@ channel.post("/", async (req, response) => {
                                 create_at: time,
                                 id_member: res[0].id,
                                 id_service_line: idServiceLine,
-                                id_user: id_user,
+                                id_user: 653,
                               };
                               console.log(channel);
                               r.table("channels")

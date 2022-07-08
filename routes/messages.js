@@ -340,8 +340,10 @@ function sendPush({ message, tokens }) {
 
 // MySql queries
 export const addMessageInMySql = (data) => {
+  console.log("add message fuction");
   connectMysql((conn) => {
     conn.connect((err) => {
+     console.log("add message x2");
       if (err) console.log(err);
       console.log("connected");
     });
