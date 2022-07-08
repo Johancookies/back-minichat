@@ -154,11 +154,11 @@ channel.post("/reassign", async (req, response) => {
     .filter({ id_channel: data.id_channel })
     .update({ id_user: data.id_user })
     .run(conn, (err, res) => {
-      sendMessageRabbit({
-        id_channel: "update_user_channel",
-        msg: data,
-        queryMySql: updateChannelUserMySql,
-      });
+     // sendMessageRabbit({
+     //   id_channel: "update_user_channel",
+     //   msg: data,
+     //   queryMySql: updateChannelUserMySql,
+     // });
       if (err) console.log(err);
       response.json({
         status: "success",
