@@ -61,6 +61,18 @@ channel.post("/", async (req, response) => {
                     .run(conn, (err, res) => {
                       if (err) console.log(err);
                     });
+                } else {
+                  // response.json({
+                  //   message: "fetch tocken"
+                  // })
+                  console.log("fetch")
+                  // fetch('', {
+                  //   method: 'POST', // or 'PUT'
+                  //   body: JSON.stringify(data), // data can be `string` or {object}!
+                  //   headers:{
+                  //     'Content-Type': 'application/json'
+                  //   }
+                  // }).then(res => res.json())
                 }
                 r.table("channels")
                   .filter({ id_channel: channelId })
@@ -69,28 +81,48 @@ channel.post("/", async (req, response) => {
                     cursor.toArray((err, result) => {
                       if (err) response.sendStatus(500);
                       if (result.length === 0) {
-                        const randomUser = getRandomInt(0, 4);
-                        const time = new Date(); // creaate the time of the channel
-                        let channel = {
-                          id_channel: channelId,
-                          create_at: time,
-                          id_member: res.generated_keys[0],
-                          id_service_line: idServiceLine,
-                          id_user: listTowerControl[randomUser],
-                        };
-                        console.log(channel);
-                        r.table("channels")
-                          .insert(channel)
-                          .run(conn, function (err, res) {
+                        r.table("users")
+                          .filter({ status: "active" })
+                          .run(conn, (err, cursor) => {
                             if (err) console.log(err);
-                            channel.id = res.generated_keys[0];
-                            // sendMessageRabbit({
-                            //   id_channel: "create_channels",
-                            //   msg: channel,
-                            //   queryMySql: addChannelsInMySql,
-                            // });
-                            response.json({
-                              id_channel: channel.id_channel,
+                            cursor.toArray((err, result) => {
+                              if (err) console.log(err);
+                              if (result.length > 0) {
+                                const randomUser = getRandomInt(
+                                  0,
+                                  result.length -1
+                                );
+                                const id_user = result[randomUser].id_user;
+                                console.log(id_user);
+                                const time = new Date(); // creaate the time of the channel
+                                let channel = {
+                                  id_channel: channelId,
+                                  create_at: time,
+                                  id_member: res.generated_keys[0],
+                                  id_service_line: idServiceLine,
+                                  id_user: id_user,
+                                };
+                                console.log(channel);
+                                r.table("channels")
+                                  .insert(channel)
+                                  .run(conn, function (err, res) {
+                                    if (err) console.log(err);
+                                    channel.id = res.generated_keys[0];
+                                    // sendMessageRabbit({
+                                    //   id_channel: "create_channels",
+                                    //   msg: channel,
+                                    //   queryMySql: addChannelsInMySql,
+                                    // });
+                                    response.json({
+                                      id_channel: channel.id_channel,
+                                    });
+                                  });
+                              } else {
+                                response.json({
+                                  status: 500,
+                                  message: "No hay usuarios disponibles.",
+                                });
+                              }
                             });
                           });
                       } else {
@@ -111,21 +143,38 @@ channel.post("/", async (req, response) => {
                     if (err) response.sendStatus(500);
                     if (result.length === 0) {
                       const time = new Date(); // creaate the time of the channel
-                      const randomUser = getRandomInt(0, 4);
-                      let channel = {
-                        id_channel: channelId,
-                        create_at: time,
-                        id_member: res[0].id,
-                        id_service_line: idServiceLine,
-                        id_user: listTowerControl[randomUser],
-                      };
-                      console.log(channel);
-                      r.table("channels")
-                        .insert(channel)
-                        .run(conn, function (err, res) {
-                          if (err) response.sendStatus(500);
-                          response.json({
-                            id_channel: channel.id_channel,
+
+                      r.table("users")
+                        .filter({ status: "active" })
+                        .run(conn, (err, cursor) => {
+                          if (err) console.log(err);
+                          cursor.toArray((err, result) => {
+                            if (err) console.log(err);
+                            if (result.length > 0) {
+                              const randomUser = getRandomInt(0, result.length);
+                              const id_user = result[randomUser].id_user;
+                              let channel = {
+                                id_channel: channelId,
+                                create_at: time,
+                                id_member: res[0].id,
+                                id_service_line: idServiceLine,
+                                id_user: id_user,
+                              };
+                              console.log(channel);
+                              r.table("channels")
+                                .insert(channel)
+                                .run(conn, function (err, res) {
+                                  if (err) response.sendStatus(500);
+                                  response.json({
+                                    id_channel: channel.id_channel,
+                                  });
+                                });
+                            } else {
+                              response.json({
+                                status: 500,
+                                message: "No hay usuarios disponibles.",
+                              });
+                            }
                           });
                         });
                     } else {
@@ -147,6 +196,8 @@ channel.post("/", async (req, response) => {
   }
 });
 
+
+
 channel.post("/reassign", async (req, response) => {
   const data = req.body;
   const conn = await getRethinkDB();
@@ -154,11 +205,11 @@ channel.post("/reassign", async (req, response) => {
     .filter({ id_channel: data.id_channel })
     .update({ id_user: data.id_user })
     .run(conn, (err, res) => {
-      sendMessageRabbit({
-        id_channel: "update_user_channel",
-        msg: data,
-        queryMySql: updateChannelUserMySql,
-      });
+      // sendMessageRabbit({
+      //   id_channel: "update_user_channel",
+      //   msg: data,
+      //   queryMySql: updateChannelUserMySql,
+      // });
       if (err) console.log(err);
       response.json({
         status: "success",

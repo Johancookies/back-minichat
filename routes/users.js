@@ -98,7 +98,7 @@ users.post("/", async (req, response) => {
     });
 });
 
-users.post("/change-status", async (res, response) => {
+users.post("/change-status", async (req, response) => {
   const conn = await getRethinkDB();
   const data = req.body;
   r.table("users")
@@ -118,7 +118,7 @@ users.post("/change-status", async (res, response) => {
     });
 });
 
-users.get("/active", (req, res) => {
+users.get("/active", async (req, response) => {
   // connectMysql((conn) => {
   //   conn.connect((err) => {
   //     if (err) console.log(err);
@@ -145,15 +145,14 @@ users.get("/active", (req, res) => {
       //   msg: data,
       //   queryMySql: updateStatusUserMySql,
       // });
-      if(err)console.log(err)
-      cursor.toArray((err, result)=>{
-        if(err)console.log(err)
+      if (err) console.log(err);
+      cursor.toArray((err, result) => {
+        if (err) console.log(err);
         response.json({
           data: result,
           status: "success",
         });
-      })
-      
+      });
     });
 });
 
