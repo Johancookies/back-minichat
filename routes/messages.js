@@ -9,7 +9,7 @@ import connectMysql from "../config/mysql.js";
 
 const messages = express.Router();
 
-const url_taskMap = {};
+export const url_taskMap = {};
 
 // middleware
 messages.use((err, req, res, next) => {
@@ -80,7 +80,6 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
             data: message,
             response: response,
             idChannel: message.id_channel,
-            file: file,
           });
         } else {
           if (result[0].status === "waiting") {
@@ -126,6 +125,15 @@ messages.post("/close-meeting", async (req, res) => {
         console.log(err);
         res.json({ menssage: "error", status: 500 });
       }
+      sendMessageRabbit({
+        id_channel: "update_meeting_status",
+        msg: {
+          id_channel: id_channel,
+          status: 'inactive',
+          id_meet: "/channel: " + id_channel
+        },
+        queryMySql: updateStatusMeetInMySql,
+      });
       res.json({ menssage: "meeting closed", status: 200 });
     });
 });
@@ -285,7 +293,7 @@ function insertMessage(con, data, response, file) {
   }
 }
 
-function createMeeting({ con, idChannel, data, response, file }) {
+function createMeeting({ con, idChannel, data, response }) {
   try {
     let dataMeeting = {
       id_channel: idChannel,
@@ -399,7 +407,7 @@ export const updateStatusMeetInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `UPDATE meetings SET status = "${data.status}" WHERE id = "${data.id_meet}"`;
+    const query = `UPDATE meetings SET status = "${data.status}" WHERE id_channel = "${data.id_channel}"`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Update Meet in mysql: ", data.id_meet);

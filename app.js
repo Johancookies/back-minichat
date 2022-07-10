@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import "dotenv/config.js";
 import {addMeetInMySql} from "./routes/messages.js"
 import sendMessageRabbit from "./rabbitmq/send.js";
+import {url_taskMap} from "./routes/messages.js";
 
 
 // db
@@ -246,6 +247,22 @@ function createMeeting(con, idChannel) {
         if (err) console.log(err);
         dataMeeting.id = res.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
+
+        const timeout = setTimeout(() => {
+          r.table("meetings")
+            .filter({ id: result[0].id })
+            .update({ status: "inactive" })
+            .run(con, (err, res) => {
+              if (err) console.log(err);
+              console.log("inactive meeting" + res.generated_keys[0]);
+              ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
+            });
+        }, 60000);
+        if (url_taskMap[res.generated_keys[0]]) {
+          clearTimeout(url_taskMap[res.generated_keys[0]]);
+        }
+        url_taskMap[res.generated_keys[0]] = timeout;
+        
         sendMessageRabbit({
           id_channel: "create_meetings",
           msg: dataMeeting,
