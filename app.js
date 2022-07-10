@@ -250,7 +250,7 @@ function createMeeting(con, idChannel) {
 
         const timeout = setTimeout(() => {
           r.table("meetings")
-            .filter({ id: result[0].id })
+            .filter({ id: res.generated_keys[0] })
             .update({ status: "inactive" })
             .run(con, (err, res) => {
               if (err) console.log(err);
