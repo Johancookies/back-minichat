@@ -7,6 +7,7 @@ import connectMysql from "../config/mysql.js";
 const users = express.Router();
 
 users.post("/", async (req, response) => {
+   console.log("post users");
   const conn = await getRethinkDB();
   const user = req.body;
   const { id, token, first_name, last_name, role_id } = req.body; // valited for no broken the server
@@ -122,35 +123,21 @@ users.post("/change-status", async (req, response) => {
 });
 
 users.get("/active", async (req, response) => {
-  // connectMysql((conn) => {
-  //   conn.connect((err) => {
-  //     if (err) console.log(err);
-  //     console.log("connected");
-  //   });
-  //   const query = 'SELECT * FROM users WHERE status = "active"';
-  //   conn.query(query, (err, result) => {
-  //     if (err) console.log(err);
-  //     res.json({
-  //       status: "success",
-  //       data: result,
-  //     });
-  //   });
-  //   conn.end();
-  // });
-
-  const conn = await getRethinkDB();
-  r.table("users")
-    .filter({ status: "active" })
-    .run(conn, (err, cursor) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
       if (err) console.log(err);
-      cursor.toArray((err, result) => {
-        if (err) console.log(err);
-        response.json({
-          data: result,
-          status: "success",
-        });
+      console.log("connected");
+    });
+    const query = 'SELECT * FROM users WHERE status = "active"';
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      response.json({
+        status: "success",
+        data: result,
       });
     });
+    conn.end();
+  });
 });
 
 // mysql queries
@@ -173,7 +160,7 @@ const updateStatusUserMySql = (data) => {
   connectMysql((conn) => {
     conn.connect((err) => {
       if (err) console.log(err);
-      console.log(connect);
+      console.log('connect');
     });
     const query = `UPDATE users SET status = "${data.status}" WHERE id_user = "${data.id_user}"`;
     conn.query(query, (err, result) => {

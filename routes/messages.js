@@ -20,18 +20,34 @@ messages.use((err, req, res, next) => {
 
 // get messages by channel
 messages.get("/by-channel", async (req, response) => {
-  const conn = await getRethinkDB();
   const idChannel = req.query.id_channel;
-  r.table("messages")
-    .filter({ id_channel: idChannel })
-    .orderBy("create_at")
-    .run(conn, (err, cursor) => {
+
+  connectMysql((conn) => {
+    conn.connect((err) => {
       if (err) console.log(err);
-      cursor.toArray((err, result) => {
-        if (err) console.log(err);
-        response.json({ data: result });
+      console.log("connected");
+    });
+    const query = 'SELECT * FROM messages WHERE id_channel = '+ idChannel;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      response.json({
+        status: "success",
+        data: result,
       });
     });
+    conn.end();
+  });
+  // const conn = await getRethinkDB();
+  // r.table("messages")
+  //   .filter({ id_channel: idChannel })
+  //   .orderBy("create_at")
+  //   .run(conn, (err, cursor) => {
+  //     if (err) console.log(err);
+  //     cursor.toArray((err, result) => {
+  //       if (err) console.log(err);
+  //       response.json({ data: result });
+  //     });
+  //   });
 });
 
 // create messages
@@ -343,17 +359,17 @@ export const addMessageInMySql = (data) => {
   console.log("add message fuction");
   connectMysql((conn) => {
     conn.connect((err) => {
-     console.log("add message x2");
+      console.log("add message x2");
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO messages (id, author, author_name, author_type, content, create_at, type, name_file, size_file, url_file, id_channel, id_meet) VALUES ("${
-      data.id
-    }", "${data.author}", "${data.author_name}", "${data.author_type}", "${
+    const query = `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel,  id_meet, type,  url_file, name_file, size_file, id_rethink ) VALUES ("${data.author}", "${data.author_name}", "${data.author_type}", "${
       data.content
-    }", "${data.create_at}", "${data.type}", ${data.name_file ?? null}, ${
+    }", "${data.create_at}",  "${data.id_channel}", "${data.id_meet}", "${
+      data.type
+    }", "${data.url_file ?? null}",  "${data.name_file ?? null}", "${
       data.size_file ?? null
-    }, ${data.url_file ?? null}, "${data.id_channel}", "${data.id_meet}");`;
+    }",  "${data.id}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Message in mysql: ", data.id);
@@ -368,10 +384,10 @@ export const addMeetInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO meetings (id, create_at, status, id_channel) VALUES ("${data.id}", "${data.create_at}", ${data.status}, "${data.id_channel}";)`;
+    const query = `INSERT INTO meetings (id_rethink, create_at, id_channel, status) VALUES ("${data.id}", "${data.create_at}",  "${data.id_channel}", "${data.status}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
-      console.log("Insert Meet in mysql: ", data.id_meet);
+      console.log("Insert Meet in mysql: ", data.id);
     });
     conn.end();
   });

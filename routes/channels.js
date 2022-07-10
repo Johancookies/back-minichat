@@ -1,6 +1,7 @@
 import express from "express";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
+import ioEmmit from "../app.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
 import { addMemberInMySql } from "../routes/members.js";
@@ -23,7 +24,8 @@ channel.post("/", async (req, response) => {
     let member = req.body;
     let idMember = member.id;
     let idServiceLine = member.id_service_line;
-    const channelId = idMember + idServiceLine; // id of the channel (unique)
+    let idUserAsignet = member.id_user;
+    const channelId = idMember + "" + idServiceLine; // id of the channel (unique)
     r.table("members")
       .filter({ id_member: idMember })
       .run(conn, (err, cursor) => {
@@ -121,7 +123,7 @@ channel.post("/", async (req, response) => {
                                   create_at: time,
                                   id_member: res.generated_keys[0],
                                   id_service_line: idServiceLine,
-                                  id_user: 653,
+                                  id_user: idUserAsignet ?? id_user,
                                 };
                                 console.log(channel);
                                 r.table("channels")
@@ -134,6 +136,7 @@ channel.post("/", async (req, response) => {
                                       msg: channel,
                                       queryMySql: addChannelsInMySql,
                                     });
+                                    ioEmmit({key: "new_channels", data: id_user});
                                     response.json({
                                       id_channel: channel.id_channel,
                                     });
@@ -172,20 +175,30 @@ channel.post("/", async (req, response) => {
                           cursor.toArray((err, result) => {
                             if (err) console.log(err);
                             if (result.length > 0) {
-                              const randomUser = getRandomInt(0, result.length - 1);
+                              const randomUser = getRandomInt(
+                                0,
+                                result.length - 1
+                              );
                               const id_user = result[randomUser].id_user;
                               let channel = {
                                 id_channel: channelId,
                                 create_at: time,
                                 id_member: res[0].id,
                                 id_service_line: idServiceLine,
-                                id_user: 653,
+                                id_user: idUserAsignet ?? id_user,
                               };
                               console.log(channel);
                               r.table("channels")
                                 .insert(channel)
                                 .run(conn, function (err, res) {
                                   if (err) response.sendStatus(500);
+                                  channel.id = res.generated_keys[0];
+                                  sendMessageRabbit({
+                                    id_channel: "create_channels",
+                                    msg: channel,
+                                    queryMySql: addChannelsInMySql,
+                                  });
+                                  ioEmmit({key: "new_channels", data: id_user});
                                   response.json({
                                     id_channel: channel.id_channel,
                                   });
@@ -199,9 +212,53 @@ channel.post("/", async (req, response) => {
                           });
                         });
                     } else {
-                      response.json({
-                        id_channel: result[0].id_channel,
-                      });
+                      r.table("users")
+                        .filter({
+                          status: "active",
+                          id_user: result[0].id_user,
+                        })
+                        .run(conn, (err, cursor) => {
+                          if (err) console.log(err);
+                          cursor.toArray((err, res) => {
+                            if (err) console.log(err);
+                            if (res.length > 0) {
+                              response.json({
+                                id_channel: result[0].id_channel,
+                              });
+                            } else {
+                              r.table("users")
+                                .filter({ status: "active" })
+                                .run(conn, (err, cursor) => {
+                                  if (err) console.log(err);
+                                  cursor.toArray((err, users) => {
+                                    if (err) console.log(err);
+                                    if (users.length > 0) {
+                                      const randomUser = getRandomInt(
+                                        0,
+                                        result.length - 1
+                                      );
+                                      const id_user = users[randomUser].id_user;
+
+                                      r.table("channels")
+                                      .filter({ id_channel: result[0].id_channel })
+                                        .update({ id_user: idUserAsignet ?? id_user })
+                                        .run(conn, (err, res) => {
+                                          if (err) console.log(err);
+                                          response.json({
+                                            id_channel: result[0].id_channel,
+                                          });
+                                        });
+                                    } else {
+                                      response.json({
+                                        status: 500,
+                                        message: "No hay usuarios disponibles.",
+                                      });
+                                    }
+                                  });
+                                });
+                            }
+                          });
+                        });
                     }
                   });
                 }
@@ -210,6 +267,7 @@ channel.post("/", async (req, response) => {
         });
       });
   } catch (e) {
+    console.log(e);
     response.json({
       error: e,
       status: 500,
@@ -264,7 +322,7 @@ export const addChannelsInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO channels (id, id_channel, create_at, id_service_line, id_user, id_member) VALUES ("${data.id}", "${data.id_channel}", "${data.create_at}", "${data.id_service_line}", "${data.id_user}", "${data.id_member}");`;
+    const query = `INSERT INTO channels (id_rethink, create_at, id_channel, id_member, id_service_line, id_user) VALUES ("${data.id}", "${data.create_at}",  "${data.id_channel}", "${data.id_member}", "${data.id_service_line}", "${data.id_user}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Channel in mysql: ", data.id);

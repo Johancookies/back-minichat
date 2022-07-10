@@ -5,6 +5,9 @@ import morgan from "morgan";
 import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import "dotenv/config.js";
+import {addMeetInMySql} from "./routes/messages.js"
+import sendMessageRabbit from "./rabbitmq/send.js";
+
 
 // db
 import r from "rethinkdb";
@@ -241,6 +244,13 @@ function createMeeting(con, idChannel) {
       .insert(dataMeeting)
       .run(con, (err, res) => {
         if (err) console.log(err);
+        dataMeeting.id = res.generated_keys[0];
+        dataMeeting.create_at = new Date().toISOString();
+        sendMessageRabbit({
+          id_channel: "create_meetings",
+          msg: dataMeeting,
+          queryMySql: addMeetInMySql,
+        });
       });
   } catch (e) {
     console.log(e);

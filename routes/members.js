@@ -81,7 +81,7 @@ export const addMemberInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO members (id, document_number, email, first_name, last_name, id_member, mobile_phone, photo) VALUES ("${data.id}", "${data.document_number}", "${data.email}", "${data.first_name}", "${data.last_name}", "${data.id_member}", "${data.mobile_phone}", "${data.photo}");`;
+    const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${data.id_member}", "${data.id}", "${data.document_number}", "${data.email}", "${data.first_name}", "${data.last_name}", "${data.mobile_phone}", "${data.photo}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert member in mysql: ", data.id);
