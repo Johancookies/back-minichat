@@ -243,25 +243,25 @@ function createMeeting(con, idChannel) {
     };
     r.table("meetings")
       .insert(dataMeeting)
-      .run(con, (err, res) => {
+      .run(con, (err, result) => {
         if (err) console.log(err);
-        dataMeeting.id = res.generated_keys[0];
+        dataMeeting.id = result.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
 
         const timeout = setTimeout(() => {
           r.table("meetings")
-            .filter({ id: res.generated_keys[0] })
+            .filter({ id: result.generated_keys[0] })
             .update({ status: "inactive" })
             .run(con, (err, res) => {
               if (err) console.log(err);
-              console.log("inactive meeting" + res.generated_keys[0]);
-              ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
+              console.log("inactive meeting" + result.generated_keys[0]);
+              ioEmmit({ key: "close_meeting", data: result.generated_keys[0] });
             });
         }, 60000);
-        if (url_taskMap[res.generated_keys[0]]) {
-          clearTimeout(url_taskMap[res.generated_keys[0]]);
+        if (url_taskMap[result.generated_keys[0]]) {
+          clearTimeout(url_taskMap[result.generated_keys[0]]);
         }
-        url_taskMap[res.generated_keys[0]] = timeout;
+        url_taskMap[result.generated_keys[0]] = timeout;
         
         sendMessageRabbit({
           id_channel: "create_meetings",
