@@ -2,8 +2,6 @@ import mysql from "mysql";
 
 export default function (callback) {
   console.log("MySql function");
-
-  callback(conn);
 }
 
 export const getConnectionMySql = async () => {
