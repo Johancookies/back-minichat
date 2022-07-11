@@ -8,8 +8,8 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       if (err) console.log("rror");
       const queue = id_channel;
       const message = Buffer.from(JSON.stringify(msg));
-      channel.assertQueue("unic_queue", { durable: true });
-      channel.sendToQueue("unic_queue", message, { persistent: true });
+      channel.assertQueue(queue, { durable: true });
+      channel.sendToQueue(queue, message, { persistent: true });
     });
   });
   rabbitConnect((conn) => {
@@ -18,17 +18,17 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
         console.log("error");
       }
       const queue = id_channel;
-      channel.assertQueue("unic_queue", { durable: true });
+      channel.assertQueue(queue, { durable: true });
       channel.prefetch(1);
       channel.consume(
         queue,
         function (msg) {
-          console.log("entro");
+          console.log("entrooooo");
           var buf = JSON.parse(msg.content);
           //insert to database
           queryMySql(buf);
         },
-        { noAck: false }
+        { noAck: true }
       );
       channel.close(() => {
         conn.close();
