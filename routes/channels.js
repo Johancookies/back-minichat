@@ -620,9 +620,9 @@ const updateChannelUserMySql = (data) => {
 };
 
 const save = async (member, channel) => {
- console.log("entra");
+  console.log("entra");
   await addMemberInMySql(member);
-console.log("despues");
+  console.log("despues");
   addChannelsInMySql(channel);
 };
 
