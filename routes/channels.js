@@ -303,11 +303,13 @@ channel.post("/", async (req, response) => {
               .run(conn, (err, res) => {
                 if (err) console.log(err);
                 dataMember.id = res.generated_keys[0];
-                // sendMessageRabbit({
-                //   id_channel: "create_members",
-                //   msg: dataMember,
-                //   queryMySql: addMemberInMySql,
-                // });
+                sendMessageRabbit({
+                  id_channel: "insert_mysql",
+                  msg: dataMember,
+                  queryMySql: addMemberInMySql,
+                });
+                // addMemberInMySql(dataMember);
+
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -388,13 +390,12 @@ channel.post("/", async (req, response) => {
                                   .run(conn, function (err, res) {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
-                                    // sendMessageRabbit({
-                                    //   id_channel: "create_channels",
-                                    //   msg: channel,
-                                    //   queryMySql: addChannelsInMySql,
-                                    // });
-                                    addChannelsInMySql(channel);
-                                    addMemberInMySql(dataMember);
+                                    sendMessageRabbit({
+                                      id_channel: "insert_mysql",
+                                      msg: channel,
+                                      queryMySql: addChannelsInMySql,
+                                    });
+                                    // addChannelsInMySql(channel);
 
                                     ioEmmit({
                                       key: "new_channels",
@@ -456,12 +457,12 @@ channel.post("/", async (req, response) => {
                                 .run(conn, function (err, res) {
                                   if (err) response.sendStatus(500);
                                   channel.id = res.generated_keys[0];
-                                  // sendMessageRabbit({
-                                  //   id_channel: "insert_mysql",
-                                  //   msg: channel,
-                                  //   queryMySql: addChannelsInMySql,
-                                  // });
-                                  addChannelsInMySql(channel);
+                                  sendMessageRabbit({
+                                    id_channel: "insert_mysql",
+                                    msg: channel,
+                                    queryMySql: addChannelsInMySql,
+                                  });
+                                  // addChannelsInMySql(channel);
                                   ioEmmit({
                                     key: "new_channels",
                                     data: id_user,
