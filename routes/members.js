@@ -4,6 +4,7 @@ import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
+import mysql from "mysql";
 
 const members = express.Router();
 
