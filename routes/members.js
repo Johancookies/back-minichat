@@ -4,7 +4,6 @@ import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
-import mysql from "mysql";
 
 const members = express.Router();
 
@@ -62,7 +61,7 @@ members.post("/", async (req, response) => {
       } else {
         dataMember.id = res.generated_keys[0];
         // sendMessageRabbit({
-        //   id_channel: "insert_mysql",
+        //   id_channel: "create_members",
         //   msg: dataMember,
         //   res: response,
         //   queryMySql: addMemberInMySql,
@@ -77,23 +76,19 @@ members.post("/", async (req, response) => {
     });
 });
 
-export const addMemberInMySql = async (data) => {
-  const conn = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
+export const addMemberInMySql = (data) => {
+  connectMysql((conn) => {
+    conn.connect((err) => {
+      if (err) console.log(err);
+      console.log("connected");
+    });
+    const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${data.id_member}", "${data.id}", "${data.document_number}", "${data.email}", "${data.first_name}", "${data.last_name}", "${data.mobile_phone}", "${data.photo}");`;
+    conn.query(query, (err, result) => {
+      if (err) console.log(err);
+      console.log("Insert member in mysql: ", data.id);
+    });
+    conn.end();
   });
-  conn.connect((err) => {
-    if (err) console.log(err);
-    console.log("connected");
-  });
-  const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${data.id_member}", "${data.id}", "${data.document_number}", "${data.email}", "${data.first_name}", "${data.last_name}", "${data.mobile_phone}", "${data.photo}");`;
-  await conn.query(query, (err, result) => {
-    if (err) console.log(err);
-    console.log("Insert member in mysql: ", data.id);
-  });
-  conn.end();
 };
 
 export default members;
