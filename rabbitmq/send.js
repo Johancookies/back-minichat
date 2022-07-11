@@ -30,9 +30,6 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
         },
         { noAck: true }
       );
-      channel.close(() => {
-        conn.close();
-      });
     });
   });
 };
