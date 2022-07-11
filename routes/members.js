@@ -60,12 +60,13 @@ members.post("/", async (req, response) => {
         response.json({ message: "Something went wrong!", status: "error" });
       } else {
         dataMember.id = res.generated_keys[0];
-        sendMessageRabbit({
-          id_channel: "insert_mysql",
-          msg: dataMember,
-          res: response,
-          queryMySql: addMemberInMySql,
-        });
+        // sendMessageRabbit({
+        //   id_channel: "insert_mysql",
+        //   msg: dataMember,
+        //   res: response,
+        //   queryMySql: addMemberInMySql,
+        // });
+        addMemberInMySql(dataMember);
         response.status(200);
         response.json({
           message: "Member added successfully",
