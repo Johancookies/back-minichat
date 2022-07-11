@@ -8,7 +8,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       if (err) console.log("rror");
       const queue = id_channel;
       const message = Buffer.from(JSON.stringify(msg));
-      channel.assertQueue(queue, { durable: true });
+      channel.assertQueue(queue);
       channel.sendToQueue(queue, message, { persistent: true });
     });
   });
@@ -18,8 +18,8 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
         console.log("error");
       }
       const queue = id_channel;
-      channel.assertQueue(queue, { durable: true });
-      channel.prefetch(1);
+      channel.assertQueue(queue);
+      // channel.prefetch(1);
       channel.consume(
         queue,
         function (msg) {
@@ -28,7 +28,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
           //insert to database
           queryMySql(buf);
         },
-        { noAck: false }
+        { noAck: true }
       );
     });
   });
