@@ -7,7 +7,7 @@ import connectMysql from "../config/mysql.js";
 const users = express.Router();
 
 users.post("/", async (req, response) => {
-   console.log("post users");
+  console.log("post users");
   const conn = await getRethinkDB();
   const user = req.body;
   const { id, token, first_name, last_name, role_id } = req.body; // valited for no broken the server
@@ -23,7 +23,7 @@ users.post("/", async (req, response) => {
           if (err) {
             console.log(err);
           } else {
-		console.log("result", result);
+            console.log("result", result);
             if (result.length === 0) {
               let dataUser = {
                 id_user: user.id,
@@ -32,7 +32,7 @@ users.post("/", async (req, response) => {
                 role_id: user.role_id,
                 status: "active",
               };
-		console.log("dataUser", dataUser);
+              console.log("dataUser", dataUser);
 
               r.table("users")
                 .insert(dataUser)
@@ -42,7 +42,7 @@ users.post("/", async (req, response) => {
                   } else {
                     dataUser.id = res.generated_keys[0];
                     sendMessageRabbit({
-                      id_channel: "create_users",
+                      id_channel: "insert_mysql",
                       msg: dataUser,
                       res: response,
                       queryMySql: addUsersInMySql,
@@ -111,7 +111,7 @@ users.post("/change-status", async (req, response) => {
     .run(conn, (err, res) => {
       if (err) console.log(err);
       sendMessageRabbit({
-        id_channel: "update_user_status",
+        id_channel: "insert_mysql",
         msg: data,
         queryMySql: updateStatusUserMySql,
       });
@@ -147,7 +147,7 @@ const addUsersInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO users (id_rethink, id_user,  first_name, last_name, role_id, status) VALUES ("${data.id}",  "${data.id_user}", "${data.first_name}", "${data.last_name}", "${data.role_id}",  "${data.status}")`;   
+    const query = `INSERT INTO users (id_rethink, id_user,  first_name, last_name, role_id, status) VALUES ("${data.id}",  "${data.id_user}", "${data.first_name}", "${data.last_name}", "${data.role_id}",  "${data.status}")`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert users in mysql: ", data.id);
@@ -160,7 +160,7 @@ const updateStatusUserMySql = (data) => {
   connectMysql((conn) => {
     conn.connect((err) => {
       if (err) console.log(err);
-      console.log('connect');
+      console.log("connect");
     });
     const query = `UPDATE users SET status = "${data.status}" WHERE id_user = "${data.id_user}"`;
     conn.query(query, (err, result) => {

@@ -50,7 +50,7 @@ channel.post("/", async (req, response) => {
               if (err) console.log(err);
               dataMember.id = res.generated_keys[0];
               sendMessageRabbit({
-                id_channel: "create_members",
+                id_channel: "insert_mysql",
                 msg: dataMember,
                 queryMySql: addMemberInMySql,
               });
@@ -135,7 +135,7 @@ channel.post("/", async (req, response) => {
                                   if (err) console.log(err);
                                   channel.id = res.generated_keys[0];
                                   sendMessageRabbit({
-                                    id_channel: "create_channels",
+                                    id_channel: "insert_mysql",
                                     msg: channel,
                                     queryMySql: addChannelsInMySql,
                                   });
@@ -547,7 +547,7 @@ channel.post("/reassign", async (req, response) => {
     .update({ id_user: data.id_user })
     .run(conn, (err, res) => {
       sendMessageRabbit({
-        id_channel: "update_user_channel",
+        id_channel: "insert_mysql",
         msg: data,
         queryMySql: updateChannelUserMySql,
       });

@@ -262,7 +262,7 @@ function createMeeting(con, idChannel) {
         url_taskMap[result.generated_keys[0]] = timeout;
 
         sendMessageRabbit({
-          id_channel: "create_meetings",
+          id_channel: "insert_mysql",
           msg: dataMeeting,
           queryMySql: addMeetInMySql,
         });

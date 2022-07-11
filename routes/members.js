@@ -61,7 +61,7 @@ members.post("/", async (req, response) => {
       } else {
         dataMember.id = res.generated_keys[0];
         sendMessageRabbit({
-          id_channel: "create_members",
+          id_channel: "insert_mysql",
           msg: dataMember,
           res: response,
           queryMySql: addMemberInMySql,

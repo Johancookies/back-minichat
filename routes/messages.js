@@ -148,7 +148,7 @@ function insertMessage(con, data, response, file) {
           if (err) console.log(err);
           data.id = res.generated_keys[0];
           sendMessageRabbit({
-            id_channel: data.id_channel,
+            id_channel: "insert_mysql",
             msg: data,
             res: response,
             queryMySql: addMessageInMySql,
