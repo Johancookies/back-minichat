@@ -390,11 +390,14 @@ channel.post("/", async (req, response) => {
                                   .run(conn, function (err, res) {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
-                                    sendMessageRabbit({
-                                      id_channel: "insert_mysql",
-                                      msg: channel,
-                                      queryMySql: addChannelsInMySql,
-                                    });
+                                    setTimeout(() => {
+                                      sendMessageRabbit({
+                                        id_channel: "insert_mysql",
+                                        msg: channel,
+                                        queryMySql: addChannelsInMySql,
+                                      });
+                                      console.log("======> creamos channels");
+                                    }, 2000);
                                     // addChannelsInMySql(channel);
 
                                     ioEmmit({

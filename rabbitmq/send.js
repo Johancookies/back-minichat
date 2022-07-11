@@ -13,7 +13,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
     });
     setTimeout(() => {
       conn.close();
-      process.exit(0);
+      // process.exit(0);
     }, 500);
   });
   rabbitConnect((conn) => {
@@ -32,7 +32,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
         setTimeout(() => {
           channel.ack(msg);
           conn.close();
-          process.exit(0);
+          // process.exit(0);
         }, 500);
       });
     });
