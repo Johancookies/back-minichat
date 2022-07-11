@@ -194,7 +194,7 @@ channel.post("/", async (req, response) => {
                                   if (err) response.sendStatus(500);
                                   channel.id = res.generated_keys[0];
                                   sendMessageRabbit({
-                                    id_channel: "create_channels",
+                                    id_channel: "insert_mysql",
                                     msg: channel,
                                     queryMySql: addChannelsInMySql,
                                   });

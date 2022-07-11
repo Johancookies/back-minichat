@@ -37,10 +37,11 @@ messages.get("/by-channel", async (req, response) => {
   //   });
   //   conn.end();
   // });
+
   const conn = await getRethinkDB();
   r.table("messages")
     .filter({ id_channel: idChannel })
-    .orderBy("create_at")
+    .orderBy(r.asc("create_at"))
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
@@ -54,7 +55,6 @@ messages.get("/by-channel", async (req, response) => {
 messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
   const conn = await getRethinkDB();
   const message = req.body;
-  const currentDate = new Date();
 
   let file = null;
   if (req.files && req.files.length > 0) {
@@ -126,11 +126,11 @@ messages.post("/close-meeting", async (req, res) => {
         res.json({ menssage: "error", status: 500 });
       }
       sendMessageRabbit({
-        id_channel: "update_meeting_status",
+        id_channel: "insert_mysql",
         msg: {
           id_channel: id_channel,
-          status: 'inactive',
-          id_meet: "/channel: " + id_channel
+          status: "inactive",
+          id_meet: "/channel: " + id_channel,
         },
         queryMySql: updateStatusMeetInMySql,
       });
@@ -306,7 +306,7 @@ function createMeeting({ con, idChannel, data, response }) {
         dataMeeting.id = res.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
         sendMessageRabbit({
-          id_channel: "create_meetings",
+          id_channel: "insert_mysql",
           msg: dataMeeting,
           queryMySql: addMeetInMySql,
         });
@@ -320,7 +320,7 @@ function createMeeting({ con, idChannel, data, response }) {
             .run(con, (err, result) => {
               if (err) console.log(err);
               sendMessageRabbit({
-                id_channel: "update_meeting_status",
+                id_channel: "insert_mysql",
                 msg: dataMeeting,
                 queryMySql: updateStatusMeetInMySql,
               });
@@ -371,13 +371,15 @@ export const addMessageInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel,  id_meet, type,  url_file, name_file, size_file, id_rethink ) VALUES ("${data.author}", "${data.author_name}", "${data.author_type}", "${
-      data.content
-    }", "${data.create_at}",  "${data.id_channel}", "${data.id_meet}", "${
-      data.type
-    }", "${data.url_file ?? null}",  "${data.name_file ?? null}", "${
-      data.size_file ?? null
-    }",  "${data.id}");`;
+    const query = `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel,  id_meet, type,  url_file, name_file, size_file, id_rethink ) VALUES ("${
+      data.author
+    }", "${data.author_name}", "${data.author_type}", "${data.content}", "${
+      data.create_at
+    }",  "${data.id_channel}", "${data.id_meet}", "${data.type}", "${
+      data.url_file ?? null
+    }",  "${data.name_file ?? null}", "${data.size_file ?? null}",  "${
+      data.id
+    }");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Message in mysql: ", data.id);
