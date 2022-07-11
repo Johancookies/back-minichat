@@ -23,6 +23,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       channel.consume(
         queue,
         function (msg) {
+          console.log("entro");
           var buf = JSON.parse(msg.content);
           //insert to database
           queryMySql(buf);
