@@ -22,32 +22,32 @@ messages.use((err, req, res, next) => {
 messages.get("/by-channel", async (req, response) => {
   const idChannel = req.query.id_channel;
 
-  connectMysql((conn) => {
-    conn.connect((err) => {
-      if (err) console.log(err);
-      console.log("connected");
-    });
-    const query = 'SELECT * FROM messages WHERE id_channel = '+ idChannel;
-    conn.query(query, (err, result) => {
-      if (err) console.log(err);
-      response.json({
-        status: "success",
-        data: result,
-      });
-    });
-    conn.end();
-  });
-  // const conn = await getRethinkDB();
-  // r.table("messages")
-  //   .filter({ id_channel: idChannel })
-  //   .orderBy("create_at")
-  //   .run(conn, (err, cursor) => {
+  // connectMysql((conn) => {
+  //   conn.connect((err) => {
   //     if (err) console.log(err);
-  //     cursor.toArray((err, result) => {
-  //       if (err) console.log(err);
-  //       response.json({ data: result });
+  //     console.log("connected");
+  //   });
+  //   const query = 'SELECT * FROM messages WHERE id_channel = '+ idChannel;
+  //   conn.query(query, (err, result) => {
+  //     if (err) console.log(err);
+  //     response.json({
+  //       status: "success",
+  //       data: result,
   //     });
   //   });
+  //   conn.end();
+  // });
+  const conn = await getRethinkDB();
+  r.table("messages")
+    .filter({ id_channel: idChannel })
+    .orderBy("create_at")
+    .run(conn, (err, cursor) => {
+      if (err) console.log(err);
+      cursor.toArray((err, result) => {
+        if (err) console.log(err);
+        response.json({ data: result });
+      });
+    });
 });
 
 // create messages
@@ -312,7 +312,7 @@ function createMeeting({ con, idChannel, data, response }) {
         });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
-        insertMessage(con, data, response, file);
+        insertMessage(con, data, response, _file);
         const timeout = setTimeout(() => {
           r.table("meetings")
             .filter({ id: res.generated_keys[0] })

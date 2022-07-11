@@ -322,6 +322,7 @@ export const addChannelsInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
+    console.log(data.id_member);
     const query = `INSERT INTO channels (id_rethink, create_at, id_channel, id_member, id_service_line, id_user) VALUES ("${data.id}", "${data.create_at}",  "${data.id_channel}", "${data.id_member}", "${data.id_service_line}", "${data.id_user}");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
