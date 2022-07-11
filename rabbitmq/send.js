@@ -19,10 +19,10 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       }
       const queue = id_channel;
       channel.assertQueue(queue, { durable: true });
+      channel.prefetch(1);
       channel.consume(
         queue,
         function (msg) {
-          console.log(msg);
           var buf = JSON.parse(msg.content);
           //insert to database
           queryMySql(buf);
