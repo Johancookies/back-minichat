@@ -266,7 +266,7 @@ function createMeeting(con, idChannel) {
           msg: dataMeeting,
           queryMySql: addMeetInMySql,
         });
-        addMeetInMySql(dataMeeting);
+        // addMeetInMySql(dataMeeting);
       });
   } catch (e) {
     console.log(e);
