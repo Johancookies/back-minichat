@@ -8,8 +8,9 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       if (err) console.log("rror");
       const queue = id_channel;
       const message = Buffer.from(JSON.stringify(msg));
-      channel.assertQueue(queue, { durable: true });
-      channel.sendToQueue(queue, message, { persistent: true });
+      channel.assertQueue(queue, { durable: true }).then(() => {
+        channel.sendToQueue(queue, message, { persistent: true });
+      });
     });
   });
   rabbitConnect((conn) => {
