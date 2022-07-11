@@ -377,7 +377,7 @@ channel.post("/", async (req, response) => {
                                 const id_user = result[randomUser].id_user;
                                 console.log(id_user);
                                 const time = new Date(); // creaate the time of the channel
-                                var channel = {
+                                let channel = {
                                   id_channel: channelId,
                                   create_at: time,
                                   id_member: res.generated_keys[0],
@@ -390,14 +390,11 @@ channel.post("/", async (req, response) => {
                                   .run(conn, function (err, res) {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
-                                    setTimeout(() => {
-                                      sendMessageRabbit({
-                                        id_channel: "insert_mysql",
-                                        msg: channel,
-                                        queryMySql: addChannelsInMySql,
-                                      });
-                                      console.log("======> creamos channels");
-                                    }, 2000);
+                                    sendMessageRabbit({
+                                      id_channel: "insert_mysql",
+                                      msg: channel,
+                                      queryMySql: addChannelsInMySql,
+                                    });
                                     // addChannelsInMySql(channel);
 
                                     ioEmmit({
