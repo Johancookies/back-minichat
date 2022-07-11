@@ -5,10 +5,9 @@ import morgan from "morgan";
 import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import "dotenv/config.js";
-import {addMeetInMySql} from "./routes/messages.js"
+import { addMeetInMySql } from "./routes/messages.js";
 import sendMessageRabbit from "./rabbitmq/send.js";
-import {url_taskMap} from "./routes/messages.js";
-
+import { url_taskMap } from "./routes/messages.js";
 
 // db
 import r from "rethinkdb";
@@ -203,7 +202,6 @@ io.on("connection", (socket) => {
       .run(conn, (err, cursor) => {
         if (err) console.error(err);
         cursor.each((err, result) => {
-          console.log(result.new_val);
           if (err) console.log(err);
           io.to(room).emit("receive_message", {
             ...result.new_val,
@@ -262,7 +260,7 @@ function createMeeting(con, idChannel) {
           clearTimeout(url_taskMap[result.generated_keys[0]]);
         }
         url_taskMap[result.generated_keys[0]] = timeout;
-        
+
         sendMessageRabbit({
           id_channel: "create_meetings",
           msg: dataMeeting,
