@@ -80,6 +80,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
             data: message,
             response: response,
             idChannel: message.id_channel,
+            file: file,
           });
         } else {
           if (result[0].status === "waiting") {
@@ -293,7 +294,7 @@ function insertMessage(con, data, response, file) {
   }
 }
 
-function createMeeting({ con, idChannel, data, response }) {
+function createMeeting({ con, idChannel, data, response, file }) {
   try {
     let dataMeeting = {
       id_channel: idChannel,
@@ -312,7 +313,7 @@ function createMeeting({ con, idChannel, data, response }) {
         });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
-        insertMessage(con, data, response, _file);
+        insertMessage(con, data, response, file);
         const timeout = setTimeout(() => {
           r.table("meetings")
             .filter({ id: res.generated_keys[0] })
