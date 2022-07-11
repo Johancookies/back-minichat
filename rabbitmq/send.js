@@ -28,7 +28,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
           //insert to database
           queryMySql(buf);
         },
-        { noAck: true }
+        { noAck: false }
       );
     });
   });
