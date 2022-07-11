@@ -19,7 +19,7 @@ const sendMessageRabbit = ({ id_channel, msg, res, queryMySql }) => {
       }
       const queue = id_channel;
       channel.assertQueue(queue, { durable: true });
-      // channel.prefetch(1);
+      channel.prefetch(1);
       channel.consume(
         queue,
         function (msg) {
