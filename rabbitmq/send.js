@@ -32,7 +32,7 @@ const sendMessageRabbit = ({ id_channel, msg, queryMySql }) => {
         const conn = await getConnectionMySql();
         const queryToExecute = () => {
           return new Promise((res, rej) => {
-            conn.query(queryMySql, (err, res) => {
+            conn.query(queryMySql, (err, result) => {
               if (err) rej(err);
               res(console.log("execute query successfully"));
             });
