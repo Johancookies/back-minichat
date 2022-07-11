@@ -29,10 +29,10 @@ const sendMessageRabbit = ({ id_channel, msg, queryMySql }) => {
         console.log("entrooooo");
         var buf = JSON.parse(msg.content);
         //insert to database
-        const conn = await getConnectionMySql();
+        const connMySql = await getConnectionMySql();
         const queryToExecute = () => {
           return new Promise((res, rej) => {
-            conn.query(queryMySql, (err, result) => {
+            connMySql.query(queryMySql, (err, result) => {
               if (err) rej(err);
               res(console.log("execute query successfully"));
             });
