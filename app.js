@@ -262,11 +262,11 @@ function createMeeting(con, idChannel) {
         url_taskMap[result.generated_keys[0]] = timeout;
         const query = `INSERT INTO meetings (id_rethink, create_at, id_channel, status) VALUES ("${dataMeeting.id}", "${dataMeeting.create_at}",  "${dataMeeting.id_channel}", "${dataMeeting.status}");`;
 
-        sendMessageRabbit({
-          id_channel: "insert_mysql",
-          msg: dataMeeting,
-          queryMySql: query,
-        });
+        // sendMessageRabbit({
+        //   id_channel: "insert_mysql",
+        //   msg: dataMeeting,
+        //   queryMySql: query,
+        // });
         // addMeetInMySql(dataMeeting);
       });
   } catch (e) {

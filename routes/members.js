@@ -62,12 +62,12 @@ members.post("/", async (req, response) => {
       } else {
         dataMember.id = res.generated_keys[0];
 
-        sendMessageRabbit({
-          id_channel: "create_members",
-          msg: dataMember,
-          // res: response,
-          queryMySql: query,
-        });
+        // sendMessageRabbit({
+        //   id_channel: "create_members",
+        //   msg: dataMember,
+        //   // res: response,
+        //   queryMySql: query,
+        // });
         addMemberInMySql(dataMember);
         response.status(200);
         response.json({
