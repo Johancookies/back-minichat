@@ -80,6 +80,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
             data: message,
             response: response,
             idChannel: message.id_channel,
+            file: file,
           });
         } else {
           if (result[0].status === "waiting") {
@@ -129,8 +130,8 @@ messages.post("/close-meeting", async (req, res) => {
         id_channel: "update_meeting_status",
         msg: {
           id_channel: id_channel,
-          status: 'inactive',
-          id_meet: "/channel: " + id_channel
+          status: "inactive",
+          id_meet: "/channel: " + id_channel,
         },
         queryMySql: updateStatusMeetInMySql,
       });
@@ -293,7 +294,7 @@ function insertMessage(con, data, response, file) {
   }
 }
 
-function createMeeting({ con, idChannel, data, response }) {
+function createMeeting({ con, idChannel, data, response, file }) {
   try {
     let dataMeeting = {
       id_channel: idChannel,
@@ -312,7 +313,7 @@ function createMeeting({ con, idChannel, data, response }) {
         });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
-        insertMessage(con, data, response, _file);
+        insertMessage(con, data, response, file);
         const timeout = setTimeout(() => {
           r.table("meetings")
             .filter({ id: res.generated_keys[0] })
@@ -371,13 +372,15 @@ export const addMessageInMySql = (data) => {
       if (err) console.log(err);
       console.log("connected");
     });
-    const query = `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel,  id_meet, type,  url_file, name_file, size_file, id_rethink ) VALUES ("${data.author}", "${data.author_name}", "${data.author_type}", "${
-      data.content
-    }", "${data.create_at}",  "${data.id_channel}", "${data.id_meet}", "${
-      data.type
-    }", "${data.url_file ?? null}",  "${data.name_file ?? null}", "${
-      data.size_file ?? null
-    }",  "${data.id}");`;
+    const query = `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel,  id_meet, type,  url_file, name_file, size_file, id_rethink ) VALUES ("${
+      data.author
+    }", "${data.author_name}", "${data.author_type}", "${data.content}", "${
+      data.create_at
+    }",  "${data.id_channel}", "${data.id_meet}", "${data.type}", "${
+      data.url_file ?? null
+    }",  "${data.name_file ?? null}", "${data.size_file ?? null}",  "${
+      data.id
+    }");`;
     conn.query(query, (err, result) => {
       if (err) console.log(err);
       console.log("Insert Message in mysql: ", data.id);
