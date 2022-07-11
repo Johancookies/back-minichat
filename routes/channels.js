@@ -377,7 +377,7 @@ channel.post("/", async (req, response) => {
                                 const id_user = result[randomUser].id_user;
                                 console.log(id_user);
                                 const time = new Date(); // creaate the time of the channel
-                                let channel = {
+                                var channel = {
                                   id_channel: channelId,
                                   create_at: time,
                                   id_member: res.generated_keys[0],
