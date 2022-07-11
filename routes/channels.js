@@ -308,7 +308,7 @@ channel.post("/", async (req, response) => {
                 //   msg: dataMember,
                 //   queryMySql: addMemberInMySql,
                 // });
-                addMemberInMySql(dataMember);
+                // addMemberInMySql(dataMember);
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -394,7 +394,8 @@ channel.post("/", async (req, response) => {
                                     //   msg: channel,
                                     //   queryMySql: addChannelsInMySql,
                                     // });
-                                    addChannelsInMySql(channel);
+                                    // addChannelsInMySql(channel);
+                                    save(dataMember, channel);
                                     ioEmmit({
                                       key: "new_channels",
                                       data: id_user,
@@ -616,6 +617,11 @@ const updateChannelUserMySql = (data) => {
     });
     conn.end();
   });
+};
+
+const save = async (member, channel) => {
+  await addMemberInMySql(member);
+  addChannelsInMySql(channel);
 };
 
 export default channel;
