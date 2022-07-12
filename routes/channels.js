@@ -298,6 +298,7 @@ channel.post("/", async (req, response) => {
               email: member.email,
               document_number: member.document_number,
             };
+
             r.table("members")
               .insert(dataMember)
               .run(conn, (err, res) => {
@@ -305,11 +306,11 @@ channel.post("/", async (req, response) => {
                 dataMember.id = res.generated_keys[0];
                 const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${dataMember.id_member}", "${dataMember.id}", "${dataMember.document_number}", "${dataMember.email}", "${dataMember.first_name}", "${dataMember.last_name}", "${dataMember.mobile_phone}", "${dataMember.photo}");`;
 
-                // sendMessageRabbit({
-                //   id_channel: "insert_mysql",
-                //   msg: dataMember,
-                //   queryMySql: query,
-                // });
+                sendMessageRabbit({
+                  id_channel: "insert_mysql",
+                  msg: dataMember,
+                  queryMySql: query,
+                });
                 // addMemberInMySql(dataMember);
 
                 if (member.token) {
@@ -351,6 +352,14 @@ channel.post("/", async (req, response) => {
                               .run(conn, (err, res) => {
                                 if (err) console.log(err);
                               });
+
+                            // {
+                            //   device: res.data[i].device,
+                            //   type: res.data[i].os,
+                            //   id_user: member.id_user ?? null,
+                            //   id_member: member.id ?? null,
+                            //   token: res.data[i].token,
+                            // }
                           }
                         }
                       });
@@ -386,6 +395,16 @@ channel.post("/", async (req, response) => {
                                   id_service_line: idServiceLine,
                                   id_user: idUserAsignet ?? id_user,
                                 };
+
+                                // {
+                                //   "id_rethink": "12312-12312-123"
+                                //   "create_at": "123123:123123Z",
+                                //   "id_channel": "123123-123123-12312",
+                                //   "id_member": "12312-123-123",
+                                //   "id_service_line": "5501",
+                                //   "id_user": "12312-1231-123",
+                                // }
+
                                 console.log(channel);
                                 r.table("channels")
                                   .insert(channel)
