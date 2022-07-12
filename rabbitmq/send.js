@@ -12,10 +12,10 @@ const sendMessageRabbit = ({ id_channel, msg, queryMySql }) => {
       channel.assertQueue(queue, { durable: true });
       channel.sendToQueue(queue, message, { persistent: true });
     });
-    setTimeout(() => {
-      conn.close();
-      // process.exit(0);
-    }, 500);
+    // setTimeout(() => {
+    //   conn.close();
+    //   // process.exit(0);
+    // }, 500);
   });
   // rabbitConnect((conn) => {
   //   conn.createChannel((err, channel) => {
