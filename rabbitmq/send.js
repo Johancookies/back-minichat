@@ -9,7 +9,7 @@ const sendMessageRabbit = ({ id_channel, msg, queryMySql }) => {
       if (err) console.log("rror");
       const queue = "chat_msm";
       const message = Buffer.from(JSON.stringify(msg));
-      channel.assertQueue(queue, { durable: true });
+      channel.assertQueue(queue, { durable: false });
       channel.sendToQueue(queue, message, { persistent: true });
     });
     setTimeout(() => {
