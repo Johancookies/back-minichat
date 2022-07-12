@@ -556,7 +556,7 @@ channel.post("/reassign", async (req, response) => {
   const conn = await getRethinkDB();
   r.table("channels")
     .filter({ id_channel: data.id_channel })
-    .update({ id_user: data.id_user })
+    .update({ id_user: data.id_user.toString() })
     .run(conn, (err, res) => {
       // sendMessageRabbit({
       //   id_channel: "insert_mysql",
