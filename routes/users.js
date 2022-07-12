@@ -125,21 +125,35 @@ users.post("/change-status", async (req, response) => {
 });
 
 users.get("/active", async (req, response) => {
-  connectMysql((conn) => {
-    conn.connect((err) => {
+  const conn = await getRethinkDB();
+
+  r.table("users")
+    .filter({ status: "active" })
+    .run(conn, (err, cursor) => {
       if (err) console.log(err);
-      console.log("connected");
-    });
-    const query = 'SELECT * FROM users WHERE status = "active"';
-    conn.query(query, (err, result) => {
-      if (err) console.log(err);
-      response.json({
-        status: "success",
-        data: result,
+      cursor.toArray((err, result) => {
+        if (err) console.log(err);
+        response.json({
+          data: result,
+        });
       });
     });
-    conn.end();
-  });
+
+  // connectMysql((conn) => {
+  //   conn.connect((err) => {
+  //     if (err) console.log(err);
+  //     console.log("connected");
+  //   });
+  //   const query = 'SELECT * FROM users WHERE status = "active"';
+  //   conn.query(query, (err, result) => {
+  //     if (err) console.log(err);
+  //     response.json({
+  //       status: "success",
+  //       data: result,
+  //     });
+  //   });
+  //   conn.end();
+  // });
 });
 
 // mysql queries
