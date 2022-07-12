@@ -580,7 +580,7 @@ channel.get("/by-collab", async (req, response) => {
     .eqJoin(r.row("id_member"), r.table("members"))
     .without({ right: "id" })
     .zip()
-    .filter({ id_user: idUser })
+    .filter({ id_user: idUser.toString() })
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
