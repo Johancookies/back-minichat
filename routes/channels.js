@@ -290,7 +290,7 @@ channel.post("/", async (req, response) => {
         cursor.toArray((err, res) => {
           if (res.length === 0) {
             let dataMember = {
-              id_member: member.id,
+              id_member_my_body: member.id,
               first_name: member.first_name,
               last_name: member.last_name,
               photo: member.photo,
@@ -304,7 +304,7 @@ channel.post("/", async (req, response) => {
               .insert(dataMember)
               .run(conn, (err, res) => {
                 if (err) console.log(err);
-                dataMember.id = res.generated_keys[0];
+                dataMember.id_member = res.generated_keys[0];
                 dataMember.id_member_my_body = member.id;
                 const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${dataMember.id_member}", "${dataMember.id}", "${dataMember.document_number}", "${dataMember.email}", "${dataMember.first_name}", "${dataMember.last_name}", "${dataMember.mobile_phone}", "${dataMember.photo}");`;
 
