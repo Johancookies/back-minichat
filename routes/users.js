@@ -38,7 +38,7 @@ users.post("/", async (req, response) => {
                   if (err) {
                     console.log(err);
                   } else {
-                    dataUser.id = res.generated_keys[0];
+                    dataUser.id_rethink = res.generated_keys[0];
                     dataUser.flag = "insert_user";
                     sendMessageRabbit({
                       msg: dataUser,
