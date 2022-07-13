@@ -7,9 +7,9 @@ export default (callback) => {
       ":" +
       process.env.RABBITMQ_PASS +
       "@" +
-      RABBITMQ_HOST +
+     process.env.RABBITMQ_HOST +
       ":" +
-      RABBITMQ_PORT +
+     process.env.RABBITMQ_PORT +
       "",
     (err, conn) => {
       if (err) console.error(err);
