@@ -53,7 +53,7 @@ channel.post("/", async (req, response) => {
                             let channel = {
                               id_channel: channelId,
                               create_at: time,
-                              id_member: resultMember[0].id,
+                              id_member: resultMember[0].id_member,
                               id_service_line: idServiceLine,
                               id_user: idUserAsignet ?? id_user.toString(),
                               flag: "insert_channel",
