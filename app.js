@@ -5,7 +5,6 @@ import morgan from "morgan";
 import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import "dotenv/config.js";
-import { addMeetInMySql } from "./routes/messages.js";
 import sendMessageRabbit from "./rabbitmq/send.js";
 import { url_taskMap } from "./routes/messages.js";
 

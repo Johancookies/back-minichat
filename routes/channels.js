@@ -53,7 +53,7 @@ channel.post("/", async (req, response) => {
                             let channel = {
                               id_channel: channelId,
                               create_at: time,
-                              id_member: resultMember[0].id,
+                              id_member: resultMember[0].id ?? idMember,
                               id_service_line: idServiceLine,
                               id_user: idUserAsignet ?? id_user.toString(),
                               flag: "insert_channel",
@@ -172,6 +172,7 @@ channel.get("/by-collab", async (req, response) => {
   r.table("channels")
     .eqJoin(r.row("id_member"), r.table("members"))
     .without({ right: "id" })
+
     .zip()
     .filter({ id_user: idUser.toString() })
     .run(conn, (err, cursor) => {
