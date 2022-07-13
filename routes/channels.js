@@ -386,14 +386,15 @@ channel.post("/", async (req, response) => {
                                   result.length - 1
                                 );
                                 const id_user = result[randomUser].id_user;
-                                console.log(id_user);
                                 const time = new Date(); // creaate the time of the channel
                                 let channel = {
                                   id_channel: channelId,
                                   create_at: time,
                                   id_member: res.generated_keys[0],
                                   id_service_line: idServiceLine,
-                                  id_user: idUserAsignet.toString() ?? id_user.toString(),
+                                  id_user:
+                                    idUserAsignet.toString() ??
+                                    id_user.toString(),
                                 };
 
                                 // {
@@ -405,7 +406,6 @@ channel.post("/", async (req, response) => {
                                 //   "id_user": "12312-1231-123",
                                 // }
 
-                                console.log(channel);
                                 r.table("channels")
                                   .insert(channel)
                                   .run(conn, function (err, res) {
@@ -472,7 +472,9 @@ channel.post("/", async (req, response) => {
                                 create_at: time,
                                 id_member: res[0].id,
                                 id_service_line: idServiceLine,
-                                id_user: idUserAsignet.toString() ?? id_user.toString(),
+                                id_user:
+                                  idUserAsignet.toString() ??
+                                  id_user.toString(),
                               };
                               console.log(channel);
                               r.table("channels")

@@ -23,7 +23,6 @@ users.post("/", async (req, response) => {
           if (err) {
             console.log(err);
           } else {
-            console.log("result", result);
             if (result.length === 0) {
               let dataUser = {
                 id_user: user.id,
@@ -32,7 +31,6 @@ users.post("/", async (req, response) => {
                 role_id: user.role_id,
                 status: "active",
               };
-              console.log("dataUser", dataUser);
 
               r.table("users")
                 .insert(dataUser)

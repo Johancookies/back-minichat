@@ -1,8 +1,9 @@
 import rabbitConnect from "../config/rabbitConnect.js";
 import { getConnectionMySql } from "../config/mysql.js";
 
-const sendMessageRabbit = ({  msg  }) => {
+const sendMessageRabbit = ({ msg }) => {
   // queryMySql(msg);
+  console.log(msg);
 
   rabbitConnect((conn) => {
     conn.createChannel((err, channel) => {
