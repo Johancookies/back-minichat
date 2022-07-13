@@ -2,9 +2,7 @@ import express from "express";
 import fetch from "node-fetch";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
-import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
-import mysql from "mysql";
 
 const members = express.Router();
 
@@ -12,7 +10,7 @@ members.post("/", async (req, response) => {
   const conn = await getRethinkDB();
   const member = req.body;
   let dataMember = {
-    id_member: member.id_member,
+    id_member: member.id,
     document_number: member.document_number,
     email: member.email,
     first_name: member.firts_name,
@@ -60,15 +58,12 @@ members.post("/", async (req, response) => {
         response.send(400);
         response.json({ message: "Something went wrong!", status: "error" });
       } else {
-        dataMember.id = res.generated_keys[0];
-
-        // sendMessageRabbit({
-        //   id_channel: "create_members",
-        //   msg: dataMember,
-        //   // res: response,
-        //   queryMySql: query,
-        // });
-        addMemberInMySql(dataMember);
+        dataMember.id_rethink = res.generated_keys[0];
+        dataMember.id_member_my_body = member.id
+        dataMember.flag = "insert_member";
+        sendMessageRabbit({
+          msg: dataMember,
+        });
         response.status(200);
         response.json({
           message: "Member added successfully",
@@ -77,23 +72,5 @@ members.post("/", async (req, response) => {
       }
     });
 });
-
-export const addMemberInMySql = (data) => {
-  const conn = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-  });
-  conn.connect((err) => {
-    if (err) console.log(err);
-    console.log("connected");
-  });
-  conn.query(query, (err, result) => {
-    if (err) console.log(err);
-    console.log("Insert member in mysql: ", data.id);
-  });
-  conn.end();
-};
 
 export default members;
