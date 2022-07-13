@@ -1,5 +1,4 @@
 import rabbitConnect from "../config/rabbitConnect.js";
-import { getConnectionMySql } from "../config/mysql.js";
 
 const sendMessageRabbit = ({ msg }) => {
   // queryMySql(msg);
@@ -12,7 +11,7 @@ const sendMessageRabbit = ({ msg }) => {
       const message = Buffer.from(JSON.stringify(msg));
       channel.assertQueue(queue, { durable: false });
       console.log("ENTREEEE!!!!");
-      channel.sendToQueue(queue, message, { persistent: false });
+      channel.sendToQueue(queue, msg, { persistent: false });
     });
     // setTimeout(() => {
     //   conn.close();
