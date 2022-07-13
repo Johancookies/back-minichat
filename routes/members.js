@@ -47,7 +47,7 @@ members.post("/", async (req, response) => {
     });
   } else {
     const dataToken = {
-      device: member.os,
+      device: member.device,
       type: "mobile",
       id_user: member.id_user ?? null,
       id_member: member.id ?? null,
