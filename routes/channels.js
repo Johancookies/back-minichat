@@ -459,9 +459,7 @@ channel.post("/", async (req, response) => {
                                 create_at: time,
                                 id_member: res[0].id,
                                 id_service_line: idServiceLine,
-                                id_user:
-                                  idUserAsignet.toString() ??
-                                  id_user.toString(),
+                                id_user: idUserAsignet ?? id_user.toString(),
                                 flag: "insert_channel",
                               };
                               console.log(channel);
