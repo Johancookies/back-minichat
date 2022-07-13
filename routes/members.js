@@ -18,19 +18,16 @@ members.post("/", async (req, response) => {
     mobile_phone: member.mobile_phone,
     photo: member.photo,
   };
-  if (member.token_oauth) {
-    fetch(
-      `https://dev.notification.bodytech.co/api/tokenpush/get-tokens-user/${member.id}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: "Bearer " + member.token_oauth,
-          "Content-Type": "application/json",
-          "x-bodytech-organization": 1,
-          "x-bodytech-brand": 1,
-        },
-      }
-    ).then(({ data }) => {
+  if (!member.token) {
+    fetch(`${process.env.API_FETCH}${member.id}`, {
+      method: "GET",
+      headers: {
+        Authorization: process.env.API_AUTHORIZATION,
+        "Content-Type": "application/json",
+        "x-bodytech-organization": API_ORGANIZATION,
+        "x-bodytech-brand": API_BRAND,
+      },
+    }).then(({ data }) => {
       if (data && data.data && data.data.length > 0) {
         data.data.forEach((token) => {
           let dataToken = {
@@ -59,7 +56,7 @@ members.post("/", async (req, response) => {
         response.json({ message: "Something went wrong!", status: "error" });
       } else {
         dataMember.id_rethink = res.generated_keys[0];
-        dataMember.id_member_my_body = member.id
+        dataMember.id_member_my_body = member.id;
         dataMember.flag = "insert_member";
         sendMessageRabbit({
           msg: dataMember,
