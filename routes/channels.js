@@ -23,7 +23,8 @@ channel.post("/", async (req, response) => {
     let member = req.body;
     let idMember = member.id;
     let idServiceLine = member.id_service_line.toString();
-    let idUserAsignet = member.id_user.toString();
+    let idUserAsignet =
+      member.id_user != null ? member.id_user.toString() : null;
     const channelId = idMember + "" + idServiceLine; // id of the channel (unique)
     r.table("channels")
       .filter({ id_channel: channelId })
