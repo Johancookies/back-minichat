@@ -43,29 +43,37 @@ channel.post("/", async (req, response) => {
                     if (result.length > 0) {
                       const randomUser = getRandomInt(0, result.length - 1);
                       const id_user = result[randomUser].id_user;
-                      let channel = {
-                        id_channel: channelId,
-                        create_at: time,
-                        id_member: res[0].id,
-                        id_service_line: idServiceLine,
-                        id_user: idUserAsignet ?? id_user.toString(),
-                        flag: "insert_channel",
-                      };
-                      console.log(channel);
-                      r.table("channels")
-                        .insert(channel)
-                        .run(conn, function (err, res) {
-                          if (err) response.sendStatus(500);
-                          channel.id = res.generated_keys[0];
-                          sendMessageRabbit({
-                            msg: channel,
-                          });
-                          ioEmmit({
-                            key: "new_channels",
-                            data: id_user,
-                          });
-                          response.json({
-                            id_channel: channel.id_channel,
+                      r.table("members")
+                        .filter({ id_member: idMember })
+                        .run(conn, (err, cursor) => {
+                          if (err) console.log(err);
+                          cursor.toArray((err, resultMember) => {
+                            if (err) console.log(err);
+                            let channel = {
+                              id_channel: channelId,
+                              create_at: time,
+                              id_member: resultMember[0].id,
+                              id_service_line: idServiceLine,
+                              id_user: idUserAsignet ?? id_user.toString(),
+                              flag: "insert_channel",
+                            };
+                            console.log(channel);
+                            r.table("channels")
+                              .insert(channel)
+                              .run(conn, function (err, res) {
+                                if (err) response.sendStatus(500);
+                                channel.id = res.generated_keys[0];
+                                sendMessageRabbit({
+                                  msg: channel,
+                                });
+                                ioEmmit({
+                                  key: "new_channels",
+                                  data: id_user,
+                                });
+                                response.json({
+                                  id_channel: channel.id_channel,
+                                });
+                              });
                           });
                         });
                     } else {
