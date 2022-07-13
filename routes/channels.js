@@ -401,12 +401,11 @@ channel.post("/", async (req, response) => {
                                   .run(conn, function (err, res) {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
+                                    channel.id_rethink = res.generated_keys[0];
                                     const query = `INSERT INTO channels (id_rethink, create_at, id_channel, id_member, id_service_line, id_user) VALUES ("${channel.id}", "${channel.create_at}",  "${channel.id_channel}", "${channel.id_member}", "${channel.id_service_line}", "${channel.id_user}");`;
-
                                     sendMessageRabbit({
                                       msg: channel,
                                     });
-
                                     ioEmmit({
                                       key: "new_channels",
                                       data: id_user,
