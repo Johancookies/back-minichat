@@ -260,6 +260,14 @@ function createMeeting(con, idChannel) {
           clearTimeout(url_taskMap[result.generated_keys[0]]);
         }
         url_taskMap[result.generated_keys[0]] = timeout;
+
+        // {
+        //   "id_rethink": "12312-123-1123",
+        //   "create_at": "1239102-12312:123123Z",
+        //   "id_channel": "12312-12312-123",
+        //   "status": "waiting"
+        // }
+
         const query = `INSERT INTO meetings (id_rethink, create_at, id_channel, status) VALUES ("${dataMeeting.id}", "${dataMeeting.create_at}",  "${dataMeeting.id_channel}", "${dataMeeting.status}");`;
 
         // sendMessageRabbit({
