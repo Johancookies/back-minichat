@@ -245,6 +245,7 @@ function createMeeting(con, idChannel) {
         if (err) console.log(err);
         dataMeeting.id_rethink = result.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
+        dataMeeting.flag = "insert_meeting";
 
         const timeout = setTimeout(() => {
           r.table("meetings")
