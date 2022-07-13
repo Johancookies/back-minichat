@@ -243,7 +243,7 @@ function createMeeting(con, idChannel) {
       .insert(dataMeeting)
       .run(con, (err, result) => {
         if (err) console.log(err);
-        dataMeeting.id = result.generated_keys[0];
+        dataMeeting.id_rethink = result.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
 
         const timeout = setTimeout(() => {
@@ -270,12 +270,9 @@ function createMeeting(con, idChannel) {
 
         const query = `INSERT INTO meetings (id_rethink, create_at, id_channel, status) VALUES ("${dataMeeting.id}", "${dataMeeting.create_at}",  "${dataMeeting.id_channel}", "${dataMeeting.status}");`;
 
-        // sendMessageRabbit({
-        //   id_channel: "insert_mysql",
-        //   msg: dataMeeting,
-        //   queryMySql: query,
-        // });
-        // addMeetInMySql(dataMeeting);
+        sendMessageRabbit({
+          msg: dataMeeting,
+        });
       });
   } catch (e) {
     console.log(e);
