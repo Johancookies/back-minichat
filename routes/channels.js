@@ -406,7 +406,7 @@ channel.post("/", async (req, response) => {
                                       sendMessageRabbit({
                                         msg: channel,
                                       });
-                                    }, 0);
+                                    }, 100);
                                     ioEmmit({
                                       key: "new_channels",
                                       data: id_user,
