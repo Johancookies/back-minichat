@@ -152,13 +152,10 @@ function insertMessage(con, data, response, file) {
         .run(con, (err, res) => {
           if (err) console.log(err);
           data.id = res.generated_keys[0];
-          // sendMessageRabbit({
-          //   id_channel: "insert_mysql",
-          //   msg: data,
-          //   res: response,
-          //   queryMySql: addMessageInMySql,
-          // });
-          addMessageInMySql(data);
+          data.flag = "insert_messages";
+          sendMessageRabbit({
+            msg: data,
+          });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
@@ -310,14 +307,12 @@ function createMeeting({ con, idChannel, data, response, file }) {
       .insert(dataMeeting)
       .run(con, (err, res) => {
         if (err) console.log(err);
-        dataMeeting.id = res.generated_keys[0];
+        dataMeeting.id_rethink = res.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
-        // sendMessageRabbit({
-        //   id_channel: "insert_mysql",
-        //   msg: dataMeeting,
-        //   queryMySql: addMeetInMySql,
-        // });
-        addMeetInMySql(dataMeeting);
+        dataMeeting.flag = "insert_meeting";
+        sendMessageRabbit({
+          msg: dataMeeting,
+        });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
         insertMessage(con, data, response, file);
@@ -327,12 +322,6 @@ function createMeeting({ con, idChannel, data, response, file }) {
             .update({ status: "inactive" })
             .run(con, (err, result) => {
               if (err) console.log(err);
-              // sendMessageRabbit({
-              //   id_channel: "insert_mysql",
-              //   msg: dataMeeting,
-              //   queryMySql: updateStatusMeetInMySql,
-              // });
-              updateStatusMeetInMySql(dataMeeting);
               console.log("inactive meeting" + res.generated_keys[0]);
               ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
             });

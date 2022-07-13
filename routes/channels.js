@@ -297,6 +297,7 @@ channel.post("/", async (req, response) => {
               mobile_phone: member.mobile_phone,
               email: member.email,
               document_number: member.document_number,
+              flag: "insert_member",
             };
 
             r.table("members")
@@ -307,12 +308,8 @@ channel.post("/", async (req, response) => {
                 const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${dataMember.id_member}", "${dataMember.id}", "${dataMember.document_number}", "${dataMember.email}", "${dataMember.first_name}", "${dataMember.last_name}", "${dataMember.mobile_phone}", "${dataMember.photo}");`;
 
                 sendMessageRabbit({
-                  id_channel: "insert_mysql",
                   msg: dataMember,
-                  queryMySql: query,
                 });
-                // addMemberInMySql(dataMember);
-
                 if (member.token) {
                   let token = {
                     device: member.device,
@@ -395,16 +392,8 @@ channel.post("/", async (req, response) => {
                                   id_user:
                                     idUserAsignet.toString() ??
                                     id_user.toString(),
+                                  flag: "insert_channel",
                                 };
-
-                                // {
-                                //   "id_rethink": "12312-12312-123"
-                                //   "create_at": "123123:123123Z",
-                                //   "id_channel": "123123-123123-12312",
-                                //   "id_member": "12312-123-123",
-                                //   "id_service_line": "5501",
-                                //   "id_user": "12312-1231-123",
-                                // }
 
                                 r.table("channels")
                                   .insert(channel)
@@ -413,12 +402,9 @@ channel.post("/", async (req, response) => {
                                     channel.id = res.generated_keys[0];
                                     const query = `INSERT INTO channels (id_rethink, create_at, id_channel, id_member, id_service_line, id_user) VALUES ("${channel.id}", "${channel.create_at}",  "${channel.id_channel}", "${channel.id_member}", "${channel.id_service_line}", "${channel.id_user}");`;
 
-                                    // sendMessageRabbit({
-                                    //   id_channel: "insert_mysql",
-                                    //   msg: channel,
-                                    //   queryMySql: query,
-                                    // });
-                                    // addChannelsInMySql(channel);
+                                    sendMessageRabbit({
+                                      msg: channel,
+                                    });
 
                                     ioEmmit({
                                       key: "new_channels",
@@ -475,6 +461,7 @@ channel.post("/", async (req, response) => {
                                 id_user:
                                   idUserAsignet.toString() ??
                                   id_user.toString(),
+                                flag: "insert_channel",
                               };
                               console.log(channel);
                               r.table("channels")
@@ -482,12 +469,9 @@ channel.post("/", async (req, response) => {
                                 .run(conn, function (err, res) {
                                   if (err) response.sendStatus(500);
                                   channel.id = res.generated_keys[0];
-                                  // sendMessageRabbit({
-                                  //   id_channel: "insert_mysql",
-                                  //   msg: channel,
-                                  //   queryMySql: addChannelsInMySql,
-                                  // });
-                                  // addChannelsInMySql(channel);
+                                  sendMessageRabbit({
+                                    msg: channel,
+                                  });
                                   ioEmmit({
                                     key: "new_channels",
                                     data: id_user,
@@ -579,12 +563,6 @@ channel.post("/reassign", async (req, response) => {
     .filter({ id_channel: data.id_channel })
     .update({ id_user: data.id_user.toString() })
     .run(conn, (err, res) => {
-      // sendMessageRabbit({
-      //   id_channel: "insert_mysql",
-      //   msg: data,
-      //   queryMySql: updateChannelUserMySql,
-      // });
-      updateChannelUserMySql(data);
       if (err) console.log(err);
       response.json({
         status: "success",
