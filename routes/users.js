@@ -14,7 +14,7 @@ users.post("/", async (req, response) => {
   if (!id || !token || !first_name || !last_name || !role_id)
     response.sendStatus(204);
   r.table("users")
-    .filter({ id_user: user.id })
+    .filter({ id_user: user.id.toString() })
     .run(conn, (err, cursor) => {
       if (err) {
         console.log(err);
@@ -25,7 +25,7 @@ users.post("/", async (req, response) => {
           } else {
             if (result.length === 0) {
               let dataUser = {
-                id_user: user.id,
+                id_user: user.id.toString(),
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role_id: user.role_id,
