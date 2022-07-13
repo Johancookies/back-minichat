@@ -226,6 +226,11 @@ function insertMessage(con, data, response, file) {
         .insert(data)
         .run(con, (err, res) => {
           if (err) console.log(err);
+          data.id_rethink = res.generated_keys[0];
+          data.flag = "insert_messages";
+          sendMessageRabbit({
+            msg: data,
+          });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
