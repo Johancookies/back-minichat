@@ -41,12 +41,10 @@ users.post("/", async (req, response) => {
                     console.log(err);
                   } else {
                     dataUser.id = res.generated_keys[0];
-                    // sendMessageRabbit({
-                    //   id_channel: "insert_mysql",
-                    //   msg: dataUser,
-                    //   res: response,
-                    //   queryMySql: addUsersInMySql,
-                    // });
+                    dataUser.flag = "insert_user";
+                    sendMessageRabbit({
+                      msg: dataUser,
+                    });
                     addUsersInMySql(dataUser);
                     const dataToken = {
                       device: user.device,
