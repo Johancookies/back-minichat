@@ -7,9 +7,9 @@ const sendMessageRabbit = ({ msg }) => {
   rabbitConnect((conn) => {
     conn.createChannel((err, channel) => {
       if (err) console.log("rror");
-      const queue = "chat_msm_test2";
+      const queue = "chat_bodytech";
       const message = Buffer.from(JSON.stringify(msg));
-      channel.assertQueue(queue, { durable: false });
+      channel.assertQueue(queue, { durable: true });
       channel.sendToQueue(queue, message, { persistent: false });
     });
     // setTimeout(() => {
