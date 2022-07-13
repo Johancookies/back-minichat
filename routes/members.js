@@ -24,8 +24,8 @@ members.post("/", async (req, response) => {
       headers: {
         Authorization: process.env.API_AUTHORIZATION,
         "Content-Type": "application/json",
-        "x-bodytech-organization": API_ORGANIZATION,
-        "x-bodytech-brand": API_BRAND,
+        "x-bodytech-organization": process.env.API_ORGANIZATION,
+        "x-bodytech-brand": process.env.API_BRAND,
       },
     }).then(({ data }) => {
       if (data && data.data && data.data.length > 0) {
