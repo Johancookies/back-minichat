@@ -290,6 +290,7 @@ channel.post("/", async (req, response) => {
         cursor.toArray((err, res) => {
           if (res.length === 0) {
             let dataMember = {
+              id_member: member.id,
               id_member_my_body: member.id,
               first_name: member.first_name,
               last_name: member.last_name,
