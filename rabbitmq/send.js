@@ -11,7 +11,7 @@ const sendMessageRabbit = ({ msg }) => {
       const message = Buffer.from(JSON.stringify(msg));
       channel.assertQueue(queue, { durable: false });
       console.log("ENTREEEE!!!!");
-      channel.sendToQueue(queue, msg, { persistent: false });
+      channel.sendToQueue(queue, message, { persistent: false });
     });
     // setTimeout(() => {
     //   conn.close();
