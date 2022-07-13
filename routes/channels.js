@@ -307,7 +307,6 @@ channel.post("/", async (req, response) => {
                 if (err) console.log(err);
                 dataMember.id_member = res.generated_keys[0];
                 dataMember.id_member_my_body = member.id;
-                const query = `INSERT INTO members (id_member_my_body, id_member, document_number, email, first_name, last_name,  mobile_phone, photo) VALUES ("${dataMember.id_member}", "${dataMember.id}", "${dataMember.document_number}", "${dataMember.email}", "${dataMember.first_name}", "${dataMember.last_name}", "${dataMember.mobile_phone}", "${dataMember.photo}");`;
 
                 sendMessageRabbit({
                   msg: dataMember,
@@ -403,10 +402,12 @@ channel.post("/", async (req, response) => {
                                     if (err) console.log(err);
                                     channel.id = res.generated_keys[0];
                                     channel.id_rethink = res.generated_keys[0];
-                                    const query = `INSERT INTO channels (id_rethink, create_at, id_channel, id_member, id_service_line, id_user) VALUES ("${channel.id}", "${channel.create_at}",  "${channel.id_channel}", "${channel.id_member}", "${channel.id_service_line}", "${channel.id_user}");`;
-                                    sendMessageRabbit({
-                                      msg: channel,
-                                    });
+                                    setTimeout(() => {
+                                      console.log(channel);
+                                      sendMessageRabbit({
+                                        msg: channel,
+                                      });
+                                    }, 200);
                                     ioEmmit({
                                       key: "new_channels",
                                       data: id_user,
