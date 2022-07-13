@@ -345,7 +345,7 @@ function sendPush({ message, tokens }) {
   };
 
   let notification_body = {
-    data: notification,
+    notification: notification,
     registration_ids: tokens,
   };
 
