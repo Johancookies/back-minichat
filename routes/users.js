@@ -45,7 +45,6 @@ users.post("/", async (req, response) => {
                     sendMessageRabbit({
                       msg: dataUser,
                     });
-                    addUsersInMySql(dataUser);
                     const dataToken = {
                       device: user.device,
                       type: user.type,
