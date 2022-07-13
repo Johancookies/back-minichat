@@ -22,7 +22,7 @@ channel.post("/", async (req, response) => {
     const conn = await getRethinkDB();
     let member = req.body;
     let idMember = member.id;
-    let idServiceLine = member.id_service_line;
+    let idServiceLine = member.id_service_line.toString();
     let idUserAsignet = member.id_user.toString();
     const channelId = idMember + "" + idServiceLine; // id of the channel (unique)
     r.table("channels")
