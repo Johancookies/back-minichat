@@ -13,7 +13,7 @@ members.post("/", async (req, response) => {
     id_member: member.id,
     document_number: member.document_number,
     email: member.email,
-    first_name: member.firts_name,
+    first_name: member.first_name,
     last_name: member.last_name,
     mobile_phone: member.mobile_phone,
     photo: member.photo,
