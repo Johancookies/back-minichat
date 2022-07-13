@@ -4,7 +4,6 @@ import getRethinkDB from "../config/db.js";
 import ioEmmit from "../app.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
-import { addMemberInMySql } from "../routes/members.js";
 import { getRandomInt, listTowerControl } from "../helpers/helper_functions.js";
 import fetch from "node-fetch";
 
