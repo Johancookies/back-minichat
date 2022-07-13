@@ -345,14 +345,14 @@ function sendPush({ message, tokens }) {
   };
 
   let notification_body = {
-    notification: notification,
+    data: notification,
     registration_ids: tokens,
   };
 
   fetch("https://fcm.googleapis.com/fcm/send", {
     method: "POST",
     headers: {
-      Authorization: "key=" + process.env.FCM_TOKEN,
+      Authorization: "" + process.env.FCM_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(notification_body),
