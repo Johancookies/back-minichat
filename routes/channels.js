@@ -307,7 +307,7 @@ channel.post("/", async (req, response) => {
                 if (err) console.log(err);
                 dataMember.id_member = res.generated_keys[0];
                 dataMember.id_member_my_body = member.id;
-
+                console.log("INSERT MEMBER");
                 sendMessageRabbit({
                   msg: dataMember,
                 });
@@ -403,6 +403,7 @@ channel.post("/", async (req, response) => {
                                     channel.id = res.generated_keys[0];
                                     channel.id_rethink = res.generated_keys[0];
                                     setTimeout(() => {
+                                      console.log("INSERT CHANNEL");
                                       console.log(channel);
                                       sendMessageRabbit({
                                         msg: channel,
