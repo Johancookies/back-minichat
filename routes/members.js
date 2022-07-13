@@ -45,6 +45,19 @@ members.post("/", async (req, response) => {
         });
       }
     });
+  } else {
+    const dataToken = {
+      device: member.os,
+      type: "mobile",
+      id_user: member.id_user ?? null,
+      id_member: member.id ?? null,
+      token: member.token,
+    };
+    r.table("token_notification")
+      .insert(dataToken)
+      .run(conn, (err, res) => {
+        if (err) console.log(err);
+      });
   }
 
   r.table("members")
