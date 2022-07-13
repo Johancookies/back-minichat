@@ -25,457 +25,96 @@ channel.post("/", async (req, response) => {
     let idServiceLine = member.id_service_line;
     let idUserAsignet = member.id_user;
     const channelId = idMember + "" + idServiceLine; // id of the channel (unique)
-    // connectMysql((connMysql) => {
-    //   connMysql.connect((err) => {
-    //     if (err) console.log(err);
-    //     console.log("connected");
-    //   });
-    //   const query = `SELECT * FROM members where id_member = "${idMember}"`;
-    //   connMysql.query(query, (err, res) => {
-    //     if (err) console.log(err);
-    //     if (res.length === 0) {
-    //       let dataMember = {
-    //         id_member: member.id,
-    //         first_name: member.first_name,
-    //         last_name: member.last_name,
-    //         photo: member.photo,
-    //         mobile_phone: member.mobile_phone,
-    //         email: member.email,
-    //         document_number: member.document_number,
-    //       };
-    //       r.table("members")
-    //         .insert(dataMember)
-    //         .run(conn, (err, res) => {
-    //           if (err) console.log(err);
-    //           dataMember.id = res.generated_keys[0];
-    //           // sendMessageRabbit({
-    //           //   id_channel: "insert_mysql",
-    //           //   msg: dataMember,
-    //           //   queryMySql: addMemberInMySql,
-    //           // });
-    //           addMemberInMySql(dataMember);
-    //           if (member.token) {
-    //             let token = {
-    //               device: member.device,
-    //               type: member.type,
-    //               id_user: member.id_user ?? null,
-    //               id_member: member.id ?? null,
-    //               token: member.token,
-    //             };
-    //             r.table("token_notification")
-    //               .insert(token)
-    //               .run(conn, (err, res) => {
-    //                 if (err) console.log(err);
-    //               });
-    //           } else {
-    //             try {
-    //               fetch(process.env.API_FETCH + member.id, {
-    //                 method: "GET",
-    //                 headers: {
-    //                   Authorization: process.env.API_AUTHORIZATION,
-    //                   "x-bodytech-organization": process.env.API_ORGANIZATION,
-    //                   "x-bodytech-brand": process.env.API_BRAND,
-    //                 },
-    //               })
-    //                 .then((res) => res.json())
-    //                 .then((res) => {
-    //                   if (res.data.length > 0) {
-    //                     for (var i = 0; i < res.data.length; i++) {
-    //                       let token = {
-    //                         device: res.data[i].device,
-    //                         type: res.data[i].os,
-    //                         id_user: member.id_user ?? null,
-    //                         id_member: member.id ?? null,
-    //                         token: res.data[i].token,
-    //                       };
-    //                       r.table("token_notification")
-    //                         .insert(token)
-    //                         .run(conn, (err, res) => {
-    //                           if (err) console.log(err);
-    //                         });
-    //                     }
-    //                   }
-    //                 });
-    //             } catch (error) {
-    //               console.log(error);
-    //             }
-    //           }
-    //           r.table("channels")
-    //             .filter({ id_channel: channelId })
-    //             .run(conn, (err, cursor) => {
-    //               if (err) response.sendStatus(500);
-    //               cursor.toArray((err, result) => {
-    //                 if (err) response.sendStatus(500);
-    //                 if (result.length === 0) {
-    //                   r.table("users")
-    //                     .filter({ status: "active" })
-    //                     .run(conn, (err, cursor) => {
-    //                       if (err) console.log(err);
-    //                       cursor.toArray((err, result) => {
-    //                         if (err) console.log(err);
-    //                         if (result.length > 0) {
-    //                           const randomUser = getRandomInt(
-    //                             0,
-    //                             result.length - 1
-    //                           );
-    //                           const id_user = result[randomUser].id_user;
-    //                           console.log(id_user);
-    //                           const time = new Date(); // creaate the time of the channel
-    //                           let channel = {
-    //                             id_channel: channelId,
-    //                             create_at: time,
-    //                             id_member: res.generated_keys[0],
-    //                             id_service_line: idServiceLine,
-    //                             id_user: idUserAsignet ?? id_user,
-    //                           };
-    //                           console.log(channel);
-    //                           r.table("channels")
-    //                             .insert(channel)
-    //                             .run(conn, function (err, res) {
-    //                               if (err) console.log(err);
-    //                               channel.id = res.generated_keys[0];
-    //                               // sendMessageRabbit({
-    //                               //   id_channel: "insert_mysql",
-    //                               //   msg: channel,
-    //                               //   queryMySql: addChannelsInMySql,
-    //                               // });
-    //                               addChannelsInMySql(channel);
-    //                               ioEmmit({
-    //                                 key: "new_channels",
-    //                                 data: id_user,
-    //                               });
-    //                               response.json({
-    //                                 id_channel: channel.id_channel,
-    //                               });
-    //                             });
-    //                         } else {
-    //                           response.json({
-    //                             status: 500,
-    //                             message: "No hay usuarios disponibles.",
-    //                           });
-    //                         }
-    //                       });
-    //                     });
-    //                 } else {
-    //                   response.json({
-    //                     id_channel: result[0].id_channel,
-    //                   });
-    //                 }
-    //               });
-    //             });
-    //         });
-    //     } else {
-    //       r.table("channels")
-    //         .filter({ id_channel: channelId })
-    //         .run(conn, (err, cursor) => {
-    //           if (err) response.sendStatus(500);
-    //           if (cursor) {
-    //             cursor.toArray((err, result) => {
-    //               if (err) response.sendStatus(500);
-    //               if (result.length === 0) {
-    //                 const time = new Date(); // creaate the time of the channel
-
-    //                 r.table("users")
-    //                   .filter({ status: "active" })
-    //                   .run(conn, (err, cursor) => {
-    //                     if (err) console.log(err);
-    //                     cursor.toArray((err, result) => {
-    //                       if (err) console.log(err);
-    //                       if (result.length > 0) {
-    //                         const randomUser = getRandomInt(
-    //                           0,
-    //                           result.length - 1
-    //                         );
-    //                         const id_user = result[randomUser].id_user;
-    //                         let channel = {
-    //                           id_channel: channelId,
-    //                           create_at: time,
-    //                           id_member: res[0].id,
-    //                           id_service_line: idServiceLine,
-    //                           id_user: idUserAsignet ?? id_user,
-    //                         };
-    //                         console.log(channel);
-    //                         r.table("channels")
-    //                           .insert(channel)
-    //                           .run(conn, function (err, res) {
-    //                             if (err) response.sendStatus(500);
-    //                             channel.id = res.generated_keys[0];
-    //                             // sendMessageRabbit({
-    //                             //   id_channel: "insert_mysql",
-    //                             //   msg: channel,
-    //                             //   queryMySql: addChannelsInMySql,
-    //                             // });
-    //                             addChannelsInMySql(channel);
-    //                             ioEmmit({
-    //                               key: "new_channels",
-    //                               data: id_user,
-    //                             });
-    //                             response.json({
-    //                               id_channel: channel.id_channel,
-    //                             });
-    //                           });
-    //                       } else {
-    //                         response.json({
-    //                           status: 500,
-    //                           message: "No hay usuarios disponibles.",
-    //                         });
-    //                       }
-    //                     });
-    //                   });
-    //               } else {
-    //                 r.table("users")
-    //                   .filter({
-    //                     status: "active",
-    //                     id_user: result[0].id_user,
-    //                   })
-    //                   .run(conn, (err, cursor) => {
-    //                     if (err) console.log(err);
-    //                     cursor.toArray((err, res) => {
-    //                       if (err) console.log(err);
-    //                       if (res.length > 0) {
-    //                         response.json({
-    //                           id_channel: result[0].id_channel,
-    //                         });
-    //                       } else {
-    //                         r.table("users")
-    //                           .filter({ status: "active" })
-    //                           .run(conn, (err, cursor) => {
-    //                             if (err) console.log(err);
-    //                             cursor.toArray((err, users) => {
-    //                               if (err) console.log(err);
-    //                               if (users.length > 0) {
-    //                                 const randomUser = getRandomInt(
-    //                                   0,
-    //                                   result.length - 1
-    //                                 );
-    //                                 const id_user = users[randomUser].id_user;
-
-    //                                 r.table("channels")
-    //                                   .filter({
-    //                                     id_channel: result[0].id_channel,
-    //                                   })
-    //                                   .update({
-    //                                     id_user: idUserAsignet ?? id_user,
-    //                                   })
-    //                                   .run(conn, (err, res) => {
-    //                                     if (err) console.log(err);
-    //                                     response.json({
-    //                                       id_channel: result[0].id_channel,
-    //                                     });
-    //                                   });
-    //                               } else {
-    //                                 response.json({
-    //                                   status: 500,
-    //                                   message: "No hay usuarios disponibles.",
-    //                                 });
-    //                               }
-    //                             });
-    //                           });
-    //                       }
-    //                     });
-    //                   });
-    //               }
-    //             });
-    //           }
-    //         });
-    //     }
-    //   });
-    //   connMysql.end();
-    // });
-    r.table("members")
-      .filter({ id_member: idMember })
+    r.table("channels")
+      .filter({ id_channel: channelId })
       .run(conn, (err, cursor) => {
-        if (err) console.log(err);
-        cursor.toArray((err, res) => {
-          if (res.length === 0) {
-            let dataMember = {
-              id_member: member.id,
-              id_member_my_body: member.id,
-              first_name: member.first_name,
-              last_name: member.last_name,
-              photo: member.photo,
-              mobile_phone: member.mobile_phone,
-              email: member.email,
-              document_number: member.document_number,
-              flag: "insert_member",
-            };
-
-            r.table("members")
-              .insert(dataMember)
-              .run(conn, (err, res) => {
-                if (err) console.log(err);
-                dataMember.id_member = res.generated_keys[0];
-                dataMember.id_member_my_body = member.id;
-                console.log("INSERT MEMBER");
-                sendMessageRabbit({
-                  msg: dataMember,
-                });
-                if (member.token) {
-                  let token = {
-                    device: member.device,
-                    type: member.type,
-                    id_user: member.id_user ?? null,
-                    id_member: member.id ?? null,
-                    token: member.token,
-                  };
-                  r.table("token_notification")
-                    .insert(token)
-                    .run(conn, (err, res) => {
-                      if (err) console.log(err);
-                    });
-                } else {
-                  try {
-                    fetch(process.env.API_FETCH + member.id, {
-                      method: "GET",
-                      headers: {
-                        Authorization: process.env.API_AUTHORIZATION,
-                        "x-bodytech-organization": process.env.API_ORGANIZATION,
-                        "x-bodytech-brand": process.env.API_BRAND,
-                      },
-                    })
-                      .then((res) => res.json())
-                      .then((res) => {
-                        if (res.data.length > 0) {
-                          for (var i = 0; i < res.data.length; i++) {
-                            let token = {
-                              device: res.data[i].device,
-                              type: res.data[i].os,
-                              id_user: member.id_user ?? null,
-                              id_member: member.id ?? null,
-                              token: res.data[i].token,
-                            };
-                            r.table("token_notification")
-                              .insert(token)
-                              .run(conn, (err, res) => {
-                                if (err) console.log(err);
-                              });
-
-                            // {
-                            //   device: res.data[i].device,
-                            //   type: res.data[i].os,
-                            //   id_user: member.id_user ?? null,
-                            //   id_member: member.id ?? null,
-                            //   token: res.data[i].token,
-                            // }
-                          }
-                        }
-                      });
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }
-                r.table("channels")
-                  .filter({ id_channel: channelId })
-                  .run(conn, (err, cursor) => {
-                    if (err) response.sendStatus(500);
-                    cursor.toArray((err, result) => {
-                      if (err) response.sendStatus(500);
-                      if (result.length === 0) {
-                        r.table("users")
-                          .filter({ status: "active" })
-                          .run(conn, (err, cursor) => {
-                            if (err) console.log(err);
-                            cursor.toArray((err, result) => {
-                              if (err) console.log(err);
-                              if (result.length > 0) {
-                                const randomUser = getRandomInt(
-                                  0,
-                                  result.length - 1
-                                );
-                                const id_user = result[randomUser].id_user;
-                                const time = new Date(); // creaate the time of the channel
-                                let channel = {
-                                  id_channel: channelId,
-                                  create_at: time,
-                                  id_member: res.generated_keys[0],
-                                  id_service_line: idServiceLine,
-                                  id_user: idUserAsignet ?? id_user.toString(),
-                                  flag: "insert_channel",
-                                };
-
-                                r.table("channels")
-                                  .insert(channel)
-                                  .run(conn, function (err, res) {
-                                    if (err) console.log(err);
-                                    channel.id = res.generated_keys[0];
-                                    channel.id_rethink = res.generated_keys[0];
-                                    setTimeout(() => {
-                                      console.log("INSERT CHANNEL");
-                                      console.log(channel);
-                                      sendMessageRabbit({
-                                        msg: channel,
-                                      });
-                                    }, 100);
-                                    ioEmmit({
-                                      key: "new_channels",
-                                      data: id_user,
-                                    });
-                                    response.json({
-                                      id_channel: channel.id_channel,
-                                    });
-                                  });
-                              } else {
-                                response.json({
-                                  status: 500,
-                                  message: "No hay usuarios disponibles.",
-                                });
-                              }
-                            });
-                          });
-                      } else {
-                        response.json({
-                          id_channel: result[0].id_channel,
-                        });
-                      }
-                    });
-                  });
-              });
-          } else {
-            r.table("channels")
-              .filter({ id_channel: channelId })
-              .run(conn, (err, cursor) => {
-                if (err) response.sendStatus(500);
-                if (cursor) {
+        if (err) response.sendStatus(500);
+        if (cursor) {
+          cursor.toArray((err, result) => {
+            if (err) response.sendStatus(500);
+            if (result.length === 0) {
+              const time = new Date(); // creaate the time of the channel
+              r.table("users")
+                .filter({ status: "active" })
+                .run(conn, (err, cursor) => {
+                  if (err) console.log(err);
                   cursor.toArray((err, result) => {
-                    if (err) response.sendStatus(500);
-                    if (result.length === 0) {
-                      const time = new Date(); // creaate the time of the channel
-
+                    if (err) console.log(err);
+                    if (result.length > 0) {
+                      const randomUser = getRandomInt(0, result.length - 1);
+                      const id_user = result[randomUser].id_user;
+                      let channel = {
+                        id_channel: channelId,
+                        create_at: time,
+                        id_member: res[0].id,
+                        id_service_line: idServiceLine,
+                        id_user: idUserAsignet ?? id_user.toString(),
+                        flag: "insert_channel",
+                      };
+                      console.log(channel);
+                      r.table("channels")
+                        .insert(channel)
+                        .run(conn, function (err, res) {
+                          if (err) response.sendStatus(500);
+                          channel.id = res.generated_keys[0];
+                          sendMessageRabbit({
+                            msg: channel,
+                          });
+                          ioEmmit({
+                            key: "new_channels",
+                            data: id_user,
+                          });
+                          response.json({
+                            id_channel: channel.id_channel,
+                          });
+                        });
+                    } else {
+                      response.json({
+                        status: 500,
+                        message: "No hay usuarios disponibles.",
+                      });
+                    }
+                  });
+                });
+            } else {
+              r.table("users")
+                .filter({
+                  status: "active",
+                  id_user: result[0].id_user,
+                })
+                .run(conn, (err, cursor) => {
+                  if (err) console.log(err);
+                  cursor.toArray((err, res) => {
+                    if (err) console.log(err);
+                    if (res.length > 0) {
+                      response.json({
+                        id_channel: result[0].id_channel,
+                      });
+                    } else {
                       r.table("users")
                         .filter({ status: "active" })
                         .run(conn, (err, cursor) => {
                           if (err) console.log(err);
-                          cursor.toArray((err, result) => {
+                          cursor.toArray((err, users) => {
                             if (err) console.log(err);
-                            if (result.length > 0) {
+                            if (users.length > 0) {
                               const randomUser = getRandomInt(
                                 0,
                                 result.length - 1
                               );
-                              const id_user = result[randomUser].id_user;
-                              let channel = {
-                                id_channel: channelId,
-                                create_at: time,
-                                id_member: res[0].id,
-                                id_service_line: idServiceLine,
-                                id_user: idUserAsignet ?? id_user.toString(),
-                                flag: "insert_channel",
-                              };
-                              console.log(channel);
+                              const id_user = users[randomUser].id_user;
+
                               r.table("channels")
-                                .insert(channel)
-                                .run(conn, function (err, res) {
-                                  if (err) response.sendStatus(500);
-                                  channel.id = res.generated_keys[0];
-                                  sendMessageRabbit({
-                                    msg: channel,
-                                  });
-                                  ioEmmit({
-                                    key: "new_channels",
-                                    data: id_user,
-                                  });
+                                .filter({
+                                  id_channel: result[0].id_channel,
+                                })
+                                .update({
+                                  id_user: idUserAsignet ?? id_user,
+                                })
+                                .run(conn, (err, res) => {
+                                  if (err) console.log(err);
                                   response.json({
-                                    id_channel: channel.id_channel,
+                                    id_channel: result[0].id_channel,
                                   });
                                 });
                             } else {
@@ -486,64 +125,12 @@ channel.post("/", async (req, response) => {
                             }
                           });
                         });
-                    } else {
-                      r.table("users")
-                        .filter({
-                          status: "active",
-                          id_user: result[0].id_user,
-                        })
-                        .run(conn, (err, cursor) => {
-                          if (err) console.log(err);
-                          cursor.toArray((err, res) => {
-                            if (err) console.log(err);
-                            if (res.length > 0) {
-                              response.json({
-                                id_channel: result[0].id_channel,
-                              });
-                            } else {
-                              r.table("users")
-                                .filter({ status: "active" })
-                                .run(conn, (err, cursor) => {
-                                  if (err) console.log(err);
-                                  cursor.toArray((err, users) => {
-                                    if (err) console.log(err);
-                                    if (users.length > 0) {
-                                      const randomUser = getRandomInt(
-                                        0,
-                                        result.length - 1
-                                      );
-                                      const id_user = users[randomUser].id_user;
-
-                                      r.table("channels")
-                                        .filter({
-                                          id_channel: result[0].id_channel,
-                                        })
-                                        .update({
-                                          id_user: idUserAsignet ?? id_user,
-                                        })
-                                        .run(conn, (err, res) => {
-                                          if (err) console.log(err);
-                                          response.json({
-                                            id_channel: result[0].id_channel,
-                                          });
-                                        });
-                                    } else {
-                                      response.json({
-                                        status: 500,
-                                        message: "No hay usuarios disponibles.",
-                                      });
-                                    }
-                                  });
-                                });
-                            }
-                          });
-                        });
                     }
                   });
-                }
-              });
-          }
-        });
+                });
+            }
+          });
+        }
       });
   } catch (e) {
     console.log(e);
