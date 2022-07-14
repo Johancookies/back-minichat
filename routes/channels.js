@@ -70,7 +70,10 @@ channel.post("/", async (req, response) => {
                                 console.log("new channel to user" + id_user);
                                 ioEmmit({
                                   key: "new_channels",
-                                  data: id_user,
+                                  data: {
+                                    id_user: id_user,
+                                    id_channel: channel.id_channel,
+                                  },
                                 });
                                 response.json({
                                   id_channel: channel.id_channel,
@@ -125,7 +128,10 @@ channel.post("/", async (req, response) => {
                                   if (err) console.log(err);
                                   ioEmmit({
                                     key: "new_channels",
-                                    data: id_user,
+                                    data: {
+                                      id_user: id_user,
+                                      id_channel: result[0].id_channel,
+                                    },
                                   });
                                   response.json({
                                     id_channel: result[0].id_channel,
