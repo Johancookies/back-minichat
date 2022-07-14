@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
   socket.on("service_ping", (data) => {
-    console.log("ping received");
+    console.log("ping received" + data) ;
     socket.emit("pong", 1);
   });
 
@@ -91,11 +91,12 @@ io.on("connection", (socket) => {
         .run(conn, (err, cursor) => {
           if (err) console.log(err);
           cursor.toArray((err, result) => {
+            console.log("entre a la validación del channe")
             if (err) console.log(err);
 
             if (result.length === 0) {
               let createdMeet = null;
-              console.log("creas");
+              console.log("Entre al changes")
               createMeeting(conn, room);
               r.table("messages")
                 .filter({ id_channel: room })
@@ -108,6 +109,7 @@ io.on("connection", (socket) => {
                       createdMeet !== null &&
                       createdMeet !== result.new_val.id_meet
                     ) {
+                      console.log("Cerré el changes")
                       cursorChanges.close();
                     } else {
                       console.log(result.new_val);
