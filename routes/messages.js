@@ -191,6 +191,7 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
+                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
@@ -246,6 +247,7 @@ function insertMessage(con, data, response, file) {
                           if (err) console.log(err);
                           if (res.length > 0) {
                             let tokens = res.map((token) => token.token);
+                            console.log(tokens);
                             sendPush({ message: data, tokens: tokens });
                           }
                         });
@@ -269,6 +271,7 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
+                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
