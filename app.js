@@ -88,14 +88,15 @@ io.on("connection", (socket) => {
         )
         .limit(1)
         .run(conn, (err, cursor) => {
+          console.log("Filtro de channels")
           if (err) console.log(err);
           cursor.toArray((err, result) => {
-            console.log("entre a la validación del channe")
+            console.log("entre a la validación del channel");
             if (err) console.log(err);
 
             if (result.length === 0) {
               let createdMeet = null;
-              console.log("Entre al changes")
+              console.log("Entre al changes");
               createMeeting(conn, room);
               r.table("messages")
                 .filter({ id_channel: room })
@@ -108,7 +109,7 @@ io.on("connection", (socket) => {
                       createdMeet !== null &&
                       createdMeet !== result.new_val.id_meet
                     ) {
-                      console.log("Cerré el changes")
+                      console.log("Cerré el changes");
                       cursorChanges.close();
                     } else {
                       console.log(result.new_val);
@@ -191,7 +192,7 @@ io.on("connection", (socket) => {
       .update({ status: "waiting" })
       .run(conn, (err, res) => {
         if (err) console.log(err);
-        console.log("change meeting status successfully");
+        console.log("change meeting status successfully" + channel);
       });
   });
 
