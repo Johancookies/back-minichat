@@ -157,6 +157,7 @@ function insertMessage(con, data, response, file) {
               cursor.toArray((err, result) => {
                 if (err) console.log(err);
                 if (result.length > 0) {
+                  console.log(result);
                   if (data.author_type === "member") {
                     r.table("token_notification")
                       .filter({
