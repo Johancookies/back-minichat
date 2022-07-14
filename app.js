@@ -88,12 +88,12 @@ io.on("connection", (socket) => {
         )
         .limit(1)
         .run(conn, (err, cursor) => {
-          console.log("Filtro de channels")
+          console.log("Filtro de channels");
           if (err) console.log(err);
           cursor.toArray((err, result) => {
             console.log("entre a la validación del channel");
             if (err) console.log(err);
-
+            console.log(result[0]);
             if (result.length === 0) {
               let createdMeet = null;
               console.log("Entre al changes");
