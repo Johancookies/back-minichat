@@ -41,7 +41,7 @@ members.post("/", async (req, response) => {
                     device: token.os,
                     type: "mobile",
                     id_user: member.id_user ?? null,
-                    id_member: member.id ?? null,
+                    id_member: member.id ? member.id.toString() : null,
                     token: token.token,
                   };
                   r.table("token_notification")
@@ -57,7 +57,7 @@ members.post("/", async (req, response) => {
               device: member.device,
               type: "mobile",
               id_user: member.id_user ?? null,
-              id_member: member.id ?? null,
+              id_member: member.id ? member.id.toString() : null,
               token: member.token,
             };
             r.table("token_notification")
@@ -87,7 +87,7 @@ members.post("/", async (req, response) => {
                 });
               }
             });
-        }else{
+        } else {
           response.json({
             message: "Current user exist!",
             status: "success",

@@ -46,7 +46,7 @@ users.post("/", async (req, response) => {
                     const dataToken = {
                       device: user.device,
                       type: user.type,
-                      id_user: user.id ?? null,
+                      id_user: user.id ? user.id.toString() : null,
                       id_member: null,
                       token: user.token,
                     };
