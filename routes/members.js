@@ -34,24 +34,26 @@ members.post("/", async (req, response) => {
                 "x-bodytech-organization": process.env.API_ORGANIZATION,
                 "x-bodytech-brand": process.env.API_BRAND,
               },
-            }).then(({ data }) => {
-              if (data && data.data && data.data.length > 0) {
-                data.data.forEach((token) => {
-                  let dataToken = {
-                    device: token.os,
-                    type: "mobile",
-                    id_user: member.id_user ?? null,
-                    id_member: member.id ? member.id.toString() : null,
-                    token: token.token,
-                  };
-                  r.table("token_notification")
-                    .insert(dataToken)
-                    .run(conn, (err, res) => {
-                      if (err) console.log(err);
-                    });
-                });
-              }
-            });
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (data && data.data && data.data.length > 0) {
+                  data.data.forEach((token) => {
+                    let dataToken = {
+                      device: token.os,
+                      type: "mobile",
+                      id_user: member.id_user ?? null,
+                      id_member: member.id ? member.id.toString() : null,
+                      token: token.token,
+                    };
+                    r.table("token_notification")
+                      .insert(dataToken)
+                      .run(conn, (err, res) => {
+                        if (err) console.log(err);
+                      });
+                  });
+                }
+              });
           } else {
             const dataToken = {
               device: member.device,

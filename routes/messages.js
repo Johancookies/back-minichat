@@ -176,7 +176,7 @@ function insertMessage(con, data, response, file) {
                   } else {
                     r.table("members")
                       .filter({
-                        id_member: result[0].id_member,
+                        id: result[0].id_member,
                       })
                       .run(con, (err, cursor) => {
                         if (err) console.log(err);
@@ -334,19 +334,21 @@ function sendPush({ message, tokens }) {
   };
 
   let notification_body = {
-    notification: notification,
-    registration_ids: tokens,
+    data: notification,
+    // registration_ids: tokens,
+    to: tokens[0],
   };
 
   fetch("https://fcm.googleapis.com/fcm/send", {
     method: "POST",
     headers: {
-      Authorization: "" + process.env.FCM_TOKEN,
+      Authorization: "key=" + process.env.FCM_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(notification_body),
   })
-    .then(() => {
+    .then((res) => {
+      console.log(res);
       console.log("Notification send successfully");
     })
     .catch((err) => {
