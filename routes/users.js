@@ -106,12 +106,6 @@ users.post("/change-status", async (req, response) => {
     .update({ status: data.status })
     .run(conn, (err, res) => {
       if (err) console.log(err);
-      // sendMessageRabbit({
-      //   id_channel: "insert_mysql",
-      //   msg: data,
-      //   queryMySql: updateStatusUserMySql,
-      // });
-      updateStatusUserMySql(data);
       response.json({
         message: "Change status successfully",
         status: "success",

@@ -230,6 +230,8 @@ io.on("connection", (socket) => {
 
 function ioEmmit({ key, data }) {
   io.emit(key, data);
+  console.log("key", key)
+  console.log("data", data)
 }
 
 server.listen(process.env.PORT, () => {

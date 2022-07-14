@@ -123,6 +123,10 @@ channel.post("/", async (req, response) => {
                                 })
                                 .run(conn, (err, res) => {
                                   if (err) console.log(err);
+                                  ioEmmit({
+                                    key: "new_channels",
+                                    data: id_user,
+                                  });
                                   response.json({
                                     id_channel: result[0].id_channel,
                                   });
