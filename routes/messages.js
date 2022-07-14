@@ -22,22 +22,6 @@ messages.use((err, req, res, next) => {
 messages.get("/by-channel", async (req, response) => {
   const idChannel = req.query.id_channel;
 
-  // connectMysql((conn) => {
-  //   conn.connect((err) => {
-  //     if (err) console.log(err);
-  //     console.log("connected");
-  //   });
-  //   const query = 'SELECT * FROM messages WHERE id_channel = '+ idChannel;
-  //   conn.query(query, (err, result) => {
-  //     if (err) console.log(err);
-  //     response.json({
-  //       status: "success",
-  //       data: result,
-  //     });
-  //   });
-  //   conn.end();
-  // });
-
   const conn = await getRethinkDB();
   r.table("messages")
     .filter({ id_channel: idChannel })
@@ -169,6 +153,7 @@ function insertMessage(con, data, response, file) {
                           if (err) console.log(err);
                           if (res.length > 0) {
                             let tokens = res.map((token) => token.token);
+                            console.log(tokens);
                             sendPush({ message: data, tokens: tokens });
                           }
                         });
@@ -192,6 +177,7 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
+                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
@@ -247,6 +233,7 @@ function insertMessage(con, data, response, file) {
                           if (err) console.log(err);
                           if (res.length > 0) {
                             let tokens = res.map((token) => token.token);
+                            console.log(tokens);
                             sendPush({ message: data, tokens: tokens });
                           }
                         });
@@ -270,6 +257,7 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
+                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
