@@ -176,7 +176,7 @@ function insertMessage(con, data, response, file) {
                   } else {
                     r.table("members")
                       .filter({
-                        id: result[0].id_member,
+                        id_member: result[0].id_member,
                       })
                       .run(con, (err, cursor) => {
                         if (err) console.log(err);
@@ -184,7 +184,7 @@ function insertMessage(con, data, response, file) {
                           if (err) console.log(err);
                           r.table("token_notification")
                             .filter({
-                              id_member: res[0].id,
+                              id_member: res[0].id_member,
                             })
                             .run(con, (err, cursor) => {
                               if (err) console.log(err);
