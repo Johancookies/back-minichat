@@ -171,7 +171,7 @@ channel.post("/reassign", async (req, response) => {
       if (err) console.log(err);
       ioEmmit({
         key: "new_channels",
-        data: data.id_user,
+        data: { id_user: data.id_user, id_channel: data.id_channel },
       });
       response.json({
         status: "success",
