@@ -69,7 +69,6 @@ io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
   socket.on("service_ping", (data) => {
-    console.log("ping received" + data) ;
     socket.emit("pong", 1);
   });
 
