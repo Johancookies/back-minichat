@@ -109,8 +109,7 @@ io.on("connection", (socket) => {
                       createdMeet !== null &&
                       createdMeet !== result.new_val.id_meet
                     ) {
-                      console.log(createMeeting)
-                      console.log("Cerré el changes");
+                      console.log(createMeeting);
                       // cursorChanges.close();
                     } else {
                       console.log("nuevo mensaje desde el changes");

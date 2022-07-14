@@ -73,7 +73,6 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
-        if (err) console.log(err);
         if (result.length === 0) {
           createMeeting({
             con: conn,
@@ -324,6 +323,7 @@ function createMeeting({ con, idChannel, data, response, file }) {
 }
 
 function sendPush({ message, tokens }) {
+  console.log(tokens);
   let notification = {
     title: message.author_name,
     body: message,
