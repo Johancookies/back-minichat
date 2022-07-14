@@ -109,9 +109,11 @@ io.on("connection", (socket) => {
                       createdMeet !== null &&
                       createdMeet !== result.new_val.id_meet
                     ) {
+                      console.log(createMeeting)
                       console.log("Cerré el changes");
                       cursorChanges.close();
                     } else {
+                      console.log("nuevo mensaje desde el changes");
                       console.log(result.new_val);
                       createdMeet = result.new_val.id_meet;
                       io.to(room).emit("receive_message", {

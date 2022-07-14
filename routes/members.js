@@ -87,6 +87,11 @@ members.post("/", async (req, response) => {
                 });
               }
             });
+        }else{
+          response.json({
+            message: "Current user exist!",
+            status: "success",
+          });
         }
       });
     });
