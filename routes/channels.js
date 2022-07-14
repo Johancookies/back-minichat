@@ -72,7 +72,6 @@ channel.post("/", async (req, response) => {
                                   key: "new_channels",
                                   data: id_user,
                                 });
-
                                 response.json({
                                   id_channel: channel.id_channel,
                                 });
