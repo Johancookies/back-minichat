@@ -14,7 +14,7 @@ users.post("/", async (req, response) => {
   if (!id || !token || !first_name || !last_name || !role_id)
     response.sendStatus(204);
   r.table("users")
-    .filter({ id_user: user.id.toString() })
+    .filter({ id_user: user.id })
     .run(conn, (err, cursor) => {
       if (err) {
         console.log(err);
@@ -25,7 +25,7 @@ users.post("/", async (req, response) => {
           } else {
             if (result.length === 0) {
               let dataUser = {
-                id_user: user.id.toString(),
+                id_user: user.id,
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role_id: user.role_id,
@@ -40,13 +40,13 @@ users.post("/", async (req, response) => {
                   } else {
                     dataUser.id_rethink = res.generated_keys[0];
                     dataUser.flag = "insert_user";
-                    // sendMessageRabbit({
-                    //   msg: dataUser,
-                    // });
+                    sendMessageRabbit({
+                      msg: dataUser,
+                    });
                     const dataToken = {
                       device: user.device,
                       type: user.type,
-                      id_user: user.id ? user.id.toString() : null,
+                      id_user: user.id ?? null,
                       id_member: null,
                       token: user.token,
                     };
