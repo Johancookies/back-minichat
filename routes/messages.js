@@ -160,7 +160,7 @@ function insertMessage(con, data, response, file) {
                   if (data.author_type === "member") {
                     r.table("token_notification")
                       .filter({
-                        id_user: Number(result[0].id_user),
+                        id_user: result[0].id_user,
                       })
                       .run(con, (err, cursor) => {
                         if (err) console.log(err);
@@ -238,7 +238,7 @@ function insertMessage(con, data, response, file) {
                   if (data.author_type === "member") {
                     r.table("token_notification")
                       .filter({
-                        id_user: Number(result[0].id_user),
+                        id_user: result[0].id_user,
                       })
                       .run(con, (err, cursor) => {
                         if (err) console.log(err);
