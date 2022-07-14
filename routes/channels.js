@@ -169,12 +169,12 @@ channel.post("/reassign", async (req, response) => {
 // get channels by product
 channel.get("/by-collab", async (req, response) => {
   const conn = await getRethinkDB();
-  const idUser = parseInt(req.query.id_user);
+  const idUser = req.query.id_user;
   r.table("channels")
     .eqJoin(r.row("id_member"), r.table("members"))
     .without({ right: "id" })
     .zip()
-    .filter({ id_user: idUser.toString() })
+    .filter({ id_user: idUser })
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
