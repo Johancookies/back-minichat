@@ -192,7 +192,6 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
-                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
@@ -248,7 +247,6 @@ function insertMessage(con, data, response, file) {
                           if (err) console.log(err);
                           if (res.length > 0) {
                             let tokens = res.map((token) => token.token);
-                            console.log(tokens);
                             sendPush({ message: data, tokens: tokens });
                           }
                         });
@@ -272,7 +270,6 @@ function insertMessage(con, data, response, file) {
                                 if (err) console.log(err);
                                 if (res.length > 0) {
                                   let tokens = res.map((token) => token.token);
-                                  console.log(tokens);
                                   sendPush({ message: data, tokens: tokens });
                                 }
                               });
@@ -327,7 +324,6 @@ function createMeeting({ con, idChannel, data, response, file }) {
 }
 
 function sendPush({ message, tokens }) {
-  console.log(tokens);
   let notification = {
     title: message.author_name,
     body: message,
@@ -348,7 +344,6 @@ function sendPush({ message, tokens }) {
     body: JSON.stringify(notification_body),
   })
     .then((res) => {
-      console.log(res);
       console.log("Notification send successfully");
     })
     .catch((err) => {

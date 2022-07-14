@@ -163,6 +163,10 @@ channel.post("/reassign", async (req, response) => {
     .update({ id_user: data.id_user.toString() })
     .run(conn, (err, res) => {
       if (err) console.log(err);
+      ioEmmit({
+        key: "new_channels",
+        data: data.id_user,
+      });
       response.json({
         status: "success",
         message: "Channel reassigned successfully",
