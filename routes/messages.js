@@ -107,7 +107,6 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
           url_taskMap[result[0].id] = timeout;
           meet_id = result[0].id;
           message.id_meet = meet_id;
-
           insertMessage(conn, message, response, file);
         }
       });
@@ -126,20 +125,6 @@ messages.post("/close-meeting", async (req, res) => {
         console.log(err);
         res.json({ menssage: "error", status: 500 });
       }
-      // sendMessageRabbit({
-      //   id_channel: "insert_mysql",
-      //   msg: {
-      //     id_channel: id_channel,
-      //     status: "inactive",
-      //     id_meet: "/channel: " + id_channel,
-      //   },
-      //   queryMySql: updateStatusMeetInMySql,
-      // });
-      updateStatusMeetInMySql({
-        id_channel: id_channel,
-        status: "inactive",
-        id_meet: "/channel: " + id_channel,
-      });
       res.json({ menssage: "meeting closed", status: 200 });
     });
 });
@@ -153,9 +138,9 @@ function insertMessage(con, data, response, file) {
           if (err) console.log(err);
           data.id_rethink = res.generated_keys[0];
           data.flag = "insert_messages";
-          sendMessageRabbit({
-            msg: data,
-          });
+          // sendMessageRabbit({
+          //   msg: data,
+          // });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
@@ -228,9 +213,9 @@ function insertMessage(con, data, response, file) {
           if (err) console.log(err);
           data.id_rethink = res.generated_keys[0];
           data.flag = "insert_messages";
-          sendMessageRabbit({
-            msg: data,
-          });
+          // sendMessageRabbit({
+          //   msg: data,
+          // });
           let messageStatus = {
             id_message: res.generated_keys[0],
             status: "sent",
@@ -315,9 +300,9 @@ function createMeeting({ con, idChannel, data, response, file }) {
         dataMeeting.id_rethink = res.generated_keys[0];
         dataMeeting.create_at = new Date().toISOString();
         dataMeeting.flag = "insert_meeting";
-        sendMessageRabbit({
-          msg: dataMeeting,
-        });
+        // sendMessageRabbit({
+        //   msg: dataMeeting,
+        // });
         const meet_id = res.generated_keys[0];
         data.id_meet = meet_id;
         insertMessage(con, data, response, file);

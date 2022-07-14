@@ -67,9 +67,9 @@ channel.post("/", async (req, response) => {
                               .run(conn, function (err, res) {
                                 if (err) response.sendStatus(500);
                                 channel.id = res.generated_keys[0];
-                                sendMessageRabbit({
-                                  msg: channel,
-                                });
+                                // sendMessageRabbit({
+                                //   msg: channel,
+                                // });
                                 ioEmmit({
                                   key: "new_channels",
                                   data: id_user,

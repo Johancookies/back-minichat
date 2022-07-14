@@ -40,9 +40,9 @@ users.post("/", async (req, response) => {
                   } else {
                     dataUser.id_rethink = res.generated_keys[0];
                     dataUser.flag = "insert_user";
-                    sendMessageRabbit({
-                      msg: dataUser,
-                    });
+                    // sendMessageRabbit({
+                    //   msg: dataUser,
+                    // });
                     const dataToken = {
                       device: user.device,
                       type: user.type,

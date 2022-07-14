@@ -94,6 +94,7 @@ io.on("connection", (socket) => {
 
             if (result.length === 0) {
               let createdMeet = null;
+              console.log("creas");
               createMeeting(conn, room);
               r.table("messages")
                 .filter({ id_channel: room })
@@ -102,17 +103,18 @@ io.on("connection", (socket) => {
                   if (err) console.error(err);
                   cursorChanges.each((err, result) => {
                     if (err) console.log(err);
-                    if (createdMeet !== null) {
-                      if (createdMeet !== result.new_val.id_meet) {
-                        cursorChanges.close();
-                      } else {
-                        console.log(result.new_val);
-                        createdMeet = result.new_val.id_meet;
-                        io.to(room).emit("receive_message", {
-                          ...result.new_val,
-                          status: "sent",
-                        });
-                      }
+                    if (
+                      createdMeet !== null &&
+                      createdMeet !== result.new_val.id_meet
+                    ) {
+                      cursorChanges.close();
+                    } else {
+                      console.log(result.new_val);
+                      createdMeet = result.new_val.id_meet;
+                      io.to(room).emit("receive_message", {
+                        ...result.new_val,
+                        status: "sent",
+                      });
                     }
                   });
                 });
@@ -260,19 +262,6 @@ function createMeeting(con, idChannel) {
           clearTimeout(url_taskMap[result.generated_keys[0]]);
         }
         url_taskMap[result.generated_keys[0]] = timeout;
-
-        // {
-        //   "id_rethink": "12312-123-1123",
-        //   "create_at": "1239102-12312:123123Z",
-        //   "id_channel": "12312-12312-123",
-        //   "status": "waiting"
-        // }
-
-        const query = `INSERT INTO meetings (id_rethink, create_at, id_channel, status) VALUES ("${dataMeeting.id}", "${dataMeeting.create_at}",  "${dataMeeting.id_channel}", "${dataMeeting.status}");`;
-
-        sendMessageRabbit({
-          msg: dataMeeting,
-        });
       });
   } catch (e) {
     console.log(e);

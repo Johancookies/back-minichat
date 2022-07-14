@@ -71,9 +71,9 @@ members.post("/", async (req, response) => {
         dataMember.id_rethink = res.generated_keys[0];
         dataMember.id_member_my_body = member.id;
         dataMember.flag = "insert_member";
-        sendMessageRabbit({
-          msg: dataMember,
-        });
+        // sendMessageRabbit({
+        //   msg: dataMember,
+        // });
         response.status(200);
         response.json({
           message: "Member added successfully",
