@@ -331,8 +331,8 @@ function sendPush({ message, tokens }) {
 
   let notification_body = {
     data: notification,
-    // registration_ids: tokens,
-    to: tokens[0],
+    registration_ids: tokens,
+    // to: tokens[0],
   };
 
   fetch("https://fcm.googleapis.com/fcm/send", {
@@ -344,6 +344,7 @@ function sendPush({ message, tokens }) {
     body: JSON.stringify(notification_body),
   })
     .then((res) => {
+      console.log(res);
       console.log("Notification send successfully");
     })
     .catch((err) => {

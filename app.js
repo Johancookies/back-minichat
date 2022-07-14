@@ -225,12 +225,19 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User Disconnected ${socket.id}`);
   });
+
+  // socket.on("view_message", (message) => {
+  //   const conn = await getRethinkDB();
+  //   r.table("messages").filter({id: message.id}).run((conn, err)=>{
+      
+  //   })
+  // });
 });
 
 function ioEmmit({ key, data }) {
   io.emit(key, data);
-  console.log("key", key)
-  console.log("data", data)
+  console.log("key", key);
+  console.log("data", data);
 }
 
 server.listen(process.env.PORT, () => {

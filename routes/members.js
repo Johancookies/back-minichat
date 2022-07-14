@@ -59,7 +59,7 @@ members.post("/", async (req, response) => {
               device: member.device,
               type: "mobile",
               id_user: member.id_user ?? null,
-              id_member: member.id ? member.id.toString() : null,
+              id_member: member.id ?? null,
               token: member.token,
             };
             r.table("token_notification")
