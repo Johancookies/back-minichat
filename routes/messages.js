@@ -314,11 +314,19 @@ function createMeeting({ con, idChannel, data, response, file }) {
 function sendPush({ message, tokens }) {
   let notification = {
     title: message.author_name,
-    body: message,
+    body: message.content,
+  };
+
+  let data = {
+    body: {
+      id_channel: message.id_channel,
+      coach: "Soporte",
+    },
   };
 
   let notification_body = {
-    data: notification,
+    notification: notification,
+    data: data,
     registration_ids: tokens,
     // to: tokens[0],
   };
