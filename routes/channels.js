@@ -36,7 +36,7 @@ channel.post("/", async (req, response) => {
             if (result.length === 0) {
               const time = new Date(); // creaate the time of the channel
               r.table("users")
-                .filter({ status: "active" })
+                .filter({ status: "active", role_id: 39 })
                 .run(conn, (err, cursor) => {
                   if (err) console.log(err);
                   cursor.toArray((err, result) => {
@@ -105,7 +105,7 @@ channel.post("/", async (req, response) => {
                       });
                     } else {
                       r.table("users")
-                        .filter({ status: "active" })
+                        .filter({ status: "active", role_id: 39 })
                         .run(conn, (err, cursor) => {
                           if (err) console.log(err);
                           cursor.toArray((err, users) => {
