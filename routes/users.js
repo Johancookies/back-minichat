@@ -117,7 +117,7 @@ users.get("/active", async (req, response) => {
   const conn = await getRethinkDB();
 
   r.table("users")
-    .filter({ status: "active" })
+    .filter(r.row("status").eq("active").and(r.row("role_id").eq(39)))
     .run(conn, (err, cursor) => {
       if (err) console.log(err);
       cursor.toArray((err, result) => {
