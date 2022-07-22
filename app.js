@@ -50,7 +50,8 @@ app.use((err, _req, res, next) => {
 
 // principal roiter to know if the server is ok
 app.get("/", (_, res) => {
-  myLogger.log("check server");
+  // myLogger.log("check server");
+  fs.writeFileSync("file.txt", "hola mundo", "UTF-8", { flags: "w+" });
   res.send("The server is ok");
 });
 
