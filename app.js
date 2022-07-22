@@ -20,6 +20,13 @@ import notifications from "./routes/notifications.js";
 import members from "./routes/members.js";
 import users from "./routes/users.js";
 
+const { Console } = require("console");
+
+export const myLogger = new Console({
+  stdout: fs.createWriteStream("normalStdout.txt"),
+  stderr: fs.createWriteStream("errStdErr.txt"),
+});
+
 const app = express(); // initial express
 app.use(cors());
 app.use(bodyParser.json());
@@ -75,6 +82,7 @@ io.on("connection", (socket) => {
   // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
+    myLogger.log(`User ${socket.id} joined room ${room}`);
     socket.join(room);
     try {
       const conn = await getRethinkDB();
@@ -229,7 +237,7 @@ io.on("connection", (socket) => {
   // socket.on("view_message", (message) => {
   //   const conn = await getRethinkDB();
   //   r.table("messages").filter({id: message.id}).run((conn, err)=>{
-      
+
   //   })
   // });
 });
