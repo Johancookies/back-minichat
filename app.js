@@ -20,13 +20,15 @@ import notifications from "./routes/notifications.js";
 import members from "./routes/members.js";
 import users from "./routes/users.js";
 
-import { Console } from "console";
+// import { Console } from "console";
 import fs from "fs";
 
-export const myLogger = new Console({
-  stdout: fs.createWriteStream("normalStdout.txt"),
-  stderr: fs.createWriteStream("errStdErr.txt"),
-});
+// export const myLogger = new Console({
+//   stdout: fs.createWriteStream("normalStdout.txt"),
+//   stderr: fs.createWriteStream("errStdErr.txt"),
+// });
+
+var file = fs.createWriteStream("normalStdout.txt");
 
 const app = express(); // initial express
 app.use(cors());
@@ -51,7 +53,7 @@ app.use((err, _req, res, next) => {
 // principal roiter to know if the server is ok
 app.get("/", (_, res) => {
   // myLogger.log("check server");
-  fs.writeFileSync("file.txt", "hola mundo", "UTF-8", { flags: "w+" });
+  fs.close(file);
   res.send("The server is ok");
 });
 
