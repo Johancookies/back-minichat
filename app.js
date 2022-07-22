@@ -20,7 +20,8 @@ import notifications from "./routes/notifications.js";
 import members from "./routes/members.js";
 import users from "./routes/users.js";
 
-const { Console } = require("console");
+import { Console } from "console";
+import fs from "fs";
 
 export const myLogger = new Console({
   stdout: fs.createWriteStream("normalStdout.txt"),
