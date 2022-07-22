@@ -1,4 +1,0 @@
-check server
-check server
-check server
-check server
