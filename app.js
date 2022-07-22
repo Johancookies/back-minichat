@@ -28,7 +28,7 @@ import fs from "fs";
 //   stderr: fs.createWriteStream("errStdErr.txt"),
 // });
 
-var file = fs.createWriteStream("normalStdout.txt");
+// var file = fs.createWriteStream("normalStdout.txt");
 
 const app = express(); // initial express
 app.use(cors());
@@ -53,7 +53,7 @@ app.use((err, _req, res, next) => {
 // principal roiter to know if the server is ok
 app.get("/", (_, res) => {
   // myLogger.log("check server");
-  fs.close(file.fd);
+  // fs.close(file.fd);
   res.send("The server is ok");
 });
 
