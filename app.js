@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import "dotenv/config.js";
 import sendMessageRabbit from "./rabbitmq/send.js";
 import { url_taskMap } from "./routes/messages.js";
+import logger from "./config/logger.js";
 
 // db
 import r from "rethinkdb";
@@ -20,21 +21,13 @@ import notifications from "./routes/notifications.js";
 import members from "./routes/members.js";
 import users from "./routes/users.js";
 
-// import { Console } from "console";
-import fs from "fs";
-
-// export const myLogger = new Console({
-//   stdout: fs.createWriteStream("normalStdout.txt"),
-//   stderr: fs.createWriteStream("errStdErr.txt"),
-// });
-
-// var file = fs.createWriteStream("normalStdout.txt");
-
 const app = express(); // initial express
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan("dev"));
+app.use(morgan("dev", { stream: logger.stream }));
+
+// logger.info("You have successfully started working with winston and morgan");
 
 const server = http.createServer(app);
 
@@ -52,8 +45,6 @@ app.use((err, _req, res, next) => {
 
 // principal roiter to know if the server is ok
 app.get("/", (_, res) => {
-  // myLogger.log("check server");
-  // fs.close(file.fd);
   res.send("The server is ok");
 });
 
@@ -87,7 +78,7 @@ io.on("connection", (socket) => {
   // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    myLogger.log(`User ${socket.id} joined room ${room}`);
+    logger.info(`User ${socket.id} joined room ${room}`);
     socket.join(room);
     try {
       const conn = await getRethinkDB();
