@@ -53,7 +53,7 @@ app.use((err, _req, res, next) => {
 // principal roiter to know if the server is ok
 app.get("/", (_, res) => {
   // myLogger.log("check server");
-  fs.close(file);
+  fs.close(file.fd);
   res.send("The server is ok");
 });
 
