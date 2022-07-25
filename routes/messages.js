@@ -321,6 +321,7 @@ function sendPush({ message, tokens }) {
     body: {
       id_channel: message.id_channel,
       coach: "Soporte",
+      id_message: message.id,
     },
   };
 

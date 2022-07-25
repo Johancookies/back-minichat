@@ -183,6 +183,7 @@ io.on("connection", (socket) => {
         if (err) console.log(err);
         io.to(data.id_channel).emit("change_status", {
           id_message: data.id_message,
+          id_channel: data.id_channel,
           status: "received",
         });
       });
