@@ -10,7 +10,7 @@ channel.use((err, req, res, next) => {
   res.sendStatus(204);
 });
 
-channel.get("/", Controller.channel);
+channel.post("/", Controller.channel);
 channel.get("/by-user", Controller.byUser);
 channel.post("/reassign", Controller.reassing);
 

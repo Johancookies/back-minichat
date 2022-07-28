@@ -30,7 +30,7 @@ service.sendNotification = (filter) => {
     service
       .getTokens(filter)
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         resolve("notifications");
       })
       .catch((err) => {

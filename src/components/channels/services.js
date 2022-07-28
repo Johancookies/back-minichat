@@ -11,7 +11,7 @@ const service = {};
 service.channel = async (body) => {
   const conn = await getRethinkDB();
 
-  const id_channel = body.id_member + body.id_service_line;
+  const id_channel = body.id + body.id_service_line;
   var id_user = body.id_user;
 
   return new Promise((resolve, reject) => {
@@ -33,8 +33,8 @@ service.channel = async (body) => {
             } else {
               usersService
                 .getUsers({ id_user: result[0].id_user, status: "active" })
-                .then((result) => {
-                  if (result.length > 0) {
+                .then((user) => {
+                  if (user.length > 0) {
                     resolve(result[0]);
                   } else {
                     usersService
@@ -65,7 +65,7 @@ service.channel = async (body) => {
             }
           } else {
             membersService
-              .getMember(parseInt(body.id_member))
+              .getMember(parseInt(body.id))
               .then((member) => {
                 let channel = {
                   id_channel: id_channel,

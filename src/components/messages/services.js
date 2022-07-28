@@ -21,7 +21,7 @@ service.getByChannel = async (id_channel) => {
         if (err) reject({ error: err });
         cursor.toArray((err, result) => {
           if (err) reject({ error: err });
-          resolve({ message: result });
+          resolve({ data: result });
         });
       });
   });
@@ -187,14 +187,14 @@ service.createChanges = async (id_channel) => {
       if (err) console.error(err);
       cursorChanges.each((err, result) => {
         console.log(result.new_val);
-        ioEmmit(
-          "receive_message",
-          {
+        ioEmmit({
+          key: "receive_message",
+          data: {
             ...result.new_val,
             status: "sent",
           },
-          id_channel
-        );
+          to: id_channel,
+        });
       });
     });
 };

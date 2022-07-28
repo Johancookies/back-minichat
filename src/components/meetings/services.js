@@ -21,8 +21,8 @@ service.createMeeting = async (id_channel) => {
         const timeout = setTimeout(() => {
           service.status(res.generated_keys[0], "inactive");
         }, 60000);
-        if (url_taskMap[result[0].id]) {
-          clearTimeout(url_taskMap[result[0].id]);
+        if (url_taskMap[res.generated_keys[0]]) {
+          clearTimeout(url_taskMap[res.generated_keys[0]]);
         }
         url_taskMap[res.generated_keys[0]] = timeout;
         resolve({ id: res.generated_keys[0] });
@@ -77,7 +77,7 @@ service.changeStatusToWaiting = async (id_channel) => {
     .update({ status: "waiting" })
     .run(conn, (err, res) => {
       if (err) console.log(err);
-      console.log("change meeting status successfully" + channel);
+      console.log("change meeting status successfully" + id_channel);
     });
 };
 

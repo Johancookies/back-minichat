@@ -70,7 +70,6 @@ io.on("connection", (socket) => {
   // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    myLogger.log(`User ${socket.id} joined room ${room}`);
     socket.join(room);
     try {
       meetingService
@@ -89,7 +88,7 @@ io.on("connection", (socket) => {
           } else {
             meetingService
               .status(result[0].id, "active")
-              .then((result) => {
+              .then((res) => {
                 console.log("change meeting status " + result[0].id);
               })
               .catch((err) => {
@@ -153,8 +152,6 @@ function ioEmmit({ key, data, to }) {
   } else {
     io.emit(key, data);
   }
-  console.log("key", key);
-  console.log("data", data);
 }
 
 server.listen(process.env.PORT, () => {
