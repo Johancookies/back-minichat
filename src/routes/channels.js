@@ -1,7 +1,7 @@
 import express from "express";
 import r from "rethinkdb";
 import getRethinkDB from "../config/db.js";
-import ioEmmit from "../app.js";
+import ioEmmit from "../../app.js";
 import connectMysql from "../config/mysql.js";
 import sendMessageRabbit from "../rabbitmq/send.js";
 import { getRandomInt, listTowerControl } from "../helpers/helper_functions.js";
