@@ -63,7 +63,6 @@ users.post("/", async (req, response) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role_id: user.role_id,
-                status: "active",
               };
 
               r.table("users")
