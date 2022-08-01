@@ -1,3 +1,4 @@
+import service from "./services.js";
 import Services from "./services.js";
 
 const controller = {};
@@ -43,6 +44,17 @@ controller.reassing = (req, res) => {
         status: 500,
         ...err,
       });
+    });
+};
+
+controller.update = (req, res) => {
+  service
+    .update()
+    .then((result) => {
+      res.send(res);
+    })
+    .catch((err) => {
+      res.send(err);
     });
 };
 

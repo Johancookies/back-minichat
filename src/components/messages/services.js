@@ -27,6 +27,21 @@ service.getByChannel = async (id_channel) => {
   });
 };
 
+service.getMessages = async (filter) => {
+  const conn = await getRethinkDB();
+  return new Promise((resolve, reject) => {
+    r.table("messages")
+      .filter(filter)
+      .run(conn, (err, cursor) => {
+        if (err) reject({ error: err });
+        cursor.toArray((err, result) => {
+          if (err) reject({ error: err });
+          resolve(result);
+        });
+      });
+  });
+};
+
 service.addMessages = async (message, file) => {
   return new Promise((resolve, reject) => {
     meetingService

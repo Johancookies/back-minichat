@@ -13,5 +13,6 @@ channel.use((err, req, res, next) => {
 channel.post("/", Controller.channel);
 channel.get("/by-user", Controller.byUser);
 channel.post("/reassign", Controller.reassing);
+channel.post("/update", Controller.update);
 
 export default channel;

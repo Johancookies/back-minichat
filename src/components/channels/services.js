@@ -5,6 +5,7 @@ import { getRandomInt } from "../../helpers/helper_functions.js";
 
 import usersService from "../users/services.js";
 import membersService from "../member/services.js";
+import mesageService from "../messages/services.js";
 
 const service = {};
 
@@ -195,6 +196,42 @@ service.byUser = async (id_user) => {
           if (err) reject(err);
           resolve({
             data: result,
+          });
+        });
+      });
+  });
+};
+
+service.update = async () => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("channels")
+      .filter({ id_user: "[object Object]" })
+      .run(conn, (err, cursor) => {
+        if (err) reject(err);
+        cursor.toArray((err, result) => {
+          if (err) reject(err);
+          result.forEach((e) => {
+            usersService
+              .getUsers({ status: "active", role_id: 39 })
+              .then((users) => {
+                const randomUser = getRandomInt(0, users.length - 1);
+                const id_user = users[randomUser].id_user;
+                console.log(e.id_channel + "to" + id_user);
+                service
+                  .reassign(e.id_channel, id_user)
+                  .then((result) => {
+                    console.log("update");
+                    resolve(result);
+                  })
+                  .catch((err) => {
+                    reject(err);
+                  });
+              })
+              .catch((err) => {
+                reject(err);
+              });
           });
         });
       });
