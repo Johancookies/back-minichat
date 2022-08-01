@@ -87,7 +87,7 @@ io.on("connection", (socket) => {
   // change feed messages
   socket.on("join_room", async (room) => {
     console.log(`User ${socket.id} joined room ${room}`);
-    myLogger.log(`User ${socket.id} joined room ${room}`);
+    // myLogger.log(`User ${socket.id} joined room ${room}`);
     socket.join(room);
     try {
       const conn = await getRethinkDB();
