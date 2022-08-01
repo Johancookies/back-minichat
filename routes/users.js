@@ -58,6 +58,22 @@ users.post("/", async (req, response) => {
                   }
                 });
             } else {
+              let dataUser = {
+                id_user: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                role_id: user.role_id,
+                status: "active",
+              };
+
+              r.table("users")
+                .filter({ id_user: user.id })
+                .update(dataUser)
+                .run(conn, (err, res) => {
+                  if (err) console.log(err);
+                  console.log(res.replaced);
+                });
+
               r.table("token_notification")
                 .filter(
                   r
