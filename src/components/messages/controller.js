@@ -33,4 +33,47 @@ controller.addMessages = (req, res) => {
     });
 };
 
+controller.Messages = (req, res) => {
+  Services.getMessages({})
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+};
+
+controller.MessagesPaginate = (req, res) => {
+  const {
+    query: { limit, page, id_channel },
+  } = req;
+
+  var filter = {};
+
+  if (id_channel) filter.id_channel = id_channel;
+
+  Services.getMessagesPaginate(filter, req, parseInt(limit), parseInt(page))
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+};
+
+controller.countMessages = (req, res) => {
+  var filter = {};
+
+  Services.countMessages(filter)
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+};
+
 export default controller;

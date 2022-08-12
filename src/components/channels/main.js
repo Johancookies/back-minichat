@@ -12,7 +12,10 @@ channel.use((err, req, res, next) => {
 
 channel.post("/", Controller.channel);
 channel.get("/by-user", Controller.byUser);
-channel.post("/reassign", Controller.reassing);
+channel.post("/reassign", Controller.reasign);
+channel.get("/reasign-history", Controller.reasignHistory);
 channel.post("/update", Controller.update);
+channel.get("/count-channels", Controller.countChannel);
+channel.get("/channels", Controller.channels);
 
 export default channel;

@@ -76,4 +76,49 @@ service.getMember = async (id_member) => {
   });
 };
 
+service.getMemberByRethink = async (id) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("members")
+      .filter({
+        id: id,
+      })
+      .run(conn, (err, cursor) => {
+        if (err) reject(err);
+        cursor.toArray((err, result) => {
+          if (err) reject(err);
+          resolve(result);
+        });
+      });
+  });
+};
+
+service.countMember = async () => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("members")
+      .count()
+      .run(conn, (err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+  });
+};
+
+service.members = async () => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("members").run(conn, (err, cursor) => {
+      if (err) reject(err);
+      cursor.toArray((err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+    });
+  });
+};
+
 export default service;

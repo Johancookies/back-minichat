@@ -1,5 +1,8 @@
 import getRethinkDB from "../../config/db.js";
 import r from "rethinkdb";
+import ioEmmit from "../../../app.js";
+
+import messageService from "../messages/services.js";
 
 import { url_taskMap } from "../messages/services.js";
 
@@ -19,15 +22,49 @@ service.createMeeting = async (id_channel) => {
       .run(conn, (err, res) => {
         if (err) reject(err);
         const timeout = setTimeout(() => {
-          service.status(res.generated_keys[0], "inactive");
-        }, 60000);
-        if (url_taskMap[res.generated_keys[0]]) {
-          clearTimeout(url_taskMap[res.generated_keys[0]]);
-        }
+          service.closeMeeting(res.generated_keys[0], id_channel);
+        }, 300000);
+
         url_taskMap[res.generated_keys[0]] = timeout;
         resolve({ id: res.generated_keys[0] });
       });
   });
+};
+
+service.closeMeeting = async (id_meet, id_channel) => {
+  service
+    .status(id_meet, "inactive")
+    .then((result) => {
+      let tzoffset = new Date().getTimezoneOffset() * 60000;
+      var create_at = new Date(Date.now() - tzoffset)
+        .toISOString()
+        .slice(0, -1);
+      const message = {
+        author: "back",
+        author_name: "back",
+        author_type: "back",
+        content: "Ha terminado esta conversación",
+        create_at: create_at,
+        id_channel: id_channel + "",
+        id_meet: id_meet + "",
+        type: "meet",
+      };
+
+      messageService
+        .insertMessage(message)
+        .then((result) => {
+          console.log("close meeting ", id_meet);
+          ioEmmit({ key: "close_meeting", message: id_channel });
+        })
+        .catch((err) => {
+          console.log("error in close meet");
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log("error in close meet");
+      console.log(err);
+    });
 };
 
 service.status = async (id_meet, status) => {
@@ -77,8 +114,40 @@ service.changeStatusToWaiting = async (id_channel) => {
     .update({ status: "waiting" })
     .run(conn, (err, res) => {
       if (err) console.log(err);
-      console.log("change meeting status successfully" + id_channel);
+      if (res.replaced) {
+        console.log("change meeting status successfully", id_channel);
+      }
     });
+};
+
+service.getMeetings = async (filter) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("meetings")
+      .filter(filter)
+      .run(conn, (err, cursor) => {
+        if (err) reject(err);
+        cursor.toArray((err, result) => {
+          if (err) reject(err);
+          resolve({ data: result });
+        });
+      });
+  });
+};
+
+service.getCountMeetings = async (filter) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("meetings")
+      .filter(filter)
+      .count()
+      .run(conn, (err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+  });
 };
 
 export default service;

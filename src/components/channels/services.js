@@ -25,12 +25,14 @@ service.channel = async (body) => {
 
           if (result.length > 0) {
             if (id_user) {
-              service.reassign(id_channel, id_user).then((result) => {
-                resolve({
-                  ...result,
-                  id_channel,
+              service
+                .reassign(id_channel, id_user, "user asign")
+                .then((res) => {
+                  resolve({
+                    ...result[0],
+                    id_user,
+                  });
                 });
-              });
             } else {
               usersService
                 .getUsers({ id_user: result[0].id_user, status: "active" })
@@ -45,11 +47,11 @@ service.channel = async (body) => {
                           const randomUser = getRandomInt(0, users.length - 1);
                           id_user = users[randomUser].id_user;
                           service
-                            .reassign(id_channel, id_user)
-                            .then((result) => {
+                            .reassign(id_channel, id_user, "back reasign")
+                            .then((res) => {
                               resolve({
-                                ...result,
-                                id_channel,
+                                ...result[0],
+                                id_user,
                               });
                             });
                         } else {
@@ -71,7 +73,7 @@ service.channel = async (body) => {
                 let channel = {
                   id_channel: id_channel,
                   id_member: member[0].id,
-                  id_service_line: id_service_line,
+                  id_service_line: body.id_service_line,
                   id_user: id_user,
                 };
                 if (id_user) {
@@ -95,6 +97,12 @@ service.channel = async (body) => {
                           .createChannel(channel)
                           .then((result) => {
                             resolve(result);
+                            service.addReasignHistory({
+                              id_channel: result["id_channel"],
+                              last_id_user: "",
+                              new_id_user: channel.id_user,
+                              type: "first reasign",
+                            });
                           })
                           .catch((err) => {
                             reject(err);
@@ -160,23 +168,90 @@ service.channelById = async (id_channel) => {
   });
 };
 
-service.reassign = async (id_channel, id_user) => {
+service.reassign = async (id_channel, id_user, type) => {
   const conn = await getRethinkDB();
 
   return new Promise((resolve, reject) => {
-    r.table("channels")
-      .filter({ id_channel: id_channel })
-      .update({ id_user: id_user.toString() })
-      .run(conn, (err, res) => {
+    service
+      .channelById(id_channel)
+      .then((channel) => {
+        if (channel.length > 0) {
+          r.table("channels")
+            .filter({ id_channel: id_channel })
+            .update({ id_user: id_user.toString() })
+            .run(conn, (err, res) => {
+              if (err) reject(err);
+              service.addReasignHistory({
+                id_channel,
+                last_id_user: channel[0].id_user,
+                new_id_user: id_user,
+                type: type,
+              });
+              ioEmmit({
+                key: "new_channels",
+                data: { id_user: id_user, id_channel: id_channel },
+              });
+              resolve({
+                status: "success",
+                message: "Channel reassigned successfully",
+              });
+            });
+        } else {
+          reject("channel not found");
+        }
+      })
+      .catch((err) => {
+        reject("channel not found");
+      });
+  });
+};
+
+service.addReasignHistory = async ({
+  id_channel,
+  last_id_user,
+  new_id_user,
+  type,
+}) => {
+  const conn = await getRethinkDB();
+  let tzoffset = new Date().getTimezoneOffset() * 60000;
+  var create_at = new Date(Date.now() - tzoffset);
+
+  const reasign = {
+    last_id_user,
+    new_id_user,
+    id_channel,
+    type,
+    create_at,
+  };
+
+  r.table("reasign_history")
+    .insert(reasign)
+    .run(conn, (err, result) => {
+      if (err) console.log(err);
+      else console.log("save reasign history");
+    });
+};
+
+service.reasignHistory = async (filter) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("reasign_history")
+      .filter(filter)
+      .orderBy(r.desc("create_at"))
+      .run(conn, (err, cursor) => {
         if (err) reject(err);
-        ioEmmit({
-          key: "new_channels",
-          data: { id_user: id_user, id_channel: id_channel },
-        });
-        resolve({
-          status: "success",
-          message: "Channel reassigned successfully",
-        });
+        else
+          cursor.toArray((err, result) => {
+            if (err) reject(err);
+            else if (result.length > 0) {
+              resolve(result);
+            } else {
+              resolve({
+                message: "Channel not found",
+              });
+            }
+          });
       });
   });
 };
@@ -202,38 +277,78 @@ service.byUser = async (id_user) => {
   });
 };
 
-service.update = async () => {
+service.channels = async () => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("channels").run(conn, (err, cursor) => {
+      if (err) reject(err);
+      cursor.toArray((err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+    });
+  });
+};
+
+service.countChannels = async () => {
   const conn = await getRethinkDB();
 
   return new Promise((resolve, reject) => {
     r.table("channels")
-      .filter({ id_user: "[object Object]" })
-      .run(conn, (err, cursor) => {
+      .count()
+      .run(conn, (err, result) => {
         if (err) reject(err);
-        cursor.toArray((err, result) => {
-          if (err) reject(err);
-          result.forEach((e) => {
-            usersService
-              .getUsers({ status: "active", role_id: 39 })
-              .then((users) => {
-                const randomUser = getRandomInt(0, users.length - 1);
-                const id_user = users[randomUser].id_user;
-                console.log(e.id_channel + "to" + id_user);
-                service
-                  .reassign(e.id_channel, id_user)
-                  .then((result) => {
-                    console.log("update");
-                    resolve(result);
-                  })
-                  .catch((err) => {
-                    reject(err);
-                  });
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          });
-        });
+        resolve({ data: result });
+      });
+  });
+};
+
+service.update = async () => {
+  return new Promise((resolve, reject) => {
+    service
+      .channels()
+      .then(async (result) => {
+        var data = [];
+        var users = {};
+        for (const channel of result["data"]) {
+          await mesageService
+            .getByChannel(channel.id_channel)
+            .then((result) => {
+              if (result["data"].length != 0) {
+                const val = result["data"].find((e) => e.author_type == "user");
+
+                if (!val) {
+                  usersService
+                    .getUsers({ id_user: channel.id_user })
+                    .then((user) => {
+                      if (users[user[0].first_name]) {
+                        users[user[0].first_name]++;
+                      } else {
+                        users[user[0].first_name] = 1;
+                      }
+
+                      data.push({
+                        id_channel: channel.id_channel,
+                        user: user[0],
+                        messages: result["data"],
+                      });
+                    })
+                    .catch((err) => {
+                      reject(err);
+                    });
+                }
+              }
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }
+
+        resolve({ data, length: data.length, users: users });
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };

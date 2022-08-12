@@ -93,4 +93,18 @@ service.chageStatus = async (body) => {
   });
 };
 
+service.countUsers = async (filter) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("users")
+      .filter(filter)
+      .count()
+      .run(conn, (err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+  });
+};
+
 export default service;

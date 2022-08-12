@@ -32,6 +32,7 @@ service.getMessages = async (filter) => {
   return new Promise((resolve, reject) => {
     r.table("messages")
       .filter(filter)
+      .orderBy(r.desc("create_at"))
       .run(conn, (err, cursor) => {
         if (err) reject({ error: err });
         cursor.toArray((err, result) => {
@@ -39,6 +40,62 @@ service.getMessages = async (filter) => {
           resolve(result);
         });
       });
+  });
+};
+
+service.getMessagesLimit = async (filter, limit, page) => {
+  const conn = await getRethinkDB();
+
+  const i = page * limit;
+  const j = limit * (page + 1);
+
+  return new Promise((resolve, reject) => {
+    r.table("messages")
+      .filter(filter)
+      .orderBy(r.desc("create_at"))
+      .slice(i, j)
+      .run(conn, (err, cursor) => {
+        if (err) reject({ error: err });
+        else
+          cursor.toArray((err, result) => {
+            if (err) reject({ error: err });
+            resolve(result);
+          });
+      });
+  });
+};
+
+service.getMessagesPaginate = async (filter, req, limit, page) => {
+  return new Promise(async (resolve, reject) => {
+    const [result, itemCount] = await Promise.all([
+      service
+        .getMessagesLimit(filter, limit, page)
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          reject(err);
+        }),
+      service
+        .countMessages(filter)
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          reject(err);
+        }),
+    ]);
+
+    const pageCount = Math.ceil(itemCount["data"] / limit);
+
+    resolve({
+      data: result,
+      itemCount: itemCount["data"],
+      limit: limit,
+      page: page,
+      pageCount,
+      has_more: page < pageCount,
+    });
   });
 };
 
@@ -51,7 +108,7 @@ service.addMessages = async (message, file) => {
           meetingService
             .createMeeting(message.id_channel)
             .then((result) => {
-              message = result.id;
+              message.id_meet = result.id;
               service
                 .insertMessage(message, file)
                 .then((result) => {
@@ -66,14 +123,14 @@ service.addMessages = async (message, file) => {
             });
         } else {
           if (result[0].status === "waiting") {
-            meetingService.status(result[0].id, "active");
+            // ioEmmit({ to: message.id_channel, key: "close_meeting" });
+            meetingService.closeMeeting(result[0].id, message.id_channel);
           }
           const timeout = setTimeout(() => {
-            meetingService.status(result[0].id, "inactive").then((result) => {
-              console.log("inactive meeting" + result[0].id);
-              ioEmmit({ key: "close_meeting", message: result[0].id });
-            });
-          }, 60000);
+            // ioEmmit({ to: message.id_channel, key: "close_meeting" });
+
+            meetingService.closeMeeting(result[0].id, message.id_channel);
+          }, 300000);
           if (url_taskMap[result[0].id]) {
             clearTimeout(url_taskMap[result[0].id]);
           }
@@ -101,7 +158,7 @@ service.insertMessage = async (message, file) => {
 
   return new Promise((resolve, reject) => {
     try {
-      if (message.type === "text") {
+      if (message.type === "text" || message.type === "meet") {
         r.table("messages")
           .insert(message)
           .run(conn, (err, res) => {
@@ -118,7 +175,9 @@ service.insertMessage = async (message, file) => {
             service.messageStatus(messageStatus);
             resolve({ status: 200, message: message });
 
-            service.messageNotification(message);
+            if (message.author_type != "back") {
+              service.messageNotification(message);
+            }
           });
       } else {
         message.url_file = file.location;
@@ -155,27 +214,35 @@ service.messageNotification = (message) => {
     .then((result) => {
       if (result.length > 0) {
         if (message.author_type === "member") {
-          notificationsService.sendNotification({
-            id_user: result[0].id_user,
-          });
+          notificationsService.sendNotification(
+            {
+              id_user: result[0].id_user,
+            },
+            message
+          );
         } else {
           memberService
-            .getMember(result[0].id_member)
+            .getMemberByRethink(result[0].id_member)
             .then((result) => {
-              notificationsService.sendNotification({
-                id_member: result[0].id_member,
-              });
+              notificationsService.sendNotification(
+                {
+                  id_member: result[0].id_member,
+                },
+                message
+              );
             })
             .catch((err) => {
               console.log(err);
             });
         }
       } else {
-        reject("channel not found");
+        // reject("channel not found");
+        console.log("channel not found");
       }
     })
     .catch((err) => {
-      reject(err);
+      // reject(err);
+      console.log(err);
     });
 };
 
@@ -214,4 +281,17 @@ service.createChanges = async (id_channel) => {
     });
 };
 
+service.countMessages = async (filter) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("messages")
+      .filter(filter)
+      .count()
+      .run(conn, (err, result) => {
+        if (err) reject(err);
+        resolve({ data: result });
+      });
+  });
+};
 export default service;

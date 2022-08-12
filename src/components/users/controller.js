@@ -28,10 +28,42 @@ controller.getUserActivate = (req, res) => {
     });
 };
 
+controller.getUsers = (req, res) => {
+  const {} = req;
+
+  Services.getUsers({})
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+};
+
 controller.changeSatus = (req, res) => {
   const { body } = req;
 
   Services.chageStatus(body)
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500);
+      res.send(err);
+    });
+};
+
+controller.countUsers = (req, res) => {
+  const {
+    query: { status },
+  } = req;
+
+  var filter = {};
+
+  if (status) filter = { status };
+
+  Services.countUsers(filter)
     .then((result) => {
       res.send(result);
     })

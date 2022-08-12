@@ -25,12 +25,12 @@ service.getTokens = async (filter) => {
   });
 };
 
-service.sendNotification = (filter) => {
+service.sendNotification = (filter, message) => {
   return new Promise((resolve, reject) => {
     service
       .getTokens(filter)
       .then((result) => {
-        // console.log(result);
+        sendPush({ message, tokens: result });
         resolve("notifications");
       })
       .catch((err) => {
@@ -83,5 +83,42 @@ service.addTokens = async (token, id_member) => {
     }
   });
 };
+
+function sendPush({ message, tokens }) {
+  let notification = {
+    title: message.author_name,
+    body: message.content,
+  };
+
+  let data = {
+    body: {
+      id_channel: message.id_channel,
+      coach: "Soporte",
+    },
+  };
+
+  let notification_body = {
+    notification: notification,
+    data: data,
+    registration_ids: [tokens],
+    // to: tokens[0],
+  };
+
+  fetch("https://fcm.googleapis.com/fcm/send", {
+    method: "POST",
+    headers: {
+      Authorization: "key=" + process.env.FCM_TOKEN,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(notification_body),
+  })
+    .then((res) => {
+      console.log(res);
+      console.log("Notification send successfully");
+    })
+    .catch((err) => {
+      console.log("Something went wrong!", err);
+    });
+}
 
 export default service;

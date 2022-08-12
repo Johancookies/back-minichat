@@ -11,7 +11,10 @@ messages.use((err, req, res, next) => {
   res.sendStatus(204);
 });
 
-messages.post("/", uploadAWS.array("file", 1), Controller.addMessages);
+messages.post("/", uploadAWS.array("file", 3), Controller.addMessages);
 messages.get("/by-channel", Controller.getByChannel);
+messages.get("/count-messages", Controller.countMessages);
+messages.get("/messages", Controller.Messages);
+messages.get("/messages-paginate", Controller.MessagesPaginate);
 
 export default messages;

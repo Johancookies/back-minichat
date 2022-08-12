@@ -10,5 +10,7 @@ member.use((err, req, res, next) => {
 });
 
 member.post("/", Controller.addMember);
+member.get("/", Controller.members);
+member.get("/count-members", Controller.countMembers);
 
 export default member;

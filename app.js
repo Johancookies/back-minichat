@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import { Server } from "socket.io";
 import "dotenv/config.js";
 import sendMessageRabbit from "./src/rabbitmq/send.js";
+import { url_taskMap } from "./src/components/messages/services.js";
 
 // services
 import meetingService from "./src/components/meetings/services.js";
@@ -16,6 +17,7 @@ import messages from "./src/components/messages/main.js";
 import channel from "./src/components/channels/main.js";
 import members from "./src/components/member/main.js";
 import users from "./src/components/users/main.js";
+import meetings from "./src/components/meetings/main.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -47,6 +49,7 @@ app.use("/channels", channel);
 app.use("/messages", messages);
 app.use("/members", members);
 app.use("/users", users);
+app.use("/meetings", meetings);
 
 // socket middleware
 io.use((socket, next) => {
@@ -89,6 +92,14 @@ io.on("connection", (socket) => {
             meetingService
               .status(result[0].id, "active")
               .then((res) => {
+                const timeout = setTimeout(() => {
+                  // io.to(room).emit("close_meeting");
+                  meetingService.closeMeeting(result[0].id, room);
+                }, 300000);
+                if (url_taskMap[result[0].id]) {
+                  clearTimeout(url_taskMap[result[0].id]);
+                }
+                url_taskMap[result[0].id] = timeout;
                 console.log("change meeting status " + result[0].id);
               })
               .catch((err) => {
