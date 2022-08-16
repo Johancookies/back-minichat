@@ -21,7 +21,7 @@ service.addUser = async (user) => {
               first_name: user.first_name,
               last_name: user.last_name,
               role_id: user.role_id,
-              status: "active",
+              status: "inactive",
             };
 
             r.table("users")
@@ -70,7 +70,7 @@ service.getUsers = async (filter) => {
         if (err) reject(err);
         cursor.toArray((err, result) => {
           if (err) reject(err);
-          resolve(result);
+          resolve({ data: result });
         });
       });
   });

@@ -21,6 +21,18 @@ controller.getMeetings = (req, res) => {
     });
 };
 
+controller.closeMeetingByChannel = (req, res) => {
+  const { body } = req;
+
+  Services.closeMeetingByChannel(body.id_channel)
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
 controller.getCountMeetings = (req, res) => {
   const {
     query: { status },

@@ -12,7 +12,7 @@ const service = {};
 service.channel = async (body) => {
   const conn = await getRethinkDB();
 
-  const id_channel = body.id + body.id_service_line;
+  const id_channel = body.id + "" + body.id_service_line;
   var id_user = body.id_user;
 
   return new Promise((resolve, reject) => {
@@ -37,7 +37,7 @@ service.channel = async (body) => {
               usersService
                 .getUsers({ id_user: result[0].id_user, status: "active" })
                 .then((user) => {
-                  if (user.length > 0) {
+                  if (user.data.length > 0) {
                     resolve(result[0]);
                   } else {
                     usersService
@@ -74,7 +74,7 @@ service.channel = async (body) => {
                   id_channel: id_channel,
                   id_member: member[0].id,
                   id_service_line: body.id_service_line,
-                  id_user: id_user,
+                  id_user: id_user + "",
                 };
                 if (id_user) {
                   service
@@ -264,7 +264,7 @@ service.byUser = async (id_user) => {
       .eqJoin(r.row("id_member"), r.table("members"))
       .without({ right: "id" })
       .zip()
-      .filter({ id_user: id_user })
+      .filter({ id_user: id_user + "" })
       .run(conn, (err, cursor) => {
         if (err) reject(err);
         cursor.toArray((err, result) => {
@@ -277,17 +277,29 @@ service.byUser = async (id_user) => {
   });
 };
 
-service.channels = async () => {
+service.channels = async ({ desc }) => {
   const conn = await getRethinkDB();
 
   return new Promise((resolve, reject) => {
-    r.table("channels").run(conn, (err, cursor) => {
-      if (err) reject(err);
-      cursor.toArray((err, result) => {
+    if (desc) {
+      r.table("channels")
+        .orderBy(r.desc("create_at"))
+        .run(conn, (err, cursor) => {
+          if (err) reject(err);
+          cursor.toArray((err, result) => {
+            if (err) reject(err);
+            resolve({ data: result });
+          });
+        });
+    } else {
+      r.table("channels").run(conn, (err, cursor) => {
         if (err) reject(err);
-        resolve({ data: result });
+        cursor.toArray((err, result) => {
+          if (err) reject(err);
+          resolve({ data: result });
+        });
       });
-    });
+    }
   });
 };
 
@@ -307,7 +319,7 @@ service.countChannels = async () => {
 service.update = async () => {
   return new Promise((resolve, reject) => {
     service
-      .channels()
+      .channels({ desc: true })
       .then(async (result) => {
         var data = [];
         var users = {};

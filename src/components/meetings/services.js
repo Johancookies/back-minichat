@@ -3,6 +3,7 @@ import r from "rethinkdb";
 import ioEmmit from "../../../app.js";
 
 import messageService from "../messages/services.js";
+import channelService from "../channels/services.js";
 
 import { url_taskMap } from "../messages/services.js";
 
@@ -27,6 +28,26 @@ service.createMeeting = async (id_channel) => {
 
         url_taskMap[res.generated_keys[0]] = timeout;
         resolve({ id: res.generated_keys[0] });
+      });
+  });
+};
+
+service.closeMeetingByChannel = async (id_channel) => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("messages")
+      .filter({ id_channel: id_channel })
+      .limit(1)
+      .run(conn, (err, cursor) => {
+        if (err) reject(err);
+        cursor.toArray((err, result) => {
+          if (err) reject(err);
+          if (result.length > 0) {
+            service.closeMeeting(result[0].id_meet, id_channel);
+            resolve("change status successfully");
+          }
+        });
       });
   });
 };
