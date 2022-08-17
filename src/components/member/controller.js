@@ -37,4 +37,14 @@ controller.members = (req, res) => {
     });
 };
 
+controller.filter = (req, res) => {
+  Services.filter()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+};
+
 export default controller;

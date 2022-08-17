@@ -2,6 +2,7 @@ import getRethinkDB from "../../config/db.js";
 import r from "rethinkdb";
 
 import notificationServices from "../notifications/services.js";
+import sendMessageRabbit from "../../rabbitmq/send.js";
 
 const service = {};
 
@@ -28,6 +29,8 @@ service.addUser = async (user) => {
               .insert(dataUser)
               .run(conn, (err, result) => {
                 if (err) reject(err);
+                dataUser.id_rethink = result.generated_keys[0];
+
                 const dataToken = {
                   device: user.device,
                   type: user.type,
@@ -35,6 +38,10 @@ service.addUser = async (user) => {
                   id_member: null,
                   token: user.token,
                 };
+                sendMessageRabbit({
+                  msg: { ...dataUser, ...dataToken },
+                  flag: "insert_user",
+                });
                 resolve({
                   message: "User added successfully",
                   status: "success",

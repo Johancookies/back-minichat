@@ -2,6 +2,18 @@ import Services from "./services.js";
 
 const controller = {};
 
+controller.createService = (req, res) => {
+  const { body } = req;
+
+  Services.createMeeting(body.id_channel)
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
+};
+
 controller.getMeetings = (req, res) => {
   const {
     query: { status },

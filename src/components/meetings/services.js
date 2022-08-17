@@ -3,9 +3,9 @@ import r from "rethinkdb";
 import ioEmmit from "../../../app.js";
 
 import messageService from "../messages/services.js";
-import channelService from "../channels/services.js";
 
 import { url_taskMap } from "../messages/services.js";
+import sendMessageRabbit from "../../rabbitmq/send.js";
 
 const service = {};
 
@@ -22,6 +22,12 @@ service.createMeeting = async (id_channel) => {
       .insert(dataMeeting)
       .run(conn, (err, res) => {
         if (err) reject(err);
+        dataMeeting.id_rethink = res.generated_keys[0];
+        console.log("meeting");
+        sendMessageRabbit({
+          msg: dataMeeting,
+          flag: "insert_meeting",
+        });
         const timeout = setTimeout(() => {
           service.closeMeeting(res.generated_keys[0], id_channel);
         }, 300000);
@@ -36,18 +42,18 @@ service.closeMeetingByChannel = async (id_channel) => {
   const conn = await getRethinkDB();
 
   return new Promise((resolve, reject) => {
-    r.table("messages")
-      .filter({ id_channel: id_channel })
-      .limit(1)
-      .run(conn, (err, cursor) => {
-        if (err) reject(err);
-        cursor.toArray((err, result) => {
-          if (err) reject(err);
-          if (result.length > 0) {
-            service.closeMeeting(result[0].id_meet, id_channel);
-            resolve("change status successfully");
-          }
-        });
+    service
+      .getMeetingActiveByChannel(id_channel)
+      .then((result) => {
+        if (result.length > 0) {
+          service.closeMeeting(result[0].id, id_channel);
+          resolve("change status successfully");
+        } else {
+          resolve({ message: "not meeting found" });
+        }
+      })
+      .catch((err) => {
+        reject(err);
       });
   });
 };

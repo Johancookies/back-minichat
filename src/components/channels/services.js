@@ -6,6 +6,7 @@ import { getRandomInt } from "../../helpers/helper_functions.js";
 import usersService from "../users/services.js";
 import membersService from "../member/services.js";
 import mesageService from "../messages/services.js";
+import sendMessageRabbit from "../../rabbitmq/send.js";
 
 const service = {};
 
@@ -89,9 +90,12 @@ service.channel = async (body) => {
                   usersService
                     .getUsers({ status: "active", role_id: 39 })
                     .then((users) => {
-                      if (users.length > 0) {
-                        const randomUser = getRandomInt(0, users.length - 1);
-                        channel.id_user = users[randomUser].id_user;
+                      if (users.data.length > 0) {
+                        const randomUser = getRandomInt(
+                          0,
+                          users.data.length - 1
+                        );
+                        channel.id_user = users.data[randomUser].id_user;
 
                         service
                           .createChannel(channel)
@@ -144,6 +148,11 @@ service.createChannel = async (channel) => {
             id_user: channel.id_user,
             id_channel: channel.id_channel,
           },
+        });
+        channel.id_rethink = res.generated_keys[0];
+        sendMessageRabbit({
+          msg: channel,
+          flag: "insert_channel",
         });
         resolve({
           id_channel: channel.id_channel,

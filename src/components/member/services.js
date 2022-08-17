@@ -2,6 +2,7 @@ import getRethinkDB from "../../config/db.js";
 import r from "rethinkdb";
 
 import notificationServices from "../notifications/services.js";
+import sendMessageRabbit from "../../rabbitmq/send.js";
 
 const service = {};
 
@@ -27,6 +28,12 @@ service.addMember = async (member) => {
             .insert(dataMember)
             .run(conn, (err, result) => {
               if (err) reject(err);
+              dataMember.id_rethink = result.generated_keys[0];
+
+              sendMessageRabbit({
+                msg: dataMember,
+                flag: "insert_member",
+              });
               resolve({
                 message: "Member added successfully",
                 status: "success",
@@ -118,6 +125,35 @@ service.members = async () => {
         resolve({ data: result });
       });
     });
+  });
+};
+
+service.filter = async () => {
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+    r.table("members")
+      .filter(function (doc) {
+        return doc("first_name").match("rafa");
+      })
+      .run(conn, (err, cursor) => {
+        if (err) reject(err);
+        cursor.toArray((err, mebers) => {
+          if (err) reject(err);
+          mebers.forEach((val) => {
+            r.table("token_notification")
+              .filter({ id_member: val.id_member })
+              .run(conn, (err, cursor) => {
+                if (err) reject(err);
+                cursor.toArray((err, result) => {
+                  if (err) reject(err);
+                  console.log({ member: val, tokens: result });
+                });
+              });
+          });
+          resolve("ok");
+        });
+      });
   });
 };
 

@@ -18,6 +18,7 @@ import channel from "./src/components/channels/main.js";
 import members from "./src/components/member/main.js";
 import users from "./src/components/users/main.js";
 import meetings from "./src/components/meetings/main.js";
+import receiveMsg from "./src/rabbitmq/recieve.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -156,6 +157,8 @@ io.on("connection", (socket) => {
   //   })
   // });
 });
+
+// receiveMsg();
 
 function ioEmmit({ key, data, to }) {
   if (to) {

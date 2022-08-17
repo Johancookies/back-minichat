@@ -6,6 +6,7 @@ import meetingService from "../meetings/services.js";
 import channelService from "../channels/services.js";
 import notificationsService from "../notifications/services.js";
 import memberService from "../member/services.js";
+import sendMessageRabbit from "../../rabbitmq/send.js";
 
 const service = {};
 
@@ -164,10 +165,12 @@ service.insertMessage = async (message, file) => {
           .run(conn, (err, res) => {
             if (err) reject({ error: 500 });
             message.id_rethink = res.generated_keys[0];
-            message.flag = "insert_messages";
-            // sendMessageRabbit({
-            //   msg: message,
-            // });
+            console.log("messages");
+
+            sendMessageRabbit({
+              msg: message,
+              flag: "insert_messages",
+            });
             let messageStatus = {
               id_message: res.generated_keys[0],
               status: "sent",
