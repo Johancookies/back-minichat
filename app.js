@@ -18,7 +18,9 @@ import channel from "./src/components/channels/main.js";
 import members from "./src/components/member/main.js";
 import users from "./src/components/users/main.js";
 import meetings from "./src/components/meetings/main.js";
-import receiveMsg from "./src/rabbitmq/recieve.js";
+// import receiveMsg from "./src/rabbitmq/recieve.js";
+import migration from "./src/components/migration/main.js";
+import { connetRabbit } from "./src/config/rabbitConnect.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -51,6 +53,7 @@ app.use("/messages", messages);
 app.use("/members", members);
 app.use("/users", users);
 app.use("/meetings", meetings);
+app.use("/migration", migration);
 
 // socket middleware
 io.use((socket, next) => {
@@ -159,6 +162,8 @@ io.on("connection", (socket) => {
 });
 
 // receiveMsg();
+
+connetRabbit();
 
 function ioEmmit({ key, data, to }) {
   if (to) {

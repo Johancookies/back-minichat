@@ -66,6 +66,17 @@ service.closeMeeting = async (id_meet, id_channel) => {
       var create_at = new Date(Date.now() - tzoffset)
         .toISOString()
         .slice(0, -1);
+
+      const meetData = {
+        id_meet: id_meet,
+        status: "inactive",
+      };
+
+      sendMessageRabbit({
+        msg: meetData,
+        flag: "update_statusmeeting",
+      });
+
       const message = {
         author: "back",
         author_name: "back",
@@ -142,6 +153,16 @@ service.changeStatusToWaiting = async (id_channel) => {
     .run(conn, (err, res) => {
       if (err) console.log(err);
       if (res.replaced) {
+        // const meetData = {
+        //   id_meet: id_meet,
+        //   status: "waiting",
+        // };
+
+        // sendMessageRabbit({
+        //   msg: meetData,
+        //   flag: "update_statusmeeting",
+        // });
+
         console.log("change meeting status successfully", id_channel);
       }
     });

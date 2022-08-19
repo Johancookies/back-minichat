@@ -44,9 +44,12 @@ service.channel = async (body) => {
                     usersService
                       .getUsers({ status: "active", role_id: 39 })
                       .then((users) => {
-                        if (users.length > 0) {
-                          const randomUser = getRandomInt(0, users.length - 1);
-                          id_user = users[randomUser].id_user;
+                        if (users.data.length > 0) {
+                          const randomUser = getRandomInt(
+                            0,
+                            users.data.length - 1
+                          );
+                          id_user = users.data[randomUser].id_user;
                           service
                             .reassign(id_channel, id_user, "back reasign")
                             .then((res) => {
@@ -190,6 +193,15 @@ service.reassign = async (id_channel, id_user, type) => {
             .update({ id_user: id_user.toString() })
             .run(conn, (err, res) => {
               if (err) reject(err);
+
+              sendMessageRabbit({
+                msg: {
+                  id_channel: id_channel,
+                  id_user: id_user,
+                },
+                flag: "update_channel_user",
+              });
+
               service.addReasignHistory({
                 id_channel,
                 last_id_user: channel[0].id_user,
@@ -237,7 +249,15 @@ service.addReasignHistory = async ({
     .insert(reasign)
     .run(conn, (err, result) => {
       if (err) console.log(err);
-      else console.log("save reasign history");
+      else {
+        reasign.id_rethink = result.generated_keys[0];
+        sendMessageRabbit({
+          msg: reasign,
+          flag: "insert_reassign",
+        });
+
+        console.log("save reasign history");
+      }
     });
 };
 

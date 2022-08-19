@@ -191,10 +191,12 @@ service.insertMessage = async (message, file) => {
           .run(conn, (err, res) => {
             if (err) console.log(err);
             message.id_rethink = res.generated_keys[0];
-            message.flag = "insert_messages";
-            // sendMessageRabbit({
-            //   msg: message,
-            // });
+            console.log("messages");
+
+            sendMessageRabbit({
+              msg: message,
+              flag: "insert_messages",
+            });
             let messageStatus = {
               id_message: res.generated_keys[0],
               status: "sent",

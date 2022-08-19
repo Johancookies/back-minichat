@@ -92,6 +92,15 @@ service.chageStatus = async (body) => {
       .update({ status: body.status })
       .run(conn, (err, res) => {
         if (err) reject(err);
+
+        sendMessageRabbit({
+          msg: {
+            id_user: body.id_user,
+            status: body.status,
+          },
+          flag: "update_user_status",
+        });
+
         resolve({
           message: "Change status successfully",
           status: "success",

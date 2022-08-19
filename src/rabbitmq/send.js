@@ -1,4 +1,8 @@
-import rabbitConnect from "../config/rabbitConnect.js";
+// import rabbitConnect from "../config/rabbitConnect.js";
+
+import { rabbitConn } from "../config/rabbitConnect.js";
+
+const queue = "chat_msm_test2";
 
 const sendMessageRabbit = ({ msg, flag }) => {
   // queryMySql(msg);
@@ -6,19 +10,22 @@ const sendMessageRabbit = ({ msg, flag }) => {
 
   console.log(msg);
 
-  rabbitConnect((conn) => {
-    conn.createChannel((err, channel) => {
-      if (err) console.log("rror");
-      const queue = "chat_msm_test2";
+  rabbitConn.createChannel((err, channel) => {
+    if (err) console.log(err);
+    else {
       const message = Buffer.from(JSON.stringify(msg));
       channel.assertQueue(queue, { durable: false });
       channel.sendToQueue(queue, message, { persistent: false });
-    });
-    // setTimeout(() => {
-    //   conn.close();
-    //   // process.exit(0);
-    // }, 500);
+    }
   });
+
+  // rabbitConnect((conn) => {
+  //   conn.
+  //   // setTimeout(() => {
+  //   //   conn.close();
+  //   //   // process.exit(0);
+  //   // }, 500);
+  // });
   // rabbitConnect((conn) => {
   //   conn.createChannel((err, channel) => {
   //     if (err) {

@@ -23,35 +23,32 @@ service.addMember = async (member) => {
             mobile_phone: member.mobile_phone,
             photo: member.photo,
           };
-
           r.table("members")
             .insert(dataMember)
             .run(conn, (err, result) => {
               if (err) reject(err);
               dataMember.id_rethink = result.generated_keys[0];
+              const dataToken = {
+                device: member.device,
+                type: "mobile",
+                id_user: member.id_user ?? null,
+                id_member: member.id ?? null,
+                token: member.token,
+              };
 
               sendMessageRabbit({
-                msg: dataMember,
+                msg: { ...dataMember, ...dataToken },
                 flag: "insert_member",
               });
+
+              notificationServices.addTokens(dataToken);
+
               resolve({
                 message: "Member added successfully",
                 status: "success",
               });
             });
-
-          if (member.token) {
-            const dataToken = {
-              device: member.device,
-              type: "mobile",
-              id_user: member.id_user ?? null,
-              id_member: member.id ?? null,
-              token: member.token,
-            };
-            notificationServices.addTokens(dataToken);
-          } else {
-            notificationServices.addTokens(null, member.id);
-          }
+          notificationServices.addTokens(null, member.id);
         } else {
           resolve({
             message: "Current user exist!",
