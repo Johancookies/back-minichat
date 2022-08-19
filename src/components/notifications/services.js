@@ -25,6 +25,33 @@ service.getTokens = async (filter) => {
   });
 };
 
+service.updateTokensByMembers = async ({ id_member, token }) => {
+  const conn = await getRethinkDB();
+  return new Promise((resolve, reject) => {
+    service
+      .getTokens({ id_member: id_member })
+      .then((result) => {
+        if (result.length > 0) {
+          if (result[0] !== token.token && token.token != null) {
+            r.table("token_notification")
+              .filter({ token: result[0] })
+              .update({ token: token.token })
+              .run(conn, (err, cursor) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve("data update");
+                }
+              });
+          }
+        } else if (token.token  != null){
+          service.addTokens(token);
+        }
+      })
+      .catch((err) => {});
+  });
+};
+
 service.sendNotification = (filter, message) => {
   return new Promise((resolve, reject) => {
     service
@@ -84,6 +111,25 @@ service.addTokens = async (token, id_member) => {
   });
 };
 
+service.testNotificationsByUser = async ({id_member}) => {
+  return new Promise((resolve, reject) => {
+    service
+      .getTokens({id_member: id_member})
+      .then((result) => {
+        const message = {
+          author_name: 'test',
+          content: 'test push',
+          id_channel: '123'
+        }
+        sendPush({ message, tokens: result });
+        resolve("notifications");
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
 function sendPush({ message, tokens }) {
   let notification = {
     title: message.author_name,
@@ -100,7 +146,7 @@ function sendPush({ message, tokens }) {
   let notification_body = {
     notification: notification,
     data: data,
-    registration_ids: [tokens],
+    registration_ids: tokens,
     // to: tokens[0],
   };
 

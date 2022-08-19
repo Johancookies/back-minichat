@@ -13,6 +13,14 @@ service.addMember = async (member) => {
     service
       .getMember(member.id)
       .then((result) => {
+        const dataToken = {
+          device: member.device  ?? null,
+          type: "mobile",
+          id_user: member.id_user ?? null,
+          id_member: member.id ?? null,
+          token: member.token  ?? null,
+        };
+        notificationServices.updateTokensByMembers({id_member: member.id, token: dataToken});
         if (result.length === 0) {
           let dataMember = {
             id_member: member.id,
@@ -28,27 +36,17 @@ service.addMember = async (member) => {
             .run(conn, (err, result) => {
               if (err) reject(err);
               dataMember.id_rethink = result.generated_keys[0];
-              const dataToken = {
-                device: member.device,
-                type: "mobile",
-                id_user: member.id_user ?? null,
-                id_member: member.id ?? null,
-                token: member.token,
-              };
 
               sendMessageRabbit({
                 msg: { ...dataMember, ...dataToken },
                 flag: "insert_member",
               });
 
-              notificationServices.addTokens(dataToken);
-
               resolve({
                 message: "Member added successfully",
                 status: "success",
               });
             });
-          notificationServices.addTokens(null, member.id);
         } else {
           resolve({
             message: "Current user exist!",

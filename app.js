@@ -18,6 +18,7 @@ import channel from "./src/components/channels/main.js";
 import members from "./src/components/member/main.js";
 import users from "./src/components/users/main.js";
 import meetings from "./src/components/meetings/main.js";
+import notification from "./src/components/notifications/main.js";
 // import receiveMsg from "./src/rabbitmq/recieve.js";
 import migration from "./src/components/migration/main.js";
 import { connetRabbit } from "./src/config/rabbitConnect.js";
@@ -54,6 +55,8 @@ app.use("/members", members);
 app.use("/users", users);
 app.use("/meetings", meetings);
 app.use("/migration", migration);
+app.use("/notification", notification);
+
 
 // socket middleware
 io.use((socket, next) => {
