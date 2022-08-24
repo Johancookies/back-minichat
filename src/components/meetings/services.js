@@ -62,8 +62,7 @@ service.closeMeeting = async (id_meet, id_channel) => {
   service
     .status(id_meet, "inactive")
     .then((result) => {
-      let tzoffset = new Date().getTimezoneOffset() * 60000;
-      var create_at = new Date(Date.now() - tzoffset)
+      var create_at = new Date(Date.now())
         .toISOString()
         .slice(0, -1);
 
