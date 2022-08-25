@@ -83,7 +83,7 @@ messages.post("/", uploadAWS.array("file", 3), async (req, response) => {
                 console.log("inactive meeting" + result[0].id);
                 // ioEmmit({ key: "close_meeting", data: result[0].id });
               });
-          }, 300000);
+          }, 3600000);
           if (url_taskMap[result[0].id]) {
             clearTimeout(url_taskMap[result[0].id]);
           }
@@ -303,7 +303,7 @@ function createMeeting({ con, idChannel, data, response, file }) {
               console.log("inactive meeting" + res.generated_keys[0]);
               ioEmmit({ key: "close_meeting", data: res.generated_keys[0] });
             });
-        }, 300000);
+        }, 3600000);
         url_taskMap[res.generated_keys[0]] = timeout;
       });
   } catch (e) {

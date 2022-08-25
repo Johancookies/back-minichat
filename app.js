@@ -22,6 +22,7 @@ import notification from "./src/components/notifications/main.js";
 // import receiveMsg from "./src/rabbitmq/recieve.js";
 import migration from "./src/components/migration/main.js";
 import { connetRabbit } from "./src/config/rabbitConnect.js";
+import { formatLocalDate } from "./src/utils/fomat_local_date.js";
 
 const app = express(); // initial express
 app.use(cors());
@@ -56,7 +57,6 @@ app.use("/users", users);
 app.use("/meetings", meetings);
 app.use("/migration", migration);
 app.use("/notification", notification);
-
 
 // socket middleware
 io.use((socket, next) => {
@@ -102,7 +102,7 @@ io.on("connection", (socket) => {
                 const timeout = setTimeout(() => {
                   // io.to(room).emit("close_meeting");
                   meetingService.closeMeeting(result[0].id, room);
-                }, 300000);
+                }, 3600000);
                 if (url_taskMap[result[0].id]) {
                   clearTimeout(url_taskMap[result[0].id]);
                 }
