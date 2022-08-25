@@ -6,6 +6,7 @@ import messageService from "../messages/services.js";
 
 import { url_taskMap } from "../messages/services.js";
 import sendMessageRabbit from "../../rabbitmq/send.js";
+import { formatLocalDate } from "../../utils/fomat_local_date.js";
 
 const service = {};
 
@@ -15,7 +16,7 @@ service.createMeeting = async (id_channel) => {
   return new Promise((resolve, reject) => {
     let dataMeeting = {
       id_channel: id_channel,
-      create_at: new Date().toISOString(),
+      create_at: formatLocalDate(),
       status: "active",
     };
     r.table("meetings")
@@ -30,7 +31,7 @@ service.createMeeting = async (id_channel) => {
         });
         const timeout = setTimeout(() => {
           service.closeMeeting(res.generated_keys[0], id_channel);
-        }, 300000);
+        }, 3600000);
 
         url_taskMap[res.generated_keys[0]] = timeout;
         resolve({ id: res.generated_keys[0] });
@@ -62,10 +63,7 @@ service.closeMeeting = async (id_meet, id_channel) => {
   service
     .status(id_meet, "inactive")
     .then((result) => {
-      let tzoffset = new Date().getTimezoneOffset() * 60000;
-      var create_at = new Date(Date.now() - tzoffset)
-        .toISOString()
-        .slice(0, -1);
+      var create_at = formatLocalDate();
 
       const meetData = {
         id_meet: id_meet,

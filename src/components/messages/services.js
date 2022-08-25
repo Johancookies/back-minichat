@@ -131,7 +131,7 @@ service.addMessages = async (message, file) => {
             // ioEmmit({ to: message.id_channel, key: "close_meeting" });
 
             meetingService.closeMeeting(result[0].id, message.id_channel);
-          }, 300000);
+          }, 3600000);
           if (url_taskMap[result[0].id]) {
             clearTimeout(url_taskMap[result[0].id]);
           }

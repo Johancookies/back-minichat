@@ -7,6 +7,7 @@ import usersService from "../users/services.js";
 import membersService from "../member/services.js";
 import mesageService from "../messages/services.js";
 import sendMessageRabbit from "../../rabbitmq/send.js";
+import { formatLocalDate } from "../../utils/fomat_local_date.js";
 
 const service = {};
 
@@ -138,7 +139,7 @@ service.createChannel = async (channel) => {
   const conn = await getRethinkDB();
 
   return new Promise((resolve, reject) => {
-    channel.create_at = new Date();
+    channel.create_at = formatLocalDate();
 
     r.table("channels")
       .insert(channel)
@@ -234,8 +235,7 @@ service.addReasignHistory = async ({
   type,
 }) => {
   const conn = await getRethinkDB();
-  let tzoffset = new Date().getTimezoneOffset() * 60000;
-  var create_at = new Date(Date.now() - tzoffset);
+  var create_at = formatLocalDate();
 
   const reasign = {
     last_id_user,
