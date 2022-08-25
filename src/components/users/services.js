@@ -50,6 +50,7 @@ service.addUser = async (user) => {
               });
           } else {
             r.table("users")
+              .filter({ id_user: user.id })
               .update({
                 first_name: user.first_name,
                 last_name: user.last_name,
