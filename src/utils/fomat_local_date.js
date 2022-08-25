@@ -7,8 +7,5 @@ export const formatLocalDate = () => {
     const timeDate = dateNode.toLocaleTimeString();
     dateLocal = new Date(`${newFormat} ${timeDate} UTC`);
   }
-
-  console.log("date: ", dateLocal);
-
   return dateLocal ?? Date.now();
 };
