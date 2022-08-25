@@ -49,6 +49,18 @@ service.addUser = async (user) => {
                 notificationServices.addTokens(dataToken);
               });
           } else {
+            r.table("users")
+              .update({
+                first_name: user.first_name,
+                last_name: user.last_name,
+              })
+              .run(conn, (err, res) => {
+                if (err) console.log(err);
+                else {
+                  console.log("user update");
+                }
+              });
+
             resolve({
               message: "User already exist",
               status: "success",
