@@ -2,7 +2,7 @@
 
 import { rabbitConn } from "../config/rabbitConnect.js";
 
-const queue = "chat_msm_test2";
+const queue = "chat_msm_env";
 
 const sendMessageRabbit = ({ msg, flag }) => {
   // queryMySql(msg);
