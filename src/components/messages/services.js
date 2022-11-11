@@ -223,7 +223,8 @@ service.messageNotification = (message) => {
             {
               id_user: result[0].id_user,
             },
-            message
+            message,
+            result[0].brand ?? 1
           );
         } else {
           memberService
@@ -233,7 +234,8 @@ service.messageNotification = (message) => {
                 {
                   id_member: result[0].id_member,
                 },
-                message
+                message,
+                result[0].brand ?? 1
               );
             })
             .catch((err) => {

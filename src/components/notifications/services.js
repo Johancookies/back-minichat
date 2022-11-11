@@ -55,16 +55,16 @@ service.updateTokensByMembers = async ({ id_member, token }) => {
           service.addTokens(token);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   });
 };
 
-service.sendNotification = (filter, message) => {
+service.sendNotification = (filter, message, brand) => {
   return new Promise((resolve, reject) => {
     service
       .getTokens(filter)
       .then((result) => {
-        sendPush({ message, tokens: result });
+        sendPush({ message, tokens: result, brand });
         resolve("notifications");
       })
       .catch((err) => {
@@ -137,7 +137,7 @@ service.testNotificationsByUser = async ({ id_member }) => {
   });
 };
 
-function sendPush({ message, tokens }) {
+function sendPush({ message, tokens, brand }) {
   let tokensIDs = tokens.map((token) => token.token);
 
   if (tokens[0].device == "Huawei") {
@@ -165,10 +165,12 @@ function sendPush({ message, tokens }) {
       // to: tokens[0],
     };
 
+    const key = brand === 1 ? process.env.FCM_TOKEN : process.env.FCM_TOKEN_ATHLETIC
+
     fetch("https://fcm.googleapis.com/fcm/send", {
       method: "POST",
       headers: {
-        Authorization: "key=" + process.env.FCM_TOKEN,
+        Authorization: "key=" + key,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(notification_body),

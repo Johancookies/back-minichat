@@ -14,13 +14,13 @@ service.addMember = async (member) => {
       .getMember(member.id)
       .then((result) => {
         const dataToken = {
-          device: member.device  ?? null,
+          device: member.device ?? null,
           type: "mobile",
           id_user: member.id_user ?? null,
           id_member: member.id ?? null,
-          token: member.token  ?? null,
+          token: member.token ?? null,
         };
-        notificationServices.updateTokensByMembers({id_member: member.id, token: dataToken});
+        notificationServices.updateTokensByMembers({ id_member: member.id, token: dataToken });
         if (result.length === 0) {
           let dataMember = {
             id_member: member.id,
@@ -30,6 +30,7 @@ service.addMember = async (member) => {
             last_name: member.last_name,
             mobile_phone: member.mobile_phone,
             photo: member.photo,
+            brand: member.brand ?? 1
           };
           r.table("members")
             .insert(dataMember)
