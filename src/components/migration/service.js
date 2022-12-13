@@ -2,6 +2,10 @@ import getRethinkDB from "../../config/db.js";
 import r from "rethinkdb";
 import sendMessageRabbit from "../../rabbitmq/send.js";
 
+import messageService from "../messages/services.js";
+import userService from "../users/services.js"
+
+
 const service = {};
 
 service.migration = async () => {
@@ -181,6 +185,64 @@ function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+service.information = async () => {
+
+  const conn = await getRethinkDB();
+
+  return new Promise((resolve, reject) => {
+
+    const channelsIds = []; 
+    const usersName = {};
+
+    r.table("channels")
+      .run(conn, (err, cursor) => {
+        if(err) reject(err)
+        else {
+          cursor.toArray(async (err, result) => {
+            if(err) reject(err);
+            else {
+              for (let i = 0; i < result.length; i++) {
+                const channel = result[i];
+
+                const messages = await messageService.getMessages({
+                  	id_channel: channel.id_channel,
+                })
+
+                const user = messages.filter(m => m.author_type === "user");
+                const member = messages.filter(m => m.author_type === "member");
+
+                if(user.length === 0 && member.length > 0){
+
+                  const {data} = await userService.getUsers({"id_user": channel.id_user });
+                  const use = data[0];
+
+                  channelsIds.push({
+                    id_channel: channel.id_channel,
+                    user: use,
+                    chat: messages.filter(m => m.author_type != "back")
+                  });
+
+                  usersName[use.first_name] = (usersName[use.first_name] ?? 0) + 1;
+                }
+
+                console.log(i);
+
+              }
+
+              resolve({
+                channelsIds,
+                usersName
+              })
+
+            }
+          })
+        }
+      })
+
+  })
+
 }
 
 export default service;

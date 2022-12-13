@@ -166,7 +166,7 @@ io.on("connection", (socket) => {
 
 // receiveMsg();
 
-connetRabbit();
+// connetRabbit();
 
 function ioEmmit({ key, data, to }) {
   if (to) {

@@ -49,10 +49,22 @@ service.addMember = async (member) => {
               });
             });
         } else {
-          resolve({
-            message: "Current user exist!",
-            status: "success",
-          });
+          r.table('members')
+            .filter({
+              id_member: member.id
+            })
+            .update({
+              brand: member.brand ?? 1
+            })
+            .run(conn, (err, result) => {
+              if (err) reject(err);
+              else {
+                resolve({
+                  message: "Current user exist!",
+                  status: "success",
+                });
+              }
+            })
         }
       })
       .catch((err) => {
