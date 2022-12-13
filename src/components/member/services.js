@@ -57,13 +57,10 @@ service.addMember = async (member) => {
               brand: member.brand ?? 1
             })
             .run(conn, (err, result) => {
-              if (err) reject(err);
-              else {
-                resolve({
-                  message: "Current user exist!",
-                  status: "success",
-                });
-              }
+              resolve({
+                message: "Current user exist!",
+                status: "success",
+              });
             })
         }
       })
