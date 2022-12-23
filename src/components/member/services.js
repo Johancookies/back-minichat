@@ -3,6 +3,7 @@ import r from "rethinkdb";
 
 import notificationServices from "../notifications/services.js";
 import sendMessageRabbit from "../../rabbitmq/send.js";
+import getConnectionMySql from "../../config/mysql.js";
 
 const service = {};
 
@@ -161,5 +162,40 @@ service.filter = async () => {
       });
   });
 };
+
+service.addMemberSql = (member) =>{ 
+  const connMySql = getConnectionMySql();
+  const query = () => {
+    return new Promise((res, rej) => {
+      connMySql.query(
+        `INSERT INTO members (id_member, document_number, email, first_name, last_name, mobile_phone,photo, id_rethink) VALUES ('${member.id_member}','${member.document_number}','${member.email}','${member.first_name}','${member.last_name}','${member.mobile_phone}','${member.photo}','${member.id_rethink}')`,
+        (err, result) => {
+          if (err) rej(err);
+          console.log(result);
+          // try {
+          //   connMySql.query(
+          //     `INSERT INTO token_notification (device, id_user, token, type, id_member) VALUES ('${member.device}','','${member.token}','${member.type}','${member.id_member}')`,
+          //     (err, result) => {
+          //       // Insert data token user
+          //       if (err) rej(err);
+          //       console.log(result);
+          //       res("execute query successfully")
+          //     }
+          //   );
+          // } catch (error) {
+          //   console.log(error);
+          // }
+        }
+      );
+    });
+  };
+  query()
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+}
 
 export default service;

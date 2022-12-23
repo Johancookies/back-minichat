@@ -83,12 +83,14 @@ service.channel = async (body) => {
                   id_channel: id_channel,
                   id_member: member[0].id,
                   id_service_line: body.id_service_line,
-                  id_user: 11111111,
+                  id_user: id_user !== 'bot' ? id_user + "" : 11111111,
                   brand: member[0].brand ?? 1
                 };
                 if (id_user) {
-                  usersService
-                    .addUserBot()
+                  if (id_user === 'bot') {
+                    usersService
+                      .addUserBot()
+                  }
                   service
                     .createChannel(channel)
                     .then((result) => {
@@ -98,57 +100,53 @@ service.channel = async (body) => {
                       reject(err);
                     });
                 } else {
-                  // bot
-                  channel.id_user = "bot";
                   usersService
-                    .addUserBot()
-                  service
-                    .createChannel(channel)
-                    .then((result) => {
-                      resolve(result);
-                      service.addReasignHistory({
-                        id_channel: result["id_channel"],
-                        last_id_user: "",
-                        new_id_user: channel.id_user,
-                        type: "first reasign",
-                      });
+                    .getUsers({ status: "active", role_id: 39 })
+                    .then((users) => {
+                      if (users.data.length > 0) {
+                        const randomUser = getRandomInt(
+                          0,
+                          users.data.length - 1
+                        );
+                        channel.id_user = users.data[randomUser].id_user;
+                        service
+                          .createChannel(channel)
+                          .then((result) => {
+                            resolve(result);
+                            service.addReasignHistory({
+                              id_channel: result["id_channel"],
+                              last_id_user: "",
+                              new_id_user: channel.id_user,
+                              type: "first reasign",
+                            });
+                          })
+                          .catch((err) => {
+                            reject(err);
+                          });
+                      } else {
+                        // bot
+                        channel.id_user = "bot";
+                        usersService
+                          .addUserBot()
+                        service
+                          .createChannel(channel)
+                          .then((result) => {
+                            resolve(result);
+                            service.addReasignHistory({
+                              id_channel: result["id_channel"],
+                              last_id_user: "",
+                              new_id_user: channel.id_user,
+                              type: "first reasign",
+                            });
+                          })
+                          .catch((err) => {
+                            reject(err);
+                          });
+                      }
                     })
                     .catch((err) => {
                       reject(err);
                     });
-                  // usersService
-                  //   .getUsers({ status: "active", role_id: 39 })
-                  //   .then((users) => {
-                  //     if (users.data.length > 0) {
-                  //       const randomUser = getRandomInt(
-                  //         0,
-                  //         users.data.length - 1
-                  //       );
-                  //       channel.id_user = users.data[randomUser].id_user;
-
-                  //       service
-                  //         .createChannel(channel)
-                  //         .then((result) => {
-                  //           resolve(result);
-                  //           service.addReasignHistory({
-                  //             id_channel: result["id_channel"],
-                  //             last_id_user: "",
-                  //             new_id_user: channel.id_user,
-                  //             type: "first reasign",
-                  //           });
-                  //         })
-                  //         .catch((err) => {
-                  //           reject(err);
-                  //         });
-                  //     } else {
-                  //       reject({
-                  //         message: "No hay usuarios disponibles.",
-                  //       });
-                  //     }
-                  //   })
-                  //   .catch((err) => {
-                  //     reject(err);
-                  //   });
                 }
               })
               .catch((err) => {

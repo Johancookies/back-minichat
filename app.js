@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import "dotenv/config.js";
 import sendMessageRabbit from "./src/rabbitmq/send.js";
 import { url_taskMap } from "./src/components/messages/services.js";
+import receiveMsg from "./src/rabbitmq/listened.js";
 
 // services
 import meetingService from "./src/components/meetings/services.js";
@@ -166,7 +167,9 @@ io.on("connection", (socket) => {
 
 // receiveMsg();
 
-// connetRabbit();
+connetRabbit();
+// Guardar datos en mysql
+receiveMsg();
 
 function ioEmmit({ key, data, to }) {
   if (to) {
