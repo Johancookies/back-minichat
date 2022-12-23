@@ -7,6 +7,8 @@ import channelService from "../channels/services.js";
 import notificationsService from "../notifications/services.js";
 import memberService from "../member/services.js";
 import sendMessageRabbit from "../../rabbitmq/send.js";
+import getConnectionMySql from "../../config/mysql.js";
+import botService from "../bot/services.js"
 
 const service = {};
 
@@ -178,9 +180,23 @@ service.insertMessage = async (message, file) => {
             service.messageStatus(messageStatus);
             resolve({ status: 200, message: message });
 
-            if (message.author_type != "back") {
-              service.messageNotification(message);
-            }
+            // if (message.author_type != "back") {
+            //   service.messageNotification(message);
+            // }
+
+            channelService.channelById(message.id_channel)
+              .then((res) => {
+                console.log(res);
+                if(res[0].id_user == 11111111 && message.author != "bot"){
+                  botService.getPing();
+                  setTimeout(botService.postMessage, 1000, message, message.id_channel);
+                } else if (message.author_type != "back") {
+                  service.messageNotification(message);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              })
           });
       } else {
         message.url_file = file.location;
@@ -301,4 +317,27 @@ service.countMessages = async (filter) => {
       });
   });
 };
+
+service.addMessagesSql = (member) =>{ 
+  const connMySql = getConnectionMySql();
+  const query = () => {
+    return new Promise((res, rej) => {
+      connMySql.query(
+        `INSERT INTO messages (author, author_name, author_type, content, create_at, id_channel, id_meet, id_rethink, type, url_file, name_file, size_file) VALUES ('${member.author}','${member.author_name}','${member.author_type}',"${member.content}",'${member.create_at}','${member.id_channel}','${member.id_meet}','${member.id_rethink}','${member.type}','${member.url_file ?? null}','${member.name_file ?? null}','${member.size_file ?? null}')`,
+        (err, result) => {
+          if (err) rej(err);
+          console.log(result);
+          res("execute query successfully")
+        }
+      );
+    });
+  };
+  query()
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+}
 export default service;
