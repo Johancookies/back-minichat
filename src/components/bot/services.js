@@ -2,12 +2,16 @@ import fetch from "node-fetch";
 import serviceMessage from "../messages/services.js"
 
 const services = {};
-const nameBot = 'new_bot'; // variables de entorno
+const nameBot = process.env.BOT_NAME;
+const urlBot = process.env.BOT_URL;
+const email = process.env.BOT_EMAIL;
+const password = process.env.BOT_PASSWORD;
+
 let token = '';
 
 services.getPing = () => {
     fetch(
-        `http://localhost:3000/api/v1/admin/ping`,
+        `${urlBot}/admin/ping`,
         {
             method: "GET",
             headers: {
@@ -33,7 +37,7 @@ services.getPing = () => {
 
 services.getToken = () => {
     fetch(
-        `http://localhost:3000/api/v1/auth/login/basic/default`,
+        `${urlBot}/auth/login/basic/default`,
         {
             method: "POST",
             headers: {
@@ -41,8 +45,8 @@ services.getToken = () => {
             },
 
             body: JSON.stringify({
-                "email": "jwro_kicfq27@jyplo.com", // variables de entorno
-                "password": "123456", // variables de entorno
+                "email": email,
+                "password": password,
             }),
         }
     )
@@ -60,7 +64,7 @@ services.getToken = () => {
 
 services.postMessage = (message, id_member) => {
     fetch(
-        `http://localhost:3000/api/v1/bots/${nameBot}/converse/${id_member}/secured?include=nlu`,
+        `${urlBot}/bots/${nameBot}/converse/${id_member}/secured?include=nlu`,
         {
             method: "POST",
             headers: {
