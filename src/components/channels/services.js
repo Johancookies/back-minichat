@@ -18,6 +18,11 @@ service.channel = async (body) => {
 
   const id_channel = body.id + "" + body.id_service_line;
   var id_user = body.id_user;
+  const id_bot = 11111111;
+
+  console.log('process.env.BOT_ACTIVE = ', process.env.BOT_ACTIVE);
+
+  console.log(body);
 
   return new Promise((resolve, reject) => {
     r.table("channels")
@@ -25,9 +30,15 @@ service.channel = async (body) => {
       .run(conn, (err, cursor) => {
         if (err) reject(err);
         cursor.toArray((err, result) => {
+
+          console.log('filter channel = ', result);
+
           if (err) reject(err);
 
           if (result.length > 0) {
+
+            console.log('if filter channel');
+
             if (id_user) {
               service
                 .reassign(id_channel, id_user, "user asign")
@@ -37,7 +48,7 @@ service.channel = async (body) => {
                     id_user,
                   });
                 });
-            } else if (result[0].id_user != "bot") {
+            } else if (result[0].id_user != id_bot) {
               usersService
                 .getUsers({ id_user: result[0].id_user, status: "active" })
                 .then((user) => {
@@ -76,6 +87,9 @@ service.channel = async (body) => {
               resolve(result[0]);
             }
           } else {
+
+            console.log('else filter channel');
+
             membersService
               .getMember(parseInt(body.id))
               .then((member) => {
@@ -83,11 +97,17 @@ service.channel = async (body) => {
                   id_channel: id_channel,
                   id_member: member[0].id,
                   id_service_line: body.id_service_line,
-                  id_user: id_user !== 'bot' ? id_user + "" : 11111111,
+                  id_user: id_user !== id_bot ? id_user + "" : id_bot,
                   brand: member[0].brand ?? 1
                 };
+
+                console.log('get member = ', member);
+
                 if (id_user) {
-                  if (id_user === 'bot') {
+                  
+                  console.log('if id_user existe');
+                  
+                  if (id_user === id_bot) {
                     usersService
                       .addUserBot()
                   }
@@ -100,10 +120,16 @@ service.channel = async (body) => {
                       reject(err);
                     });
                 } else {
+
+                  console.log('else id_user no existe');
+
                   usersService
                     .getUsers({ status: "active", role_id: 39 })
                     .then((users) => {
                       if (users.data.length > 0) {
+
+                        console.log('if id_user activo y de rol 39 existe');
+
                         const randomUser = getRandomInt(
                           0,
                           users.data.length - 1
@@ -124,24 +150,29 @@ service.channel = async (body) => {
                             reject(err);
                           });
                       } else {
-                        // bot
-                        channel.id_user = "bot";
-                        usersService
-                          .addUserBot()
-                        service
-                          .createChannel(channel)
-                          .then((result) => {
-                            resolve(result);
-                            service.addReasignHistory({
-                              id_channel: result["id_channel"],
-                              last_id_user: "",
-                              new_id_user: channel.id_user,
-                              type: "first reasign",
+
+                        console.log('else id_user activo y de rol 39 no existe');
+
+                        if (process.env.BOT_ACTIVE === 'TRUE') {
+                          // bot
+                          channel.id_user = id_bot;
+                          usersService
+                            .addUserBot()
+                          service
+                            .createChannel(channel)
+                            .then((result) => {
+                              resolve(result);
+                              service.addReasignHistory({
+                                id_channel: result["id_channel"],
+                                last_id_user: "",
+                                new_id_user: channel.id_user,
+                                type: "first reasign",
+                              });
+                            })
+                            .catch((err) => {
+                              reject(err);
                             });
-                          })
-                          .catch((err) => {
-                            reject(err);
-                          });
+                        }
                       }
                     })
                     .catch((err) => {
@@ -467,7 +498,7 @@ service.addReassingSql = (member) => {
   const query = () => {
     return new Promise((res, rej) => {
       connMySql.query(
-        `INSERT INTO reassign_history (id_channel, create_at, last_id_user, new_id_user, id_rethink) VALUES ('${member.id_channel}','${member.create_at}','${member.last_id_user}','${member.new_id_user}','${member.id_rethink}')`,
+        `INSERT INTO reasign_history (id_channel, create_at, last_id_user, new_id_user, id_rethink) VALUES ('${member.id_channel}','${member.create_at}','${member.last_id_user}','${member.new_id_user}','${member.id_rethink}')`,
         (err, result) => {
           if (err) rej(err);
           console.log(result);
