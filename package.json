@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
+    "migration": "node migration.js",
     "debug": "DEGUB=express:* ./app.js"
   },
   "license": "MIT",

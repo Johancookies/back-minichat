@@ -107,7 +107,7 @@ service.channel = async (body) => {
                   
                   console.log('if id_user existe');
                   
-                  if (id_user === id_bot) {
+                  if (id_user === id_bot && process.env.BOT_ACTIVE === 'TRUE') {
                     usersService
                       .addUserBot()
                   }
