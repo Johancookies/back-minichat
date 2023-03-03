@@ -1,17 +1,33 @@
-const express = require("express");
-const http = require("http");
-const cors = require("cors");
-const morgan = require("morgan");
-const { Server } = require("socket.io");
-require("dotenv").config();
+import express from "express";
+import http from "http";
+import cors from "cors";
+import morgan from "morgan";
+import bodyParser from "body-parser";
+import { Server } from "socket.io";
+import "dotenv/config.js";
+import sendMessageRabbit from "./src/rabbitmq/send.js";
+import { url_taskMap } from "./src/components/messages/services.js";
 
-// import routes
-const serviceLines = require("./routes/service_lines");
-const channel = require("./routes/channels");
+// services
+import meetingService from "./src/components/meetings/services.js";
+import messageService from "./src/components/messages/services.js";
 
-const app = express();
+//express services
+import messages from "./src/components/messages/main.js";
+import channel from "./src/components/channels/main.js";
+import members from "./src/components/member/main.js";
+import users from "./src/components/users/main.js";
+import meetings from "./src/components/meetings/main.js";
+import notification from "./src/components/notifications/main.js";
+// import receiveMsg from "./src/rabbitmq/recieve.js";
+import migration from "./src/components/migration/main.js";
+import { connetRabbit } from "./src/config/rabbitConnect.js";
+import { formatLocalDate } from "./src/utils/fomat_local_date.js";
+
+const app = express(); // initial express
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 const server = http.createServer(app);
@@ -22,56 +38,146 @@ const io = new Server(server, {
   },
 });
 
-// routes
-app.get("/", (req, res) => {
-  res.send("...");
+// middleware to control any error when join to the server
+app.use((err, _req, res, next) => {
+  if (err) res.json({ error: err, status: 500 });
+  next("router");
 });
 
-app.use("/service-lines", serviceLines);
-app.use("/channels", channel);
+// principal roiter to know if the server is ok
+app.get("/", (_, res) => {
+  res.send("The server is ok");
+});
 
-// app.get("/chats/:room", async (req, res) => {
-//   res.send("dont have database");
-//   const conn = await getRethinkDB();
-//   const room = req.params.room;
-//   // let query = r.table("chats").filter({ room: room });
-//   // let orderedQuery = query.orderBy(r.desc("ts"));
-//   // orderedQuery.run(conn, (err, cursor) => {
-//   //   if (err) throw err;
-//   //   cursor.toArray((err, result) => {
-//   //     if (err) throw err;
-//   //     res.json({
-//   //       data: result,
-//   //     });
-//   //   });
-//   // });
-// });
+// router
+app.use("/channels", channel);
+app.use("/messages", messages);
+app.use("/members", members);
+app.use("/users", users);
+app.use("/meetings", meetings);
+app.use("/migration", migration);
+app.use("/notification", notification);
+
+// socket middleware
+io.use((socket, next) => {
+  if (!socket.request) {
+    const err = new Error("error");
+    err.data = { content: "Not socket request" };
+    next(err);
+  } else {
+    next();
+  }
+});
 
 // socket config
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
-  socket.on("join_room", (room) => {
-    socket.join(room);
-    console.log(`User ${socket.id} joined room ${room}`);
+  socket.on("service_ping", (data) => {
+    socket.emit("pong", 1);
   });
 
-  socket.on("send_message", async (data) => {
-    // const conn = await getRethinkDB();
-    // r.table("chats")
-    //   .insert(data)
-    //   .run(conn, function (err, res) {
-    //     if (err) throw err;
-    //     console.log(res);
-    //   });
-    socket.to(data.room).emit("receive_message", data);
+  // change feed messages
+  socket.on("join_room", async (room) => {
+    console.log(`User ${socket.id} joined room ${room}`);
+    socket.join(room);
+    try {
+      meetingService
+        .getMeetingActiveByChannel(room)
+        .then((result) => {
+          if (result.length === 0) {
+            meetingService
+              .createMeeting(room)
+              .then((result) => {
+                console.log("create meeting " + result.id);
+                messageService.createChanges(room);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          } else {
+            meetingService
+              .status(result[0].id, "active")
+              .then((res) => {
+                const timeout = setTimeout(() => {
+                  // io.to(room).emit("close_meeting");
+                  meetingService.closeMeeting(result[0].id, room);
+                }, 3600000);
+                if (url_taskMap[result[0].id]) {
+                  clearTimeout(url_taskMap[result[0].id]);
+                }
+                url_taskMap[result[0].id] = timeout;
+                console.log("change meeting status " + result[0].id);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  socket.on("receive_message", async (data) => {
+    let messageStatus = {
+      id_message: data.id_message,
+      status: "received",
+    };
+
+    messageService
+      .messageStatus(messageStatus)
+      .then((result) => {
+        io.to(data.id_channel).emit("change_status", {
+          id_message: data.id_message,
+          status: "received",
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+
+  socket.on("change_waiting", async (channel) => {
+    meetingService.changeStatusToWaiting(channel);
+  });
+
+  socket.on("reactive_changefeed", async (room) => {
+    console.log("reactive change feed");
+    io.to(room).emit("recharge_messages");
+
+    messageService.createChanges(room);
   });
 
   socket.on("disconnect", () => {
     console.log(`User Disconnected ${socket.id}`);
   });
+
+  // socket.on("view_message", (message) => {
+  //   const conn = await getRethinkDB();
+  //   r.table("messages").filter({id: message.id}).run((conn, err)=>{
+
+  //   })
+  // });
 });
 
+// receiveMsg();
+
+connetRabbit();
+
+function ioEmmit({ key, data, to }) {
+  if (to) {
+    io.to(to).emit(key, data);
+  } else {
+    io.emit(key, data);
+  }
+}
+
 server.listen(process.env.PORT, () => {
-  console.log("server is running in port " + process.env.PORT);
+  console.log("server is running on port " + process.env.PORT);
 });
+
+export default ioEmmit;
