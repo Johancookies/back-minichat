@@ -80,6 +80,7 @@ service.channel = async (body) => {
                   id_member: member[0].id,
                   id_service_line: body.id_service_line,
                   id_user: id_user + "",
+                  brand: member[0].brand ?? 1
                 };
                 if (id_user) {
                   service

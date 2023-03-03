@@ -12,4 +12,16 @@ controller.migration = (req, res) => {
     });
 };
 
+controller.info = (req, res) => {
+
+  Service.information()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+
+}
+
 export default controller;

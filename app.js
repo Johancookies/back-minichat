@@ -20,9 +20,12 @@ import users from "./src/components/users/main.js";
 import meetings from "./src/components/meetings/main.js";
 import notification from "./src/components/notifications/main.js";
 // import receiveMsg from "./src/rabbitmq/recieve.js";
+import accessControl from "./src/rabbitmq/recieveAccess.js";
 import migration from "./src/components/migration/main.js";
 import { connetRabbit } from "./src/config/rabbitConnect.js";
 import { formatLocalDate } from "./src/utils/fomat_local_date.js";
+import userState from "./src/components/userState/main.js"
+
 
 const app = express(); // initial express
 app.use(cors());
@@ -57,6 +60,7 @@ app.use("/users", users);
 app.use("/meetings", meetings);
 app.use("/migration", migration);
 app.use("/notification", notification);
+app.use("/userState", userState);
 
 // socket middleware
 io.use((socket, next) => {
@@ -156,6 +160,15 @@ io.on("connection", (socket) => {
     console.log(`User Disconnected ${socket.id}`);
   });
 
+  socket.on("nose", (data) => {
+    console.log(data);
+  });
+
+  socket.emit("ver", (data) => {
+    console.log(data);
+  });
+  
+
   // socket.on("view_message", (message) => {
   //   const conn = await getRethinkDB();
   //   r.table("messages").filter({id: message.id}).run((conn, err)=>{
@@ -177,6 +190,7 @@ function ioEmmit({ key, data, to }) {
 }
 
 server.listen(process.env.PORT, () => {
+  accessControl()
   console.log("server is running on port " + process.env.PORT);
 });
 

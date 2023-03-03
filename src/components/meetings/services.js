@@ -112,6 +112,17 @@ service.status = async (id_meet, status) => {
       .update({ status: status })
       .run(conn, (err, res) => {
         if (err) reject(err);
+
+        const meetData = {
+          id_meet: id_meet,
+          status: status,
+        };
+  
+        sendMessageRabbit({
+          msg: meetData,
+          flag: "update_statusmeeting",
+        });
+
         resolve("change status successfully");
       });
   });
@@ -147,19 +158,19 @@ service.changeStatusToWaiting = async (id_channel) => {
       r.row("id_channel").eq(id_channel).and(r.row("status").eq("active"))
     )
     .limit(1)
-    .update({ status: "waiting" })
+    .update({ status: "waiting" },{ returnChanges: true })
     .run(conn, (err, res) => {
       if (err) console.log(err);
       if (res.replaced) {
-        // const meetData = {
-        //   id_meet: id_meet,
-        //   status: "waiting",
-        // };
+        const meetData = {
+          id_meet: res.changes[0].new_val.id,
+          status: "waiting",
+        };
 
-        // sendMessageRabbit({
-        //   msg: meetData,
-        //   flag: "update_statusmeeting",
-        // });
+        sendMessageRabbit({
+          msg: meetData,
+          flag: "update_statusmeeting",
+        });
 
         console.log("change meeting status successfully", id_channel);
       }
