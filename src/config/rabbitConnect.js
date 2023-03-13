@@ -2,7 +2,7 @@ import amqp from "amqplib/callback_api.js";
 
 export var rabbitConn;
 
-export const connetRabbit = () => {
+export const connetRabbit = (callback = () =>{}) => {
   amqp.connect(
     "amqp://" +
       process.env.RABBITMQ_USER +
@@ -17,7 +17,8 @@ export const connetRabbit = () => {
       if (err) console.error(err);
       console.log("rabit connetc");
       rabbitConn = conn;
-      // callback(conn);
+      callback(conn);
+
     }
   );
 };
